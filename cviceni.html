@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cvičení z matematické analýzy · Josef Hlahulek</title>
-<meta name="description" content="Materiály a interaktivní animace k dobrovolným cvičením z matematické analýzy pro studenty IES FSV UK.">
+<meta name="description" content="Záznamy z cvičení, animace, rady a odkazy k dobrovolným cvičením z matematické analýzy pro studenty IES FSV UK.">
 <meta name="theme-color" content="#f6f5f1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,66 +26,77 @@
   <header class="hero short" id="top">
     <div class="wrap">
       <h1 class="sm rv">Matematická analýza pro studenty <em>IES FSV</em></h1>
-      <p class="lead rv">Materiály, příklady a interaktivní animace k dobrovolným cvičením.</p>
+      <p class="lead rv">Animace, rady a záznamy z dobrovolných cvičení.</p>
     </div>
   </header>
 
   <main class="wrap">
-    <div class="layout">
+    <div class="tlayout">
 
-      <aside class="cats" aria-label="Kategorie">
-        <div class="k">Kategorie</div>
-        <button class="cat" type="button" data-cat="all" aria-pressed="true">Vše <span class="n"></span></button>
-        <button class="cat" type="button" data-cat="supremum" aria-pressed="false">Supremum a infimum <span class="n"></span></button>
-        <button class="cat" type="button" data-cat="posloupnosti" aria-pressed="false">Posloupnosti a limity <span class="n"></span></button>
-        <button class="cat" type="button" data-cat="zdroje" aria-pressed="false">Další zdroje <span class="n"></span></button>
-        <!-- Nová kategorie: přidej sem další <button class="cat" data-cat="klic"> … </button>
-             a stejný klíč napiš do data-cat u položek, které do ní patří. -->
+      <div class="tmain">
+
+        <section id="animace">
+          <h2 class="sec rv">Animace</h2>
+
+          <!-- Nová animace: zkopíruj blok <article class="item rv"> … </article>, uprav název, popis a odkaz.
+               Soubor s animací patří do složky animace/. -->
+          <article class="item rv">
+            <div>
+              <h3>Supremum množiny: která část definice selhala?</h3>
+              <p>Vyber množinu a číslo s. Animace ukáže, která podmínka definice suprema není splněna, a zvýrazní ji.</p>
+            </div>
+            <a class="go" href="animace/supremum.html">Otevřít</a>
+          </article>
+
+          <article class="item rv">
+            <div>
+              <h3>Limita posloupnosti: definice pomocí ε a N</h3>
+              <p>Posouvej ε a sleduj, od kterého indexu N leží všechny členy posloupnosti v ε-okolí limity.</p>
+            </div>
+            <a class="go" href="animace/limita-posloupnosti.html">Otevřít</a>
+          </article>
+        </section>
+
+        <section id="rady">
+          <h2 class="sec rv">Rady</h2>
+
+          <!-- Nová rada: zkopíruj blok <article class="item rv"> … </article> bez odkazu. -->
+          <article class="item rv">
+            <div>
+              <h3>Kvantifikátory jako hra s nepřítelem</h3>
+              <p>Výrok „pro každé t existuje a" je hra. Nepřítel zvolí libovolné t a ty musíš odpovědět prvkem a, který splňuje podmínku. Když umíš odpovědět na každý jeho tah, výrok platí; když ti nepřítel najde tah, na který odpověď neexistuje, výrok neplatí.</p>
+            </div>
+          </article>
+        </section>
+
+        <section id="odkazy">
+          <h2 class="sec rv">Odkazy</h2>
+
+          <!-- Nový odkaz: zkopíruj blok <article class="item rv"> … </article> a uprav href. -->
+          <article class="item rv">
+            <div>
+              <h3>Matematická analýza 1: sady příkladů a řešení</h3>
+              <p>Archiv cvičení (MFF UK, zimní semestr 2024/25): příklady s řešeními, teoretické podklady a písemky. Dobrý zdroj, ze kterého se můžete učit na Matematiku I.</p>
+            </div>
+            <a class="go" href="https://www2.karlin.mff.cuni.cz/~kuncova/historie33.php" target="_blank" rel="noopener">Otevřít ↗</a>
+          </article>
+        </section>
+
+      </div>
+
+      <aside class="side" aria-label="Záznamy ze cvičení">
+        <div class="k">Záznamy ze cvičení</div>
+
+        <!-- Nové cvičení: zkopíruj blok <div class="sess"> … </div> a vlož ho NAD ten nejstarší (nejnovější nahoře).
+             PDF nahraj do složky materialy/. Odkazy, které ještě nemáš, prostě vynech. -->
+        <div class="sess">
+          <div class="date">2. 10.</div>
+          <h3>Úvod: supremum a limita posloupnosti</h3>
+          <div class="lk">
+            <a href="materialy/uvod-supremum-limita-posloupnosti.pdf">Podklady (PDF)</a>
+          </div>
+        </div>
       </aside>
-
-      <section class="list" id="items" aria-live="polite">
-        <h2 class="catlabel" id="catlabel">Vše</h2>
-
-        <!-- Nová položka: zkopíruj celý blok <article class="item"> … </article>.
-             data-cat = jedna nebo více kategorií oddělených mezerou (např. "supremum posloupnosti").
-             Typ: PDF / Animace / Odkaz. PDF nahraj do složky materialy/ a odkaž na ni. -->
-
-        <article class="item" data-cat="supremum posloupnosti">
-          <div>
-            <span class="type">PDF</span>
-            <h3>Úvod: supremum a limita posloupnosti</h3>
-            <p>Podklady z hodiny 2. 10.: supremum jako hra s nepřítelem, posloupnosti, limita 1/n, operace s nekonečnem, polynomy.</p>
-          </div>
-          <a class="go" href="materialy/uvod-supremum-limita-posloupnosti.pdf">Otevřít</a>
-        </article>
-
-        <article class="item" data-cat="supremum">
-          <div>
-            <span class="type">Animace</span>
-            <h3>Supremum množiny: která část definice selhala?</h3>
-            <p>Vyber množinu a číslo s. Animace ukáže, která podmínka definice suprema není splněna, a zvýrazní ji.</p>
-          </div>
-          <a class="go" href="animace/supremum.html">Otevřít</a>
-        </article>
-
-        <article class="item" data-cat="posloupnosti">
-          <div>
-            <span class="type">Animace</span>
-            <h3>Limita posloupnosti: definice pomocí ε a N</h3>
-            <p>Posouvej ε a sleduj, od kterého indexu N leží všechny členy posloupnosti v ε-okolí limity.</p>
-          </div>
-          <a class="go" href="animace/limita-posloupnosti.html">Otevřít</a>
-        </article>
-
-        <article class="item" data-cat="zdroje">
-          <div>
-            <span class="type">Odkaz</span>
-            <h3>Matematická analýza 1: sady příkladů a řešení</h3>
-            <p>Archiv cvičení (MFF UK, zimní semestr 2024/25): příklady s řešeními, teoretické podklady a písemky. Dobrý zdroj, ze kterého se můžete učit na Matematiku I.</p>
-          </div>
-          <a class="go" href="https://www2.karlin.mff.cuni.cz/~kuncova/historie33.php" target="_blank" rel="noopener">Otevřít ↗</a>
-        </article>
-      </section>
 
     </div>
   </main>
@@ -99,37 +110,5 @@
 </div>
 
 <script src="assets/site.js"></script>
-<script>
-(function () {
-  var cats = [].slice.call(document.querySelectorAll('.cat'));
-  var items = [].slice.call(document.querySelectorAll('#items .item'));
-  var label = document.getElementById('catlabel');
-
-  function has(el, c) { return (' ' + el.getAttribute('data-cat') + ' ').indexOf(' ' + c + ' ') > -1; }
-
-  // item counts next to each category
-  cats.forEach(function (b) {
-    var c = b.getAttribute('data-cat');
-    var n = c === 'all' ? items.length : items.filter(function (i) { return has(i, c); }).length;
-    b.querySelector('.n').textContent = n;
-  });
-
-  function show(c) {
-    if (!cats.some(function (b) { return b.getAttribute('data-cat') === c; })) c = 'all';
-    cats.forEach(function (b) {
-      var on = b.getAttribute('data-cat') === c;
-      b.setAttribute('aria-pressed', on);
-      if (on) label.textContent = b.firstChild.textContent.trim();
-    });
-    items.forEach(function (i) { i.hidden = !(c === 'all' || has(i, c)); });
-    var firstDone = false;
-    items.forEach(function (i) { i.classList.remove('first'); if (!i.hidden && !firstDone) { i.classList.add('first'); firstDone = true; } });
-    history.replaceState(null, '', c === 'all' ? location.pathname : '#' + c);
-  }
-
-  cats.forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-cat')); }); });
-  show(location.hash.replace('#', '') || 'all');
-})();
-</script>
 </body>
 </html>

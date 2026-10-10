@@ -130,6 +130,8 @@
   var tex_b3 = T`=\sqrt[3]{\lim_{n\to\infty}\dfrac{n^{7/2}\bigl(1-n^{7/3-7/2}\bigr)}{n^{7/2}}}`;
   var tex_b4 = T`=\sqrt[3]{\lim_{n\to\infty}\bigl(1-n^{-7/6}\bigr)}`;
   var tex_b5 = T`\overset{\text{AL}}{=}\sqrt[3]{1-0}=1`;
+  var L3 = T`=\lim_{n\to\infty}\dfrac{2}{\Bigl(\dfrac{A_n}{n^{7/6}}\Bigr)^{2}+\dfrac{A_n}{n^{7/6}}\cdot\dfrac{B_n}{n^{7/6}}+\Bigl(\dfrac{B_n}{n^{7/6}}\Bigr)^{2}}`;
+  var L4 = T`\overset{\text{AL}}{=}\dfrac{2}{1^{2}+1\cdot1+1^{2}}=\dfrac{2}{3}`;
   var MID = { a: [tex_a1, tex_a2, tex_a3, tex_a4, tex_a5], b: [tex_b1, tex_b2, tex_b3, tex_b4, tex_b5] };
 
   // "without A_n, B_n": only shown on request, to see what happens inside
@@ -155,6 +157,8 @@
     sub:  T`Za $a$ dosazuju první člen $A_n$, za $b$ druhý člen $B_n$.`,
     num:  T`Nahoře: $\bigl(n^{7/2}+n^{7/3}\bigr)-\bigl(n^{7/2}-n^{7/3}\bigr)=2n^{7/3}$.`,
     den:  T`Dole: protože $A_n,\,B_n\sim n^{7/6}$, chovají se $A_n^2$, $A_nB_n$ i $B_n^2$ jako $n^{7/3}$. Proto z celého jmenovatele vytknu $n^{7/3}$.`,
+    cut:  T`Krátím $n^{7/3}$ v čitateli i ve jmenovateli.`,
+    ref:  T`Z mezivýpočtu výše víme, že $\lim\dfrac{A_n}{n^{7/6}}=1$ i $\lim\dfrac{B_n}{n^{7/6}}=1$. Použiju AL a dosadím.`,
     alt:  T`Jde to počítat i {{alt}}.`,
     note: T`Náhled: postup bez $A_n$, $B_n$, jen aby bylo vidět, co se děje uvnitř.`
   };
@@ -311,6 +315,11 @@
     await addLine(L2, my, '', 4.6);
     await think('num',  my, 5200);
     await think('den',  my, 8200);
+    await addLine(L3, my, '', 3.6);
+    await think('cut',  my, 4200);
+    await think('ref',  my, 6200);
+    await addLine(L4, my, '', 3.6);
+    await sleep(2500, my);
     await think('alt',  my, 0, false, true);   // stays on screen: this is where the animation currently ends
   }
 

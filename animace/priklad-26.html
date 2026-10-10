@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Příklad 26: limita s odmocninami · Josef Hlahulek</title>
+<meta name="description" content="Animované řešení příkladu 26: limita rozdílu třetích odmocnin, s myšlenkovým procesem krok za krokem.">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  body { padding-bottom: 140px; }
+  .top { display: flex; justify-content: space-between; align-items: center; height: 76px; font-size: 14px; color: var(--muted); }
+  .top a:hover { color: var(--ink); }
+  .tools { display: flex; gap: 8px 24px; flex-wrap: wrap; align-items: baseline; font-size: 14px; color: var(--muted); margin: 0 0 40px; }
+  .link { background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 0 0 1px; font: inherit; font-size: 14px; font-weight: 500;
+          cursor: pointer; color: var(--ink); transition: color .2s, border-color .2s; }
+  .link:hover { color: var(--accent); border-color: var(--accent); }
+  .spd { background: none; border: 0; padding: 0; font: inherit; font-size: 14px; color: var(--muted); cursor: pointer; }
+  .spd[aria-pressed="true"] { color: var(--ink); border-bottom: 1px solid var(--accent); }
+
+  .katex { font-size: 1.12em; }
+  .assign { opacity: 0; transform: translateY(8px); transition: opacity 1.2s ease, transform 1.2s ease; margin-bottom: 8px; }
+  .assign.in { opacity: 1; transform: none; }
+  .assign .lbl { font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); font-weight: 500; margin-bottom: 10px; }
+  .assign .ex { font-size: 1.15em; overflow-x: auto; overflow-y: hidden; padding: 6px 0 10px; }
+
+  .line { overflow-x: auto; overflow-y: hidden; padding: 10px 0 12px 1.6em; }
+  .line .reveal { display: inline-block; clip-path: inset(-10% 100% -10% 0); transition: clip-path var(--dur, 2s) linear; }
+  .line.in .reveal { clip-path: inset(-10% -2% -10% 0); }
+  .line.result { color: var(--accent); }
+  .result-tag { font-family: var(--serif); font-size: clamp(22px, 3vw, 30px); padding: 18px 0 0 1.6em; color: var(--accent); opacity: 0; transition: opacity 1.2s ease; }
+  .result-tag.in { opacity: 1; }
+
+  /* thought-process comments: appear, stay a while, then fade and collapse */
+  .th { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .8s ease, opacity .8s ease; margin-left: 1.6em; }
+  .th > div { overflow: hidden; }
+  .th.in { grid-template-rows: 1fr; opacity: 1; }
+  .th p { margin: 4px 0 10px; padding-left: 16px; border-left: 2px solid var(--accent); color: var(--muted); font-family: var(--serif);
+          font-style: italic; font-size: clamp(17px, 2.2vw, 20px); line-height: 1.5; max-width: 62ch; }
+  .th.dim p { border-left-color: var(--line); }
+  .th .katex { font-size: 1.04em; }
+  .term { background: none; border: 0; border-bottom: 1.5px dotted var(--accent); padding: 0; font: inherit; font-style: italic; color: var(--ink);
+          cursor: pointer; transition: color .2s; }
+  .term:hover { color: var(--accent); }
+
+  .hint { color: var(--muted); font-size: 14px; margin-top: 34px; }
+
+  #pop { position: absolute; z-index: 30; max-width: min(460px, calc(100vw - 32px)); background: var(--bg); border: 1px solid var(--accent);
+         border-radius: 10px; padding: 18px 22px 16px; box-shadow: 0 24px 50px -24px rgba(13,27,42,.45); }
+  #pop p { margin: 0 0 10px; font-family: var(--serif); font-size: 18px; line-height: 1.5; }
+  #pop .pt { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-family: var(--sans); font-weight: 500; margin-bottom: 8px; }
+  #pop .x { font-size: 13px; color: var(--muted); cursor: pointer; background: none; border: 0; padding: 0; font-family: var(--sans); }
+  #pop .x:hover { color: var(--ink); }
+  .badge { position: fixed; left: 0; right: 0; bottom: 0; text-align: center; padding: 10px 16px; font-size: 13px; color: var(--muted);
+           background: rgba(246,245,241,.9); border-top: 1px solid var(--line); display: none; }
+  .badge.on { display: block; }
+  @media (prefers-reduced-motion: reduce) { .line .reveal { transition-duration: 0s !important; } .th, .assign { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href="../cviceni.html">← Cvičení z analýzy</a>
+    <a href="../index.html">Josef Hlahulek</a>
+  </div>
+
+  <div class="tools">
+    <button class="link" id="pause" type="button">Pozastavit</button>
+    <button class="link" id="again" type="button">Znovu</button>
+    <span>Rychlost:</span>
+    <button class="spd" data-v="0.7" type="button" aria-pressed="false">pomalu</button>
+    <button class="spd" data-v="1" type="button" aria-pressed="true">normálně</button>
+    <button class="spd" data-v="1.7" type="button" aria-pressed="false">rychle</button>
+  </div>
+
+  <div class="assign" id="assign">
+    <div class="lbl">Příklad 26</div>
+    <div class="ex" id="ex"></div>
+  </div>
+
+  <div id="lines"></div>
+
+  <p class="hint">Klikni na podtržená slova, vyskočí upřesnění (animace se při tom zastaví).</p>
+</div>
+
+<div id="pop" hidden role="dialog" aria-label="Upřesnění pojmu"></div>
+<div class="badge" id="badge">Animace je pozastavena</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script>
+(function () {
+  if (!window.katex) { document.getElementById('ex').textContent = 'Vzorce se nepodařilo načíst. Zkus stránku obnovit.'; return; }
+
+  var T = String.raw;   // TeX is written without doubling the backslashes
+
+  /* ---------- content ---------- */
+  var ASSIGN = T`\displaystyle\lim_{n\to\infty}\left(\sqrt[3]{\sqrt{n^{7}}+\sqrt[3]{n^{7}}}-\sqrt[3]{\sqrt{n^{7}}-\sqrt[3]{n^{7}}}\right)`;
+
+  var L1 = T`=\lim_{n\to\infty}\dfrac{\bigl(n^{7/2}+n^{7/3}\bigr)-\bigl(n^{7/2}-n^{7/3}\bigr)}{\sqrt[3]{\bigl(n^{7/2}+n^{7/3}\bigr)^{2}}+\sqrt[3]{\bigl(n^{7/2}+n^{7/3}\bigr)\bigl(n^{7/2}-n^{7/3}\bigr)}+\sqrt[3]{\bigl(n^{7/2}-n^{7/3}\bigr)^{2}}}`;
+  var L2 = T`=\lim_{n\to\infty}\dfrac{2n^{7/3}}{n^{7/3}\Bigl[\sqrt[3]{\bigl(1+n^{-7/6}\bigr)^{2}}+\sqrt[3]{1-n^{-7/3}}+\sqrt[3]{\bigl(1-n^{-7/6}\bigr)^{2}}\Bigr]}`;
+  var L3 = T`=\lim_{n\to\infty}\dfrac{2}{\sqrt[3]{\bigl(1+n^{-7/6}\bigr)^{2}}+\sqrt[3]{1-n^{-7/3}}+\sqrt[3]{\bigl(1-n^{-7/6}\bigr)^{2}}}`;
+  var L4 = T`\overset{\text{ZOAL}}{=}\dfrac{2}{\sqrt[3]{\lim\bigl(1+n^{-7/6}\bigr)^{2}}+\sqrt[3]{\lim\bigl(1-n^{-7/3}\bigr)}+\sqrt[3]{\lim\bigl(1-n^{-7/6}\bigr)^{2}}}`;
+  var L5 = T`\overset{\text{AL}}{=}\dfrac{2}{\sqrt[3]{1}+\sqrt[3]{1}+\sqrt[3]{1}}=\dfrac{2}{3}`;
+
+  // thought text: $...$ is math, {{term}} is the clickable phrase
+  var TH = {
+    q:    T`Chovají se ty odmocniny {{term}}?`,
+    mark: T`Označím $A_n=\sqrt[3]{\sqrt{n^7}+\sqrt[3]{n^7}}$ a $B_n=\sqrt[3]{\sqrt{n^7}-\sqrt[3]{n^7}}$. Pod třetí odmocninou dominuje $\sqrt{n^7}=n^{7/2}$, protože $\tfrac72>\tfrac73$.`,
+    asym: T`Proto $A_n,\,B_n\sim\sqrt[3]{n^{7/2}}=n^{7/6}$.`,
+    chk:  T`Ověření: $\lim\dfrac{A_n}{n^{7/6}}=\lim\sqrt[3]{1+n^{-7/6}}=1$ a stejně $\lim\dfrac{B_n}{n^{7/6}}=1$. Tedy $\dfrac{A_n}{B_n}\to1$.`,
+    yes:  T`Ano, chovají se {{term}}: obě jdou k $\infty$ stejně rychle, takže rozdíl je typu $\infty-\infty$.`,
+    no:   T`Kdyby ne: vytknu nejrychleji rostoucí člen, použiju AL a dostanu definovaný výraz. Tady to nepomůže.`,
+    form: T`Použiju tedy vzorec $a^3-b^3=(a-b)(a^2+ab+b^2)$, tj. $a-b=\dfrac{a^3-b^3}{a^2+ab+b^2}$.`,
+    num:  T`Čitatel: $\bigl(n^{7/2}+n^{7/3}\bigr)-\bigl(n^{7/2}-n^{7/3}\bigr)=2n^{7/3}$.`,
+    fac:  T`Z každého členu jmenovatele vytknu $n^{7/3}$.`,
+    canc: T`Zkrátím $n^{7/3}$. Každý člen ve jmenovateli má teď limitu, výraz je definovaný.`,
+    zoal: T`ZOAL: záměna limity a odmocniny (díky Heineho větě a spojitosti odmocniny).`,
+    al:   T`AL: aritmetika limit, protože $n^{-7/6}\to0$ a $n^{-7/3}\to0$.`
+  };
+
+  var POP = {
+    title: 'Chovají se stejně',
+    html: T`<p>Posloupnosti $A_n$ a $B_n$ se chovají stejně, když</p>
+            <p style="text-align:center">$\displaystyle\lim_{n\to\infty}\frac{A_n}{B_n}=c,$</p>
+            <p>kde $c\neq0$ je konečná konstanta.</p>
+            <p>To způsobuje právě ten problém: obě rostou stejně rychle, takže rozdíl $A_n-B_n$ je typu $\infty-\infty$ a přímo ho aritmetikou limit nespočítáme.</p>`
+  };
+
+  /* ---------- helpers ---------- */
+  function mathHTML(tex, display) { return katex.renderToString(tex, { throwOnError: false, displayMode: !!display }); }
+  function rich(str) {
+    var parts = str.split('$'), out = '';
+    for (var i = 0; i < parts.length; i++) {
+      if (i % 2) out += mathHTML(parts[i]);
+      else out += parts[i].replace('{{term}}', '<button class="term" type="button">stejně</button>');
+    }
+    return out;
+  }
+
+  var assign = document.getElementById('assign'), ex = document.getElementById('ex'), lines = document.getElementById('lines');
+  var pop = document.getElementById('pop'), badge = document.getElementById('badge'), pauseBtn = document.getElementById('pause');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var token = 0, speed = 1, manualPause = false, popOpen = false;
+
+  function paused() { return manualPause || popOpen; }
+  function syncBadge() { badge.className = 'badge' + (paused() ? ' on' : ''); pauseBtn.textContent = manualPause ? 'Pokračovat' : 'Pozastavit'; }
+
+  // sleep that stops while paused and never resolves after a replay
+  function sleep(ms, my) {
+    return new Promise(function (resolve) {
+      var left = ms / speed;
+      (function tick() {
+        if (my !== token) return;
+        if (paused()) { setTimeout(tick, 80); return; }
+        if (left <= 0) { resolve(); return; }
+        left -= 40; setTimeout(tick, 40);
+      })();
+    });
+  }
+  function frame() { return new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); }); }
+  function follow(el) {
+    var b = el.getBoundingClientRect();
+    if (b.bottom > window.innerHeight - 90) window.scrollBy({ top: b.bottom - window.innerHeight + 140, behavior: reduce ? 'auto' : 'smooth' });
+  }
+
+  async function addLine(tex, my, cls, secs) {
+    var d = document.createElement('div'); d.className = 'line' + (cls ? ' ' + cls : '');
+    d.innerHTML = '<span class="reveal">' + mathHTML('\\displaystyle ' + tex) + '</span>';
+    d.firstChild.style.setProperty('--dur', (secs / speed) + 's');
+    lines.appendChild(d); follow(d);
+    await frame(); if (my !== token) return;
+    d.classList.add('in');
+    await sleep(secs * 1000 + 500, my);
+  }
+
+  async function think(key, my, hold, dim) {
+    var d = document.createElement('div'); d.className = 'th' + (dim ? ' dim' : '');
+    d.innerHTML = '<div><p>' + rich(TH[key]) + '</p></div>';
+    lines.appendChild(d);
+    await frame(); if (my !== token) return;
+    d.classList.add('in'); follow(d);
+    await sleep(hold, my);
+    // fade out and collapse in the background so the next step can start straight away
+    d.classList.remove('in');
+    setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 1000);
+  }
+
+  /* ---------- the story ---------- */
+  async function run() {
+    var my = ++token;
+    lines.innerHTML = ''; assign.classList.remove('in'); closePop(true);
+    ex.innerHTML = mathHTML(ASSIGN, false);
+    window.scrollTo(0, 0);
+    await sleep(500, my);
+    assign.classList.add('in');
+    await sleep(2200, my);
+
+    await think('q',    my, 5200);
+    await think('mark', my, 7600);
+    await think('asym', my, 4600);
+    await think('chk',  my, 7800);
+    await think('yes',  my, 6200);
+    await think('no',   my, 6000, true);
+    await think('form', my, 6200);
+
+    await addLine(L1, my, '', 3.8);
+    await think('num',  my, 5200);
+    await addLine(L2, my, '', 3.4);
+    await think('fac',  my, 3800);
+    await addLine(L3, my, '', 3.0);
+    await think('canc', my, 5200);
+    await addLine(L4, my, '', 3.4);
+    await think('zoal', my, 5200);
+    await addLine(L5, my, 'result', 2.6);
+    await think('al',   my, 4200);
+
+    var r = document.createElement('div'); r.className = 'result-tag'; r.innerHTML = 'Výsledek: ' + mathHTML('\\dfrac{2}{3}');
+    lines.appendChild(r); follow(r);
+    await frame(); r.classList.add('in');
+  }
+
+  /* ---------- the clickable phrase ---------- */
+  function openPop(btn) {
+    pop.innerHTML = '<div class="pt">' + POP.title + '</div>' + rich(POP.html) + '<button class="x" type="button">Zavřít</button>';
+    pop.hidden = false;
+    var b = btn.getBoundingClientRect(), pw = pop.offsetWidth;
+    var left = Math.max(16, Math.min(window.scrollX + b.left, window.scrollX + window.innerWidth - pw - 16));
+    pop.style.left = left + 'px'; pop.style.top = (window.scrollY + b.bottom + 10) + 'px';
+    popOpen = true; syncBadge();
+    pop.querySelector('.x').addEventListener('click', function () { closePop(); });
+  }
+  function closePop(silent) { pop.hidden = true; popOpen = false; if (!silent) syncBadge(); else syncBadge(); }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('.term') : null;
+    if (t) { e.preventDefault(); if (popOpen) closePop(); else openPop(t); return; }
+    if (popOpen && !pop.contains(e.target)) closePop();
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && popOpen) closePop(); });
+
+  /* ---------- controls ---------- */
+  pauseBtn.addEventListener('click', function () { manualPause = !manualPause; syncBadge(); });
+  document.getElementById('again').addEventListener('click', function () { manualPause = false; syncBadge(); run(); });
+  [].forEach.call(document.querySelectorAll('.spd'), function (b) {
+    b.addEventListener('click', function () {
+      speed = parseFloat(b.getAttribute('data-v'));
+      [].forEach.call(document.querySelectorAll('.spd'), function (o) { o.setAttribute('aria-pressed', o === b); });
+    });
+  });
+
+  syncBadge();
+  run();
+})();
+</script>
+</body>
+</html>

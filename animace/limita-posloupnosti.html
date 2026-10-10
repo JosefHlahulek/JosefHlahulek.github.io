@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Limita posloupnosti (ε–N) · Josef Hlahulek</title>
+<meta name="description" content="Interaktivní animace definice limity posloupnosti pomocí ε a N.">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  body { padding-bottom: 60px; }
+  .top { display: flex; justify-content: space-between; align-items: center; height: 76px; font-size: 14px; color: var(--muted); }
+  .top a:hover { color: var(--ink); }
+  h1 { font-size: clamp(32px, 5vw, 56px); max-width: 22ch; margin: 18px 0 14px; }
+  .def { font-family: var(--serif); font-style: italic; font-size: clamp(18px, 2.4vw, 22px); margin: 0 0 30px; max-width: none; }
+  .tabs { display: flex; gap: 26px; flex-wrap: wrap; margin: 0 0 6px; }
+  .tab { background: none; border: 0; border-bottom: 1px solid transparent; padding: 4px 0; font: inherit; font-family: var(--serif);
+         font-size: 19px; color: var(--muted); cursor: pointer; transition: color .2s, border-color .2s; }
+  .tab:hover { color: var(--ink); }
+  .tab[aria-pressed="true"] { color: var(--ink); border-color: var(--accent); }
+  .plot { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: 18px; }
+  canvas#cv { display: block; width: 100%; height: 380px; }
+  .ctl { display: grid; grid-template-columns: 1fr auto; gap: 14px 28px; align-items: center; margin: 24px 0 0; }
+  .ctl label { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .play { font: inherit; font-size: 15px; font-weight: 500; background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 0 0 2px; cursor: pointer;
+          color: var(--ink); transition: color .2s, border-color .2s; }
+  .play:hover { color: var(--accent); border-color: var(--accent); }
+  .read { margin-top: 28px; }
+  .read .big { font-family: var(--serif); font-size: clamp(24px, 3.4vw, 34px); line-height: 1.25; margin: 0 0 8px; max-width: none; }
+  .read .big i { color: var(--accent); }
+  .read p { color: var(--muted); max-width: 70ch; }
+  .legend { display: flex; gap: 22px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 12px; }
+  .legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 0; background: var(--c); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href="../cviceni.html">← Cvičení z analýzy</a>
+    <a href="../index.html">Josef Hlahulek</a>
+  </div>
+
+  <div class="eyebrow">Animace · Posloupnosti</div>
+  <h1>Limita posloupnosti: <em>ε</em> a <em>N</em></h1>
+  <p class="def">lim aₙ = L &nbsp;⇔&nbsp; ∀ε &gt; 0 ∃N ∀n &gt; N: |aₙ − L| &lt; ε</p>
+
+  <div class="tabs" role="group" aria-label="Volba posloupnosti" id="tabs"></div>
+
+  <div class="plot"><canvas id="cv" role="img" aria-label="Členy posloupnosti a ε-okolí limity"></canvas></div>
+
+  <div class="legend">
+    <span style="--c:#0b6e8a">člen v ε-okolí</span>
+    <span style="--c:#b4443a">člen mimo ε-okolí</span>
+  </div>
+
+  <div class="ctl">
+    <label for="eps">Poloměr okolí ε</label><span></span>
+    <input id="eps" type="range" min="0" max="100" value="20" step="0.1" aria-label="Hodnota ε">
+    <button class="play" id="play" type="button">Přehrát: ε → 0</button>
+  </div>
+
+  <div class="read" aria-live="polite">
+    <p class="big" id="r1"></p>
+    <p id="r2"></p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var SEQ = [
+    { name: 'aₙ = 1/n',              f: function (n) { return 1 / n; },                         L: 0, form: '1/n' },
+    { name: 'aₙ = 1 + (−1)ⁿ/n',      f: function (n) { return 1 + (n % 2 ? -1 : 1) / n; },       L: 1, form: '1 + (−1)ⁿ/n' },
+    { name: 'aₙ = (2n + 1)/(n + 3)', f: function (n) { return (2 * n + 1) / (n + 3); },          L: 2, form: '(2n + 1)/(n + 3)' }
+  ];
+  var cur = 0, v = 20, anim = null;
+
+  var cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  var slider = document.getElementById('eps'), play = document.getElementById('play');
+  var r1 = document.getElementById('r1'), r2 = document.getElementById('r2'), tabs = document.getElementById('tabs');
+  var W = 0, H = 0;
+
+  function eps(val) { return 1.5 * Math.pow(0.01 / 1.5, val / 100); }          // 1.5 → 0.01 on a log scale
+  function num(x) { return x.toLocaleString('cs-CZ', { maximumFractionDigits: x < 0.1 ? 3 : 2 }); }
+
+  // last index n for which |a_n − L| ≥ ε; every n > N then lies inside the ε-neighbourhood
+  function calcN(s, e) {
+    var last = 0;
+    for (var n = 1; n <= 20000; n++) if (Math.abs(s.f(n) - s.L) >= e) last = n;
+    return last;
+  }
+
+  SEQ.forEach(function (s, i) {
+    var b = document.createElement('button');
+    b.className = 'tab'; b.type = 'button'; b.textContent = s.name; b.setAttribute('aria-pressed', i === cur);
+    b.addEventListener('click', function () {
+      cur = i; [].forEach.call(tabs.children, function (c, k) { c.setAttribute('aria-pressed', k === cur); }); render();
+    });
+    tabs.appendChild(b);
+  });
+
+  function size() {
+    var d = window.devicePixelRatio || 1, b = cv.getBoundingClientRect();
+    W = b.width; H = b.height; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0);
+  }
+
+  var yLo = 0, yHi = 1, nShow = 30, ready = false;
+
+  function render() {
+    var s = SEQ[cur], e = eps(v), N = calcN(s, e);
+    var nMax = Math.max(24, Math.min(300, N + 14)), n, i;
+
+    // target view, eased so the picture moves smoothly
+    var lo = s.L - e, hi = s.L + e;
+    for (n = 1; n <= nMax; n++) { var a = s.f(n); if (a < lo) lo = a; if (a > hi) hi = a; }
+    var pad = (hi - lo) * 0.1; lo -= pad; hi += pad;
+    if (!ready) { yLo = lo; yHi = hi; nShow = nMax; ready = true; }
+    else { yLo += (lo - yLo) * 0.35; yHi += (hi - yHi) * 0.35; nShow += (nMax - nShow) * 0.35; }
+
+    var padL = 46, padR = 16, padT = 14, padB = 30;
+    function X(k) { return padL + (W - padL - padR) * (k - 0.5) / nShow; }
+    function Y(val) { return padT + (H - padT - padB) * (1 - (val - yLo) / (yHi - yLo)); }
+
+    ctx.clearRect(0, 0, W, H);
+
+    // ε-neighbourhood
+    ctx.fillStyle = 'rgba(11,110,138,.10)';
+    ctx.fillRect(padL, Y(s.L + e), W - padL - padR, Y(s.L - e) - Y(s.L + e));
+    ctx.strokeStyle = 'rgba(11,110,138,.45)'; ctx.lineWidth = 1;
+    [s.L + e, s.L - e].forEach(function (yy) { ctx.beginPath(); ctx.moveTo(padL, Y(yy)); ctx.lineTo(W - padR, Y(yy)); ctx.stroke(); });
+
+    // limit
+    ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(13,27,42,.55)';
+    ctx.beginPath(); ctx.moveTo(padL, Y(s.L)); ctx.lineTo(W - padR, Y(s.L)); ctx.stroke(); ctx.setLineDash([]);
+
+    // index N
+    if (N > 0 && N < nShow) {
+      ctx.strokeStyle = 'rgba(13,27,42,.35)'; ctx.setLineDash([2, 4]);
+      ctx.beginPath(); ctx.moveTo(X(N + 0.5), padT); ctx.lineTo(X(N + 0.5), H - padB); ctx.stroke(); ctx.setLineDash([]);
+    }
+
+    // points
+    var rad = Math.max(2.2, Math.min(5, (W / nShow) * 0.32));
+    for (n = 1; n <= Math.floor(nShow + 0.5); n++) {
+      var out = Math.abs(s.f(n) - s.L) >= e;
+      ctx.beginPath(); ctx.arc(X(n), Y(s.f(n)), rad, 0, 6.2832);
+      ctx.fillStyle = out ? '#b4443a' : '#0b6e8a'; ctx.fill();
+    }
+
+    // axes labels
+    ctx.fillStyle = '#5b6672'; ctx.font = '12px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'right'; ctx.fillText('L = ' + num(s.L), padL - 8, Y(s.L) + 4);
+    ctx.textAlign = 'center';
+    var tick = nShow > 120 ? 50 : nShow > 60 ? 20 : nShow > 30 ? 10 : 5;
+    for (n = tick; n <= nShow; n += tick) ctx.fillText('n = ' + n, X(n), H - 10);
+    ctx.textAlign = 'left';
+    if (N > 0 && N < nShow) { ctx.fillStyle = '#0d1b2a'; ctx.fillText('N = ' + N, X(N + 0.5) + 6, padT + 12); }
+
+    // text
+    r1.innerHTML = 'ε = <i>' + num(e) + '</i> &nbsp;→&nbsp; N = <i>' + N + '</i>';
+    r2.textContent = 'Pro všechna n > ' + N + ' platí |aₙ − ' + num(s.L) + '| < ' + num(e) +
+      '. Posloupnost ' + s.name + ' má limitu ' + num(s.L) + '; čím menší ε, tím větší N je potřeba.';
+
+    if (Math.abs(nShow - nMax) > 0.5 || Math.abs(yLo - lo) > (hi - lo) * 0.003) requestAnimationFrame(render);
+  }
+
+  slider.addEventListener('input', function () { stop(); v = parseFloat(slider.value); render(); });
+
+  function stop() { if (anim) { cancelAnimationFrame(anim); anim = null; play.textContent = 'Přehrát: ε → 0'; } }
+  play.addEventListener('click', function () {
+    if (anim) { stop(); return; }
+    var t0 = null, from = v < 98 ? v : 0;
+    play.textContent = 'Zastavit';
+    (function step(t) {
+      if (t0 === null) t0 = t;
+      var p = Math.min(1, (t - t0) / 7000), eased = p * p * (3 - 2 * p);
+      v = from + (100 - from) * eased; slider.value = v; render();
+      if (p < 1) anim = requestAnimationFrame(step); else stop();
+    })(performance.now());
+  });
+
+  window.addEventListener('resize', function () { size(); render(); });
+  size(); render();
+})();
+</script>
+</body>
+</html>

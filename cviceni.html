@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cvičení z matematické analýzy · Josef Hlahulek</title>
+<meta name="description" content="Materiály a interaktivní animace k dobrovolným cvičením z matematické analýzy pro studenty IES FSV UK.">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<div class="page">
+  <nav>
+    <div class="wrap">
+      <a class="logo" href="index.html">Josef Hlahulek</a>
+      <ul>
+        <li><a href="#materialy">Materiály</a></li>
+        <li><a href="#animace">Animace</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero short" id="top">
+    <div class="wrap">
+      <div class="eyebrow rv">Cvičení · Matematická analýza</div>
+      <h1 class="sm rv">Matematická analýza pro studenty <em>IES FSV</em></h1>
+      <p class="lead rv">Materiály, příklady a interaktivní animace k dobrovolným cvičením.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="row" id="materialy">
+      <div class="k rv">Materiály</div>
+      <div>
+        <!-- Nová položka: zkopíruj blok <div class="item rv"> … </div> a uprav název, popis a odkaz.
+             PDF nahraj do složky materialy/ a odkaž na ni, např. href="materialy/limity-posloupnosti.pdf". -->
+        <p class="empty rv">Materiály sem budou přibývat průběžně.</p>
+      </div>
+    </section>
+
+    <section class="row" id="animace">
+      <div class="k rv">Animace</div>
+      <div>
+        <div class="item rv">
+          <div>
+            <h3>Limita posloupnosti: definice pomocí ε a N</h3>
+            <p>Posouvej ε a sleduj, od kterého indexu N leží všechny členy posloupnosti v ε-okolí limity.</p>
+          </div>
+          <a class="go" href="animace/limita-posloupnosti.html">Otevřít</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>© <span id="y"></span> Josef Hlahulek</span>
+      <a href="index.html">Zpět na úvod</a>
+    </div>
+  </footer>
+</div>
+
+<div id="ticker" aria-label="Živé ukazatele simulované řady">
+  <div class="wrap">
+    <span class="tag">Simulace · GARCH(1,1)</span>
+    <span class="m">Cena <b id="i-p">—</b></span>
+    <span class="m">Δ <b id="i-r">—</b></span>
+    <span class="m">σ̂ <b id="i-s">—</b></span>
+    <span class="m opt2">EWMA <b id="i-e">—</b></span>
+    <span class="m opt">VaR95 <b id="i-v">—</b></span>
+    <span class="m opt">H(sign) <b id="i-h">—</b></span>
+    <span class="m opt">MaxDD <b id="i-d">—</b></span>
+  </div>
+</div>
+
+<script src="assets/site.js"></script>
+<script src="assets/market.js"></script>
+</body>
+</html>

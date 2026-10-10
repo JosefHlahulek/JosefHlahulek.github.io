@@ -31,9 +31,6 @@
   .line { overflow-x: auto; overflow-y: hidden; padding: 10px 0 12px 1.6em; }
   .line .reveal { display: inline-block; clip-path: inset(-10% 100% -10% 0); transition: clip-path var(--dur, 2s) linear; }
   .line.in .reveal { clip-path: inset(-10% -2% -10% 0); }
-  .line.result { color: var(--accent); }
-  .result-tag { font-family: var(--serif); font-size: clamp(22px, 3vw, 30px); padding: 18px 0 0 1.6em; color: var(--accent); opacity: 0; transition: opacity 1.2s ease; }
-  .result-tag.in { opacity: 1; }
 
   /* thought-process comments: appear, stay a while, then fade and collapse */
   .th { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .8s ease, opacity .8s ease; margin-left: 1.6em; }
@@ -47,6 +44,8 @@
           cursor: pointer; transition: color .2s; }
   .term:hover { color: var(--accent); }
 
+  .lineterm { opacity: 0; margin-left: 16px; font-size: 15px; font-family: var(--serif); transition: opacity .9s ease; vertical-align: middle; }
+  .line.done .lineterm { opacity: 1; }
   .hint { color: var(--muted); font-size: 14px; margin-top: 34px; }
 
   #pop { position: absolute; z-index: 30; max-width: min(460px, calc(100vw - 32px)); background: var(--bg); border: 1px solid var(--accent);
@@ -100,11 +99,8 @@
   /* ---------- content ---------- */
   var ASSIGN = T`\displaystyle\lim_{n\to\infty}\left(\sqrt[3]{\sqrt{n^{7}}+\sqrt[3]{n^{7}}}-\sqrt[3]{\sqrt{n^{7}}-\sqrt[3]{n^{7}}}\right)`;
 
-  var L1 = T`=\lim_{n\to\infty}\dfrac{\bigl(n^{7/2}+n^{7/3}\bigr)-\bigl(n^{7/2}-n^{7/3}\bigr)}{\sqrt[3]{\bigl(n^{7/2}+n^{7/3}\bigr)^{2}}+\sqrt[3]{\bigl(n^{7/2}+n^{7/3}\bigr)\bigl(n^{7/2}-n^{7/3}\bigr)}+\sqrt[3]{\bigl(n^{7/2}-n^{7/3}\bigr)^{2}}}`;
-  var L2 = T`=\lim_{n\to\infty}\dfrac{2n^{7/3}}{n^{7/3}\Bigl[\sqrt[3]{\bigl(1+n^{-7/6}\bigr)^{2}}+\sqrt[3]{1-n^{-7/3}}+\sqrt[3]{\bigl(1-n^{-7/6}\bigr)^{2}}\Bigr]}`;
-  var L3 = T`=\lim_{n\to\infty}\dfrac{2}{\sqrt[3]{\bigl(1+n^{-7/6}\bigr)^{2}}+\sqrt[3]{1-n^{-7/3}}+\sqrt[3]{\bigl(1-n^{-7/6}\bigr)^{2}}}`;
-  var L4 = T`\overset{\text{ZOAL}}{=}\dfrac{2}{\sqrt[3]{\lim\bigl(1+n^{-7/6}\bigr)^{2}}+\sqrt[3]{\lim\bigl(1-n^{-7/3}\bigr)}+\sqrt[3]{\lim\bigl(1-n^{-7/6}\bigr)^{2}}}`;
-  var L5 = T`\overset{\text{AL}}{=}\dfrac{2}{\sqrt[3]{1}+\sqrt[3]{1}+\sqrt[3]{1}}=\dfrac{2}{3}`;
+  // the cube roots cancel against the cubes, so the numerator has no roots; the denominator keeps A_n, B_n
+  var L1 = T`=\lim_{n\to\infty}\dfrac{\bigl(n^{7/2}+n^{7/3}\bigr)-\bigl(n^{7/2}-n^{7/3}\bigr)}{A_n^{2}+A_nB_n+B_n^{2}}`;
 
   // thought text: $...$ is math, {{term}} is the clickable phrase
   var TH = {
@@ -115,19 +111,26 @@
     yes:  T`Ano, chovají se {{term}}: obě jdou k $\infty$ stejně rychle, takže rozdíl je typu $\infty-\infty$.`,
     no:   T`Kdyby ne: vytknu nejrychleji rostoucí člen, použiju AL a dostanu definovaný výraz. Tady to nepomůže.`,
     form: T`Použiju tedy vzorec $a^3-b^3=(a-b)(a^2+ab+b^2)$, tj. $a-b=\dfrac{a^3-b^3}{a^2+ab+b^2}$.`,
-    num:  T`Čitatel: $\bigl(n^{7/2}+n^{7/3}\bigr)-\bigl(n^{7/2}-n^{7/3}\bigr)=2n^{7/3}$.`,
-    fac:  T`Z každého členu jmenovatele vytknu $n^{7/3}$.`,
-    canc: T`Zkrátím $n^{7/3}$. Každý člen ve jmenovateli má teď limitu, výraz je definovaný.`,
-    zoal: T`ZOAL: záměna limity a odmocniny (díky Heineho větě a spojitosti odmocniny).`,
-    al:   T`AL: aritmetika limit, protože $n^{-7/6}\to0$ a $n^{-7/3}\to0$.`
+    sub:  T`Za $a$ dosazuju první člen $A_n$, za $b$ druhý člen $B_n$.`
   };
 
-  var POP = {
-    title: 'Chovají se stejně',
-    html: T`<p>Posloupnosti $A_n$ a $B_n$ se chovají stejně, když</p>
-            <p style="text-align:center">$\displaystyle\lim_{n\to\infty}\frac{A_n}{B_n}=c,$</p>
-            <p>kde $c\neq0$ je konečná konstanta.</p>
-            <p>To způsobuje právě ten problém: obě rostou stejně rychle, takže rozdíl $A_n-B_n$ je typu $\infty-\infty$ a přímo ho aritmetikou limit nespočítáme.</p>`
+  var POPS = {
+    same: {
+      title: 'Chovají se stejně',
+      html: T`<p>Posloupnosti $A_n$ a $B_n$ se chovají stejně, když</p>
+              <p style="text-align:center">$\displaystyle\lim_{n\to\infty}\frac{A_n}{B_n}=c,$</p>
+              <p>kde $c\neq0$ je konečná konstanta.</p>
+              <p>To způsobuje právě ten problém: obě rostou stejně rychle, takže rozdíl $A_n-B_n$ je typu $\infty-\infty$ a přímo ho aritmetikou limit nespočítáme.</p>`
+    },
+    subst: {
+      title: 'Dosazení do vzorce',
+      html: T`<p>Vzorec $a-b=\dfrac{a^3-b^3}{a^2+ab+b^2}$ s dosazením</p>
+              <p style="text-align:center">$a=A_n=\sqrt[3]{n^{7/2}+n^{7/3}},\qquad b=B_n=\sqrt[3]{n^{7/2}-n^{7/3}}.$</p>
+              <p>Třetí mocnina ruší třetí odmocninu:</p>
+              <p style="text-align:center">$a^3=A_n^3=n^{7/2}+n^{7/3},\qquad b^3=B_n^3=n^{7/2}-n^{7/3}.$</p>
+              <p>Proto</p>
+              <p style="text-align:center">$A_n-B_n=\dfrac{\bigl(n^{7/2}+n^{7/3}\bigr)-\bigl(n^{7/2}-n^{7/3}\bigr)}{A_n^2+A_nB_n+B_n^2}.$</p>`
+    }
   };
 
   /* ---------- helpers ---------- */
@@ -136,7 +139,7 @@
     var parts = str.split('$'), out = '';
     for (var i = 0; i < parts.length; i++) {
       if (i % 2) out += mathHTML(parts[i]);
-      else out += parts[i].replace('{{term}}', '<button class="term" type="button">stejně</button>');
+      else out += parts[i].replace('{{term}}', '<button class="term" data-pop="same" type="button">stejně</button>');
     }
     return out;
   }
@@ -167,22 +170,25 @@
     if (b.bottom > window.innerHeight - 90) window.scrollBy({ top: b.bottom - window.innerHeight + 140, behavior: reduce ? 'auto' : 'smooth' });
   }
 
-  async function addLine(tex, my, cls, secs) {
+  async function addLine(tex, my, cls, secs, pop) {
     var d = document.createElement('div'); d.className = 'line' + (cls ? ' ' + cls : '');
-    d.innerHTML = '<span class="reveal">' + mathHTML('\\displaystyle ' + tex) + '</span>';
+    d.innerHTML = '<span class="reveal">' + mathHTML('\\displaystyle ' + tex) + '</span>' +
+      (pop ? '<button class="term lineterm" data-pop="' + pop[0] + '" type="button">' + pop[1] + '</button>' : '');
     d.firstChild.style.setProperty('--dur', (secs / speed) + 's');
     lines.appendChild(d); follow(d);
     await frame(); if (my !== token) return;
     d.classList.add('in');
-    await sleep(secs * 1000 + 500, my);
+    await sleep(secs * 1000 + 300, my);
+    d.classList.add('done');
   }
 
-  async function think(key, my, hold, dim) {
+  async function think(key, my, hold, dim, keep) {
     var d = document.createElement('div'); d.className = 'th' + (dim ? ' dim' : '');
     d.innerHTML = '<div><p>' + rich(TH[key]) + '</p></div>';
     lines.appendChild(d);
     await frame(); if (my !== token) return;
     d.classList.add('in'); follow(d);
+    if (keep) return;
     await sleep(hold, my);
     // fade out and collapse in the background so the next step can start straight away
     d.classList.remove('in');
@@ -207,24 +213,13 @@
     await think('no',   my, 6000, true);
     await think('form', my, 6200);
 
-    await addLine(L1, my, '', 3.8);
-    await think('num',  my, 5200);
-    await addLine(L2, my, '', 3.4);
-    await think('fac',  my, 3800);
-    await addLine(L3, my, '', 3.0);
-    await think('canc', my, 5200);
-    await addLine(L4, my, '', 3.4);
-    await think('zoal', my, 5200);
-    await addLine(L5, my, 'result', 2.6);
-    await think('al',   my, 4200);
-
-    var r = document.createElement('div'); r.className = 'result-tag'; r.innerHTML = 'Výsledek: ' + mathHTML('\\dfrac{2}{3}');
-    lines.appendChild(r); follow(r);
-    await frame(); r.classList.add('in');
+    await addLine(L1, my, '', 4.2, ['subst', 'dosazení']);
+    await think('sub', my, 0, false, true);   // stays on screen: this is where the animation currently ends
   }
 
   /* ---------- the clickable phrase ---------- */
   function openPop(btn) {
+    var POP = POPS[btn.getAttribute('data-pop')] || POPS.same;
     pop.innerHTML = '<div class="pt">' + POP.title + '</div>' + rich(POP.html) + '<button class="x" type="button">Zavřít</button>';
     pop.hidden = false;
     var b = btn.getBoundingClientRect(), pw = pop.offsetWidth;

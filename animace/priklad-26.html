@@ -158,7 +158,8 @@
     num:  T`Nahoře: $\bigl(n^{7/2}+n^{7/3}\bigr)-\bigl(n^{7/2}-n^{7/3}\bigr)=2n^{7/3}$.`,
     den:  T`Dole: protože $A_n,\,B_n\sim n^{7/6}$, chovají se $A_n^2$, $A_nB_n$ i $B_n^2$ jako $n^{7/3}$. Proto z celého jmenovatele vytknu $n^{7/3}$.`,
     cut:  T`Krátím $n^{7/3}$ v čitateli i ve jmenovateli.`,
-    ref:  T`Z mezivýpočtu výše víme, že $\lim\dfrac{A_n}{n^{7/6}}=1$ i $\lim\dfrac{B_n}{n^{7/6}}=1$. Použiju AL a dosadím.`,
+    ref:  T`Podle mezivýpočtu výše je $\lim\dfrac{A_n}{n^{7/6}}=1$ a $\lim\dfrac{B_n}{n^{7/6}}=1$. Z AL (limita součinu je součin limit) proto $\Bigl(\dfrac{A_n}{n^{7/6}}\Bigr)^{2}\to1^2$, $\dfrac{A_n}{n^{7/6}}\cdot\dfrac{B_n}{n^{7/6}}\to1\cdot1$ a $\Bigl(\dfrac{B_n}{n^{7/6}}\Bigr)^{2}\to1^2$, takže všechny tři členy mají limitu 1.`,
+    choice: T`Jak dál? {{cont}}, nebo {{alt}}.`,
     alt:  T`Jde to počítat i {{alt}}.`,
     note: T`Náhled: postup bez $A_n$, $B_n$, jen aby bylo vidět, co se děje uvnitř.`
   };
@@ -196,6 +197,7 @@
       if (i % 2) out += mathHTML(parts[i]);
       else out += parts[i]
         .replace('{{term}}', '<button class="term" data-pop="same" type="button">stejně</button>')
+        .replace('{{cont}}', '<button class="term" data-act="cont" type="button">pokračovat s A<sub>n</sub>, B<sub>n</sub></button>')
         .replace('{{alt}}', '<button class="term" data-pop="alt" type="button">bez A<sub>n</sub>, B<sub>n</sub></button>');
     }
     return out;
@@ -315,15 +317,20 @@
     await addLine(L2, my, '', 4.6);
     await think('num',  my, 5200);
     await think('den',  my, 8200);
+    await think('choice', my, 0, false, true);   // waits for the choice; "bez A_n, B_n" opens its popup instead
+    await new Promise(function (res) { contRes = res; });
+    if (my !== token) return;
+    contRes = null;
+    var ch = lines.querySelector('[data-act="cont"]'); if (ch) ch.classList.add('chosen');
     await addLine(L3, my, '', 3.6);
     await think('cut',  my, 4200);
     await think('ref',  my, 6200);
     await addLine(L4, my, '', 3.6);
     await sleep(2500, my);
-    await think('alt',  my, 0, false, true);   // stays on screen: this is where the animation currently ends
   }
 
   /* ---------- the clickable phrases ---------- */
+  var contRes = null;
   var ACTIONS = { inside: showInside };
 
   function openPop(btn) {
@@ -343,6 +350,8 @@
   function closePop() { pop.hidden = true; popOpen = false; syncBadge(); }
 
   document.addEventListener('click', function (e) {
+    var c = e.target.closest ? e.target.closest('[data-act="cont"]') : null;
+    if (c) { e.preventDefault(); if (popOpen) closePop(); if (contRes) contRes(); return; }
     var t = e.target.closest ? e.target.closest('.term') : null;
     if (t) { e.preventDefault(); if (popOpen) closePop(); else openPop(t); return; }
     if (popOpen && !pop.contains(e.target)) closePop();

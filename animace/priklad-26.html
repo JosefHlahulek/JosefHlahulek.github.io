@@ -29,8 +29,9 @@
   .assign .ex { font-size: 1.15em; overflow-x: auto; overflow-y: hidden; padding: 6px 0 10px; }
 
   .line { overflow-x: auto; overflow-y: hidden; padding: 10px 0 12px 1.6em; }
-  .line .reveal { display: inline-block; clip-path: inset(-10% 100% -10% 0); transition: clip-path var(--dur, 2s) linear; }
-  .line.in .reveal { clip-path: inset(-10% -2% -10% 0); }
+  .reveal { display: inline-block; clip-path: inset(-10% 100% -10% 0); transition: clip-path var(--dur, 2s) linear; }
+  .in > .reveal { clip-path: inset(-10% -2% -10% 0); }
+  .line.inside { color: var(--muted); }
 
   /* thought-process comments: appear, stay a while, then fade and collapse */
   .th { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .8s ease, opacity .8s ease; margin-left: 1.6em; }
@@ -44,20 +45,34 @@
           cursor: pointer; transition: color .2s; }
   .term:hover { color: var(--accent); }
 
+  /* side calculation: comment on the left, intermediate result for A_n and B_n on the right */
+  .mid > div { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.35fr); gap: 8px 36px; align-items: start; }
+  .midr { border-left: 1px solid var(--line); padding: 4px 0 4px 24px; }
+  .midr .blk + .blk { border-top: 1px dashed var(--line); margin-top: 8px; padding-top: 10px; }
+  .midr .ml { overflow-x: auto; overflow-y: hidden; padding: 2px 0 4px; font-size: .94em; }
+  .midr .katex { font-size: 1.02em; }
+  .inside-note p { margin: 18px 0 4px; padding-left: 16px; border-left: 2px solid var(--line); color: var(--muted); font-family: var(--serif); font-style: italic; font-size: 18px; max-width: 62ch; }
   .lineterm { opacity: 0; margin-left: 16px; font-size: 15px; font-family: var(--serif); transition: opacity .9s ease; vertical-align: middle; }
   .line.done .lineterm { opacity: 1; }
   .hint { color: var(--muted); font-size: 14px; margin-top: 34px; }
 
-  #pop { position: absolute; z-index: 30; max-width: min(460px, calc(100vw - 32px)); background: var(--bg); border: 1px solid var(--accent);
+  #pop { position: absolute; z-index: 30; max-width: min(480px, calc(100vw - 32px)); background: var(--bg); border: 1px solid var(--accent);
          border-radius: 10px; padding: 18px 22px 16px; box-shadow: 0 24px 50px -24px rgba(13,27,42,.45); }
   #pop p { margin: 0 0 10px; font-family: var(--serif); font-size: 18px; line-height: 1.5; }
   #pop .pt { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-family: var(--sans); font-weight: 500; margin-bottom: 8px; }
+  #pop .acts { display: flex; gap: 22px; align-items: baseline; margin-top: 6px; }
   #pop .x { font-size: 13px; color: var(--muted); cursor: pointer; background: none; border: 0; padding: 0; font-family: var(--sans); }
   #pop .x:hover { color: var(--ink); }
+  #pop .do { font-size: 14px; font-weight: 500; color: var(--ink); cursor: pointer; background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 0 0 1px; font-family: var(--sans); }
+  #pop .do:hover { color: var(--accent); border-color: var(--accent); }
   .badge { position: fixed; left: 0; right: 0; bottom: 0; text-align: center; padding: 10px 16px; font-size: 13px; color: var(--muted);
            background: rgba(246,245,241,.9); border-top: 1px solid var(--line); display: none; }
   .badge.on { display: block; }
-  @media (prefers-reduced-motion: reduce) { .line .reveal { transition-duration: 0s !important; } .th, .assign { transition: none; } }
+  @media (max-width: 860px) {
+    .mid > div { grid-template-columns: 1fr; }
+    .midr { border-left: 0; padding-left: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .reveal { transition-duration: 0s !important; } .th, .assign { transition: none; } }
 </style>
 </head>
 <body>
@@ -99,19 +114,49 @@
   /* ---------- content ---------- */
   var ASSIGN = T`\displaystyle\lim_{n\to\infty}\left(\sqrt[3]{\sqrt{n^{7}}+\sqrt[3]{n^{7}}}-\sqrt[3]{\sqrt{n^{7}}-\sqrt[3]{n^{7}}}\right)`;
 
-  // the cube roots cancel against the cubes, so the numerator has no roots; the denominator keeps A_n, B_n
+  // main calculation. The cube roots cancel against the cubes, so the numerator has no roots; the denominator keeps A_n, B_n.
   var L1 = T`=\lim_{n\to\infty}\dfrac{\bigl(n^{7/2}+n^{7/3}\bigr)-\bigl(n^{7/2}-n^{7/3}\bigr)}{A_n^{2}+A_nB_n+B_n^{2}}`;
+  // numerator computed (top), n^{7/3} factored out of the denominator (bottom)
+  var L2 = T`=\lim_{n\to\infty}\dfrac{2n^{7/3}}{n^{7/3}\Bigl[\Bigl(\dfrac{A_n}{n^{7/6}}\Bigr)^{2}+\dfrac{A_n}{n^{7/6}}\cdot\dfrac{B_n}{n^{7/6}}+\Bigl(\dfrac{B_n}{n^{7/6}}\Bigr)^{2}\Bigr]}`;
 
-  // thought text: $...$ is math, {{term}} is the clickable phrase
+  // side calculation on the right: how A_n and B_n behave compared with n^{7/6} (identical for both)
+  var tex_a1 = T`\lim_{n\to\infty}\dfrac{A_n}{n^{7/6}}=\lim_{n\to\infty}\sqrt[3]{\dfrac{n^{7/2}+n^{7/3}}{n^{7/2}}}`;
+  var tex_a2 = T`\overset{\text{ZOAL}}{=}\sqrt[3]{\lim_{n\to\infty}\dfrac{n^{7/2}+n^{7/3}}{n^{7/2}}}`;
+  var tex_a3 = T`=\sqrt[3]{\lim_{n\to\infty}\dfrac{n^{7/2}\bigl(1+n^{7/3-7/2}\bigr)}{n^{7/2}}}`;
+  var tex_a4 = T`=\sqrt[3]{\lim_{n\to\infty}\bigl(1+n^{-7/6}\bigr)}`;
+  var tex_a5 = T`\overset{\text{AL}}{=}\sqrt[3]{1+0}=1`;
+  var tex_b1 = T`\lim_{n\to\infty}\dfrac{B_n}{n^{7/6}}=\lim_{n\to\infty}\sqrt[3]{\dfrac{n^{7/2}-n^{7/3}}{n^{7/2}}}`;
+  var tex_b2 = T`\overset{\text{ZOAL}}{=}\sqrt[3]{\lim_{n\to\infty}\dfrac{n^{7/2}-n^{7/3}}{n^{7/2}}}`;
+  var tex_b3 = T`=\sqrt[3]{\lim_{n\to\infty}\dfrac{n^{7/2}\bigl(1-n^{7/3-7/2}\bigr)}{n^{7/2}}}`;
+  var tex_b4 = T`=\sqrt[3]{\lim_{n\to\infty}\bigl(1-n^{-7/6}\bigr)}`;
+  var tex_b5 = T`\overset{\text{AL}}{=}\sqrt[3]{1-0}=1`;
+  var MID = { a: [tex_a1, tex_a2, tex_a3, tex_a4, tex_a5], b: [tex_b1, tex_b2, tex_b3, tex_b4, tex_b5] };
+
+  // "without A_n, B_n": only shown on request, to see what happens inside
+  var tex_p0 = T`\lim_{n\to\infty}\Bigl(\sqrt[3]{n^{7/2}+n^{7/3}}-\sqrt[3]{n^{7/2}-n^{7/3}}\Bigr)`;
+  var tex_p1 = T`=\lim_{n\to\infty}\dfrac{\bigl(n^{7/2}+n^{7/3}\bigr)-\bigl(n^{7/2}-n^{7/3}\bigr)}{\sqrt[3]{\bigl(n^{7/2}+n^{7/3}\bigr)^{2}}+\sqrt[3]{\bigl(n^{7/2}+n^{7/3}\bigr)\bigl(n^{7/2}-n^{7/3}\bigr)}+\sqrt[3]{\bigl(n^{7/2}-n^{7/3}\bigr)^{2}}}`;
+  var tex_p2 = T`=\lim_{n\to\infty}\dfrac{2n^{7/3}}{n^{7/3}\Bigl[\sqrt[3]{\bigl(1+n^{-7/6}\bigr)^{2}}+\sqrt[3]{1-n^{-7/3}}+\sqrt[3]{\bigl(1-n^{-7/6}\bigr)^{2}}\Bigr]}`;
+  var tex_p3 = T`=\lim_{n\to\infty}\dfrac{2}{\sqrt[3]{\bigl(1+n^{-7/6}\bigr)^{2}}+\sqrt[3]{1-n^{-7/3}}+\sqrt[3]{\bigl(1-n^{-7/6}\bigr)^{2}}}`;
+  var tex_p4 = T`\overset{\text{ZOAL}}{=}\dfrac{2}{\sqrt[3]{\lim\bigl(1+n^{-7/6}\bigr)^{2}}+\sqrt[3]{\lim\bigl(1-n^{-7/3}\bigr)}+\sqrt[3]{\lim\bigl(1-n^{-7/6}\bigr)^{2}}}`;
+  var tex_p5 = T`\overset{\text{AL}}{=}\dfrac{2}{\sqrt[3]{1}+\sqrt[3]{1}+\sqrt[3]{1}}=\dfrac{2}{3}`;
+  var INSIDE = [tex_p0, tex_p1, tex_p2, tex_p3, tex_p4, tex_p5];
+
+  // thought text: $...$ is math, {{term}} and {{alt}} are the clickable phrases
   var TH = {
     q:    T`Chovají se ty odmocniny {{term}}?`,
-    mark: T`Označím $A_n=\sqrt[3]{\sqrt{n^7}+\sqrt[3]{n^7}}$ a $B_n=\sqrt[3]{\sqrt{n^7}-\sqrt[3]{n^7}}$. Pod třetí odmocninou dominuje $\sqrt{n^7}=n^{7/2}$, protože $\tfrac72>\tfrac73$.`,
+    mark: T`Označím $A_n=\sqrt[3]{\sqrt{n^7}+\sqrt[3]{n^7}}$ a $B_n=\sqrt[3]{\sqrt{n^7}-\sqrt[3]{n^7}}$.`,
+    dom:  T`Pod třetí odmocninou dominuje, tedy nejrychleji roste, člen $\sqrt{n^7}=n^{7/2}$, protože $\tfrac72>\tfrac73$.`,
     asym: T`Proto $A_n,\,B_n\sim\sqrt[3]{n^{7/2}}=n^{7/6}$.`,
-    chk:  T`Ověření: $\lim\dfrac{A_n}{n^{7/6}}=\lim\sqrt[3]{1+n^{-7/6}}=1$ a stejně $\lim\dfrac{B_n}{n^{7/6}}=1$. Tedy $\dfrac{A_n}{B_n}\to1$.`,
+    midq: T`Jak se $A_n$ chová vzhledem k $n^{7/6}$? Podíl napíšu pod jednu odmocninu, protože $n^{7/6}=\sqrt[3]{n^{7/2}}$. Limitu vložím dovnitř, protože odmocnina je spojitá na svém $D_f$ (ZOAL), a pak vytknu. Pro $B_n$ je to úplně stejné.`,
+    chk:  T`Obě limity jsou rovny 1, takže $\dfrac{A_n}{B_n}\to1$, tedy nenulová konstanta.`,
     yes:  T`Ano, chovají se {{term}}: obě jdou k $\infty$ stejně rychle, takže rozdíl je typu $\infty-\infty$.`,
     no:   T`Kdyby ne: vytknu nejrychleji rostoucí člen, použiju AL a dostanu definovaný výraz. Tady to nepomůže.`,
     form: T`Použiju tedy vzorec $a^3-b^3=(a-b)(a^2+ab+b^2)$, tj. $a-b=\dfrac{a^3-b^3}{a^2+ab+b^2}$.`,
-    sub:  T`Za $a$ dosazuju první člen $A_n$, za $b$ druhý člen $B_n$.`
+    sub:  T`Za $a$ dosazuju první člen $A_n$, za $b$ druhý člen $B_n$.`,
+    num:  T`Nahoře: $\bigl(n^{7/2}+n^{7/3}\bigr)-\bigl(n^{7/2}-n^{7/3}\bigr)=2n^{7/3}$.`,
+    den:  T`Dole: protože $A_n,\,B_n\sim n^{7/6}$, chovají se $A_n^2$, $A_nB_n$ i $B_n^2$ jako $n^{7/3}$. Proto z celého jmenovatele vytknu $n^{7/3}$.`,
+    alt:  T`Jde to počítat i {{alt}}.`,
+    note: T`Náhled: postup bez $A_n$, $B_n$, jen aby bylo vidět, co se děje uvnitř.`
   };
 
   var POPS = {
@@ -120,7 +165,7 @@
       html: T`<p>Posloupnosti $A_n$ a $B_n$ se chovají stejně, když</p>
               <p style="text-align:center">$\displaystyle\lim_{n\to\infty}\frac{A_n}{B_n}=c,$</p>
               <p>kde $c\neq0$ je konečná konstanta.</p>
-              <p>To způsobuje právě ten problém: obě rostou stejně rychle, takže rozdíl $A_n-B_n$ je typu $\infty-\infty$ a přímo ho aritmetikou limit nespočítáme.</p>`
+              <p>To způsobuje právě ten problém: obě rostou stejně rychle, takže rozdíl $A_n-B_n$ je typu $\infty-\infty$ a aritmetikou limit (AL) ho nespočítáme, ani po vytknutí nejrychleji rostoucího členu.</p>`
     },
     subst: {
       title: 'Dosazení do vzorce',
@@ -130,6 +175,12 @@
               <p style="text-align:center">$a^3=A_n^3=n^{7/2}+n^{7/3},\qquad b^3=B_n^3=n^{7/2}-n^{7/3}.$</p>
               <p>Proto</p>
               <p style="text-align:center">$A_n-B_n=\dfrac{\bigl(n^{7/2}+n^{7/3}\bigr)-\bigl(n^{7/2}-n^{7/3}\bigr)}{A_n^2+A_nB_n+B_n^2}.$</p>`
+    },
+    alt: {
+      title: 'Počítat bez A<sub>n</sub> a B<sub>n</sub>',
+      html: T`<p>Tento postup <b>nedoporučuji</b> používat u písemky. Zobrazí jen to, co se děje uvnitř, když se $A_n$ a $B_n$ rozepíšou na celé odmocniny.</p>
+              <p>Se značením $A_n$ a $B_n$ je výpočet mnohem praktičtější a přehlednější.</p>`,
+      action: ['inside', 'Zobrazit, co se děje uvnitř']
     }
   };
 
@@ -139,7 +190,9 @@
     var parts = str.split('$'), out = '';
     for (var i = 0; i < parts.length; i++) {
       if (i % 2) out += mathHTML(parts[i]);
-      else out += parts[i].replace('{{term}}', '<button class="term" data-pop="same" type="button">stejně</button>');
+      else out += parts[i]
+        .replace('{{term}}', '<button class="term" data-pop="same" type="button">stejně</button>')
+        .replace('{{alt}}', '<button class="term" data-pop="alt" type="button">bez A<sub>n</sub>, B<sub>n</sub></button>');
     }
     return out;
   }
@@ -147,7 +200,7 @@
   var assign = document.getElementById('assign'), ex = document.getElementById('ex'), lines = document.getElementById('lines');
   var pop = document.getElementById('pop'), badge = document.getElementById('badge'), pauseBtn = document.getElementById('pause');
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var token = 0, speed = 1, manualPause = false, popOpen = false;
+  var token = 0, speed = 1, manualPause = false, popOpen = false, insideShown = false;
 
   function paused() { return manualPause || popOpen; }
   function syncBadge() { badge.className = 'badge' + (paused() ? ' on' : ''); pauseBtn.textContent = manualPause ? 'Pokračovat' : 'Pozastavit'; }
@@ -169,11 +222,15 @@
     var b = el.getBoundingClientRect();
     if (b.bottom > window.innerHeight - 90) window.scrollBy({ top: b.bottom - window.innerHeight + 140, behavior: reduce ? 'auto' : 'smooth' });
   }
+  function fadeOut(d) {
+    d.classList.remove('in');
+    setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 1000);
+  }
 
-  async function addLine(tex, my, cls, secs, pop) {
+  async function addLine(tex, my, cls, secs, popBtn) {
     var d = document.createElement('div'); d.className = 'line' + (cls ? ' ' + cls : '');
     d.innerHTML = '<span class="reveal">' + mathHTML('\\displaystyle ' + tex) + '</span>' +
-      (pop ? '<button class="term lineterm" data-pop="' + pop[0] + '" type="button">' + pop[1] + '</button>' : '');
+      (popBtn ? '<button class="term lineterm" data-pop="' + popBtn[0] + '" type="button">' + popBtn[1] + '</button>' : '');
     d.firstChild.style.setProperty('--dur', (secs / speed) + 's');
     lines.appendChild(d); follow(d);
     await frame(); if (my !== token) return;
@@ -190,15 +247,49 @@
     d.classList.add('in'); follow(d);
     if (keep) return;
     await sleep(hold, my);
-    // fade out and collapse in the background so the next step can start straight away
-    d.classList.remove('in');
-    setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 1000);
+    fadeOut(d);       // fades in the background so the next step can start straight away
+  }
+
+  // comment on the left + the same intermediate calculation for A_n and B_n on the right, written at the same time
+  async function midBlock(my) {
+    var d = document.createElement('div'); d.className = 'th mid';
+    d.innerHTML = '<div><div class="midl"><p>' + rich(TH.midq) + '</p></div>' +
+                  '<div class="midr"><div class="blk"></div><div class="blk"></div></div></div>';
+    lines.appendChild(d);
+    await frame(); if (my !== token) return;
+    d.classList.add('in'); follow(d);
+    await sleep(2400, my);
+    var blocks = d.querySelectorAll('.blk');
+    for (var i = 0; i < MID.a.length; i++) {
+      var pair = [MID.a[i], MID.b[i]].map(function (tex, k) {
+        var e = document.createElement('div'); e.className = 'ml';
+        e.innerHTML = '<span class="reveal">' + mathHTML('\\displaystyle ' + tex) + '</span>';
+        e.firstChild.style.setProperty('--dur', (2.2 / speed) + 's');
+        blocks[k].appendChild(e); return e;
+      });
+      follow(d);
+      await frame(); if (my !== token) return;
+      pair.forEach(function (e) { e.classList.add('in'); });
+      await sleep(2800, my);
+    }
+    await sleep(7000, my);
+    fadeOut(d);
+  }
+
+  // "without A_n, B_n": appended below on request
+  async function showInside() {
+    if (insideShown) return; insideShown = true;
+    var my = token;
+    var n = document.createElement('div'); n.className = 'inside-note'; n.innerHTML = '<p>' + rich(TH.note) + '</p>';
+    lines.appendChild(n); follow(n);
+    for (var i = 0; i < INSIDE.length; i++) await addLine(INSIDE[i], my, 'inside', 2.8);
   }
 
   /* ---------- the story ---------- */
   async function run() {
     var my = ++token;
-    lines.innerHTML = ''; assign.classList.remove('in'); closePop(true);
+    insideShown = false;
+    lines.innerHTML = ''; assign.classList.remove('in'); closePop();
     ex.innerHTML = mathHTML(ASSIGN, false);
     window.scrollTo(0, 0);
     await sleep(500, my);
@@ -206,29 +297,41 @@
     await sleep(2200, my);
 
     await think('q',    my, 5200);
-    await think('mark', my, 7600);
+    await think('mark', my, 5200);
+    await think('dom',  my, 6400);
     await think('asym', my, 4600);
-    await think('chk',  my, 7800);
+    await midBlock(my);
+    await think('chk',  my, 6000);
     await think('yes',  my, 6200);
     await think('no',   my, 6000, true);
     await think('form', my, 6200);
 
     await addLine(L1, my, '', 4.2, ['subst', 'dosazení']);
-    await think('sub', my, 0, false, true);   // stays on screen: this is where the animation currently ends
+    await think('sub',  my, 5200);
+    await addLine(L2, my, '', 4.6);
+    await think('num',  my, 5200);
+    await think('den',  my, 8200);
+    await think('alt',  my, 0, false, true);   // stays on screen: this is where the animation currently ends
   }
 
-  /* ---------- the clickable phrase ---------- */
+  /* ---------- the clickable phrases ---------- */
+  var ACTIONS = { inside: showInside };
+
   function openPop(btn) {
-    var POP = POPS[btn.getAttribute('data-pop')] || POPS.same;
-    pop.innerHTML = '<div class="pt">' + POP.title + '</div>' + rich(POP.html) + '<button class="x" type="button">Zavřít</button>';
+    var P = POPS[btn.getAttribute('data-pop')] || POPS.same;
+    pop.innerHTML = '<div class="pt">' + P.title + '</div>' + rich(P.html) +
+      '<div class="acts">' + (P.action ? '<button class="do" type="button">' + P.action[1] + '</button>' : '') +
+      '<button class="x" type="button">Zavřít</button></div>';
     pop.hidden = false;
     var b = btn.getBoundingClientRect(), pw = pop.offsetWidth;
     var left = Math.max(16, Math.min(window.scrollX + b.left, window.scrollX + window.innerWidth - pw - 16));
     pop.style.left = left + 'px'; pop.style.top = (window.scrollY + b.bottom + 10) + 'px';
     popOpen = true; syncBadge();
     pop.querySelector('.x').addEventListener('click', function () { closePop(); });
+    var go = pop.querySelector('.do');
+    if (go) go.addEventListener('click', function () { closePop(); ACTIONS[P.action[0]](); });
   }
-  function closePop(silent) { pop.hidden = true; popOpen = false; if (!silent) syncBadge(); else syncBadge(); }
+  function closePop() { pop.hidden = true; popOpen = false; syncBadge(); }
 
   document.addEventListener('click', function (e) {
     var t = e.target.closest ? e.target.closest('.term') : null;

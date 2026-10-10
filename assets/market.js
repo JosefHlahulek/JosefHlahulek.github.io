@@ -123,27 +123,27 @@
     var bw = cw * 0.62;
     for (i = start; i < n; i++) {
       var cc = candles[i], up = cc.c >= cc.o, h = volH * (cc.v / mv);
-      ctx.fillStyle = up ? 'rgba(18,128,92,.16)' : 'rgba(180,68,58,.18)';
+      ctx.fillStyle = up ? 'rgba(11,110,138,.09)' : 'rgba(13,27,42,.07)';
       ctx.fillRect(XC(i) - bw / 2, H - h, bw, h);
     }
 
     // candles
     for (i = start; i < n; i++) {
       var k = candles[i], isUp = k.c >= k.o, x = XC(i);
-      var col = isUp ? '18,128,92' : '180,68,58';
-      var a = (k === live) ? 0.85 : 0.55;
+      var col = isUp ? '11,110,138' : '13,27,42';
+      var a = (k === live) ? 0.55 : 0.30;
       var yo = Y(k.o), yc = Y(k.c), yh = Y(k.h), yl = Y(k.l);
       ctx.strokeStyle = 'rgba(' + col + ',' + a + ')'; ctx.lineWidth = 1.2;
       ctx.beginPath(); ctx.moveTo(x, yh); ctx.lineTo(x, yl); ctx.stroke();
       var bt = Math.min(yo, yc), bh = Math.max(1.5, Math.abs(yo - yc));
-      ctx.fillStyle = 'rgba(' + col + ',' + (isUp ? 0.14 : 0.30) + ')';
+      ctx.fillStyle = 'rgba(' + col + ',' + (isUp ? 0.04 : 0.14) + ')';
       ctx.fillRect(x - bw / 2, bt, bw, bh);
       ctx.strokeRect(x - bw / 2 + 0.5, bt + 0.5, bw - 1, Math.max(0.5, bh - 1));
     }
 
     // last price
     var lc = candles[n - 1].c, ly = Y(lc);
-    ctx.setLineDash([3, 5]); ctx.strokeStyle = 'rgba(11,110,138,.35)'; ctx.lineWidth = 1;
+    ctx.setLineDash([3, 5]); ctx.strokeStyle = 'rgba(11,110,138,.28)'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(0, ly); ctx.lineTo(W, ly); ctx.stroke(); ctx.setLineDash([]);
   }
 

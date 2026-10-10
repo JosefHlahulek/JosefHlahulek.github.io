@@ -12,69 +12,82 @@
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
-<canvas id="bg" aria-hidden="true"></canvas>
 
 <div class="page">
   <nav>
     <div class="wrap">
       <a class="logo" href="index.html">Josef Hlahulek</a>
       <ul>
-        <li><a href="#materialy">Materiály</a></li>
-        <li><a href="#animace">Animace</a></li>
+        <li><a href="index.html">Úvod</a></li>
       </ul>
     </div>
   </nav>
 
   <header class="hero short" id="top">
     <div class="wrap">
-      <div class="eyebrow rv">Cvičení · Matematická analýza</div>
       <h1 class="sm rv">Matematická analýza pro studenty <em>IES FSV</em></h1>
       <p class="lead rv">Materiály, příklady a interaktivní animace k dobrovolným cvičením.</p>
     </div>
   </header>
 
   <main class="wrap">
-    <section class="row" id="materialy">
-      <div class="k rv">Materiály</div>
-      <div>
-        <!-- Nová položka: zkopíruj blok <div class="item rv"> … </div> a uprav název, popis a odkaz.
-             PDF nahraj do složky materialy/ a odkaž na ni, např. href="materialy/limity-posloupnosti.pdf". -->
-        <div class="item rv">
+    <div class="layout">
+
+      <aside class="cats" aria-label="Kategorie">
+        <div class="k">Kategorie</div>
+        <button class="cat" type="button" data-cat="all" aria-pressed="true">Vše <span class="n"></span></button>
+        <button class="cat" type="button" data-cat="supremum" aria-pressed="false">Supremum a infimum <span class="n"></span></button>
+        <button class="cat" type="button" data-cat="posloupnosti" aria-pressed="false">Posloupnosti a limity <span class="n"></span></button>
+        <button class="cat" type="button" data-cat="zdroje" aria-pressed="false">Další zdroje <span class="n"></span></button>
+        <!-- Nová kategorie: přidej sem další <button class="cat" data-cat="klic"> … </button>
+             a stejný klíč napiš do data-cat u položek, které do ní patří. -->
+      </aside>
+
+      <section class="list" id="items" aria-live="polite">
+        <h2 class="catlabel" id="catlabel">Vše</h2>
+
+        <!-- Nová položka: zkopíruj celý blok <article class="item"> … </article>.
+             data-cat = jedna nebo více kategorií oddělených mezerou (např. "supremum posloupnosti").
+             Typ: PDF / Animace / Odkaz. PDF nahraj do složky materialy/ a odkaž na ni. -->
+
+        <article class="item" data-cat="supremum posloupnosti">
           <div>
+            <span class="type">PDF</span>
             <h3>Úvod: supremum a limita posloupnosti</h3>
             <p>Podklady z hodiny 2. 10.: supremum jako hra s nepřítelem, posloupnosti, limita 1/n, operace s nekonečnem, polynomy.</p>
           </div>
-          <a class="go" href="materialy/uvod-supremum-limita-posloupnosti.pdf">PDF</a>
-        </div>
-        <div class="item rv">
-          <div>
-            <h3>Matematická analýza 1: sady příkladů a řešení</h3>
-            <p>Archiv cvičení (MFF UK, zimní semestr 2024/25): příklady s řešeními, teoretické podklady a písemky. Dobrý zdroj, ze kterého se můžete učit na Matematiku I.</p>
-          </div>
-          <a class="go" href="https://www2.karlin.mff.cuni.cz/~kuncova/historie33.php" target="_blank" rel="noopener">Otevřít ↗</a>
-        </div>
-      </div>
-    </section>
+          <a class="go" href="materialy/uvod-supremum-limita-posloupnosti.pdf">Otevřít</a>
+        </article>
 
-    <section class="row" id="animace">
-      <div class="k rv">Animace</div>
-      <div>
-        <div class="item rv">
+        <article class="item" data-cat="supremum">
           <div>
+            <span class="type">Animace</span>
             <h3>Supremum množiny: která část definice selhala?</h3>
             <p>Vyber množinu a číslo s. Animace ukáže, která podmínka definice suprema není splněna, a zvýrazní ji.</p>
           </div>
           <a class="go" href="animace/supremum.html">Otevřít</a>
-        </div>
-        <div class="item rv">
+        </article>
+
+        <article class="item" data-cat="posloupnosti">
           <div>
+            <span class="type">Animace</span>
             <h3>Limita posloupnosti: definice pomocí ε a N</h3>
             <p>Posouvej ε a sleduj, od kterého indexu N leží všechny členy posloupnosti v ε-okolí limity.</p>
           </div>
           <a class="go" href="animace/limita-posloupnosti.html">Otevřít</a>
-        </div>
-      </div>
-    </section>
+        </article>
+
+        <article class="item" data-cat="zdroje">
+          <div>
+            <span class="type">Odkaz</span>
+            <h3>Matematická analýza 1: sady příkladů a řešení</h3>
+            <p>Archiv cvičení (MFF UK, zimní semestr 2024/25): příklady s řešeními, teoretické podklady a písemky. Dobrý zdroj, ze kterého se můžete učit na Matematiku I.</p>
+          </div>
+          <a class="go" href="https://www2.karlin.mff.cuni.cz/~kuncova/historie33.php" target="_blank" rel="noopener">Otevřít ↗</a>
+        </article>
+      </section>
+
+    </div>
   </main>
 
   <footer>
@@ -85,20 +98,38 @@
   </footer>
 </div>
 
-<div id="ticker" aria-label="Živé ukazatele simulované řady">
-  <div class="wrap">
-    <span class="tag">Simulace · GARCH(1,1)</span>
-    <span class="m">Cena <b id="i-p">—</b></span>
-    <span class="m">Δ <b id="i-r">—</b></span>
-    <span class="m">σ̂ <b id="i-s">—</b></span>
-    <span class="m opt2">EWMA <b id="i-e">—</b></span>
-    <span class="m opt">VaR95 <b id="i-v">—</b></span>
-    <span class="m opt">H(sign) <b id="i-h">—</b></span>
-    <span class="m opt">MaxDD <b id="i-d">—</b></span>
-  </div>
-</div>
-
 <script src="assets/site.js"></script>
-<script src="assets/market.js"></script>
+<script>
+(function () {
+  var cats = [].slice.call(document.querySelectorAll('.cat'));
+  var items = [].slice.call(document.querySelectorAll('#items .item'));
+  var label = document.getElementById('catlabel');
+
+  function has(el, c) { return (' ' + el.getAttribute('data-cat') + ' ').indexOf(' ' + c + ' ') > -1; }
+
+  // item counts next to each category
+  cats.forEach(function (b) {
+    var c = b.getAttribute('data-cat');
+    var n = c === 'all' ? items.length : items.filter(function (i) { return has(i, c); }).length;
+    b.querySelector('.n').textContent = n;
+  });
+
+  function show(c) {
+    if (!cats.some(function (b) { return b.getAttribute('data-cat') === c; })) c = 'all';
+    cats.forEach(function (b) {
+      var on = b.getAttribute('data-cat') === c;
+      b.setAttribute('aria-pressed', on);
+      if (on) label.textContent = b.firstChild.textContent.trim();
+    });
+    items.forEach(function (i) { i.hidden = !(c === 'all' || has(i, c)); });
+    var firstDone = false;
+    items.forEach(function (i) { i.classList.remove('first'); if (!i.hidden && !firstDone) { i.classList.add('first'); firstDone = true; } });
+    history.replaceState(null, '', c === 'all' ? location.pathname : '#' + c);
+  }
+
+  cats.forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-cat')); }); });
+  show(location.hash.replace('#', '') || 'all');
+})();
+</script>
 </body>
 </html>

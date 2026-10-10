@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Josef Hlahulek</title>
+<meta name="description" content="Josef Hlahulek — Mathematics and Finance. Charles University, Prague.">
+<meta name="theme-color" content="#020617">
+<style>
+  :root {
+    --bg: #020617;
+    --panel: #050b1f;
+    --line: #0e3a4a;
+    --cyan: #22d3ee;
+    --green: #00ff9c;
+    --violet: #a855f7;
+    --text: #cfe8f3;
+    --dim: #5d7f92;
+    --mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0; min-height: 100vh; color: var(--text); font-family: var(--mono);
+    font-size: 15px; line-height: 1.65;
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(34,211,238,.10), transparent 60%),
+      radial-gradient(700px 500px at -10% 110%, rgba(168,85,247,.09), transparent 60%),
+      var(--bg);
+  }
+  /* faint grid + scanlines */
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(34,211,238,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34,211,238,.035) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at center, #000 40%, transparent 85%);
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 5;
+    background: repeating-linear-gradient(to bottom, rgba(255,255,255,.018) 0 1px, transparent 1px 3px);
+  }
+  main { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 56px 20px 80px; }
+
+  .status { display: flex; gap: 10px; flex-wrap: wrap; color: var(--dim); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+  .status b { color: var(--green); font-weight: 600; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+         box-shadow: 0 0 10px var(--green); margin-right: 6px; animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .35; } }
+
+  h1 {
+    margin: 22px 0 6px; font-size: clamp(34px, 8vw, 68px); line-height: 1.02; letter-spacing: -.01em;
+    color: #e6f7ff; font-weight: 700;
+    text-shadow: 0 0 22px rgba(34,211,238,.35);
+  }
+  h1 span { color: var(--cyan); }
+  .sub { color: var(--cyan); letter-spacing: .32em; text-transform: uppercase; font-size: 13px; margin: 0 0 40px; }
+
+  .win { border: 1px solid var(--line); background: linear-gradient(180deg, rgba(5,11,31,.92), rgba(2,6,23,.92));
+         border-radius: 6px; margin: 0 0 22px; box-shadow: 0 0 0 1px rgba(34,211,238,.04), 0 12px 40px rgba(0,0,0,.35); }
+  .win > header { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid var(--line);
+                  color: var(--dim); font-size: 12px; letter-spacing: .1em; }
+  .win > header i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); display: inline-block; }
+  .win > header i:first-child { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+  .win > header span { margin-left: 6px; }
+  .body { padding: 16px 18px 18px; }
+  .prompt { color: var(--green); }
+  .prompt::before { content: "❯ "; color: var(--cyan); }
+  .body p { margin: 10px 0 0; }
+  .kv { display: grid; grid-template-columns: 110px 1fr; gap: 4px 14px; margin-top: 12px; }
+  .kv dt { color: var(--dim); text-transform: uppercase; font-size: 12px; letter-spacing: .12em; padding-top: 2px; }
+  .kv dd { margin: 0; }
+  .tag { color: var(--violet); }
+  a { color: var(--cyan); text-decoration: none; border-bottom: 1px dashed rgba(34,211,238,.4); }
+  a:hover { color: var(--green); border-color: var(--green); }
+
+  .bar { height: 4px; background: #0a2230; border-radius: 2px; overflow: hidden; margin-top: 12px; }
+  .bar i { display: block; height: 100%; width: 40%; background: linear-gradient(90deg, var(--cyan), var(--green));
+           box-shadow: 0 0 12px var(--cyan); }
+
+  /* interactive terminal */
+  #log { white-space: pre-wrap; min-height: 24px; }
+  #log .out { color: var(--text); }
+  #log .cmd { color: var(--green); }
+  .input { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .input label { color: var(--cyan); }
+  #cmd { flex: 1; background: transparent; border: 0; outline: 0; color: var(--green); font: inherit; caret-color: var(--green); }
+  .hint { color: var(--dim); font-size: 12px; margin-top: 8px; }
+  .chip { cursor: pointer; color: var(--cyan); border: 1px solid var(--line); border-radius: 4px; padding: 1px 8px; margin-right: 6px;
+          background: none; font: inherit; font-size: 12px; }
+  .chip:hover { border-color: var(--cyan); }
+
+  footer { color: var(--dim); font-size: 12px; margin-top: 34px; letter-spacing: .08em; }
+  @media (max-width: 560px) { .kv { grid-template-columns: 1fr; } .kv dt { padding-top: 8px; } }
+  @media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="status">
+    <span><span class="dot"></span><b>online</b></span><span>/</span><span>prague</span><span>/</span><span>charles university</span>
+  </div>
+
+  <h1>Josef <span>Hlahulek</span></h1>
+  <p class="sub">Mathematics · Finance</p>
+
+  <section class="win" aria-label="About">
+    <header><i></i><i></i><i></i><span>about.sys</span></header>
+    <div class="body">
+      <div class="prompt">whoami</div>
+      <p>I study where mathematics meets markets: how much structure a price series really contains, and what that means for managing risk.</p>
+      <dl class="kv">
+        <dt>Studies</dt><dd>Economics &amp; Finance (IES FSV) and General Mathematics (MFF), Charles University</dd>
+        <dt>Building</dt><dd><span class="tag">Prague Quant Club</span>, connecting students with quantitative research</dd>
+        <dt>Tools</dt><dd>Python · pandas · LaTeX · Git</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="win" aria-label="Current research">
+    <header><i></i><i></i><i></i><span>research.log</span></header>
+    <div class="body">
+      <div class="prompt">tail -f thesis.log</div>
+      <p>Bachelor thesis: <b>information-theoretic limits of intraday return predictability</b>. In short, how much of the next move can be known at all, before any model is fitted.</p>
+      <div class="bar" role="img" aria-label="thesis in progress"><i></i></div>
+    </div>
+  </section>
+
+  <section class="win" aria-label="Links">
+    <header><i></i><i></i><i></i><span>links.cfg</span></header>
+    <div class="body">
+      <div class="prompt">ls ./links</div>
+      <p><a href="https://github.com/JosefHlahulek">github.com/JosefHlahulek</a></p>
+    </div>
+  </section>
+
+  <section class="win" aria-label="Terminal">
+    <header><i></i><i></i><i></i><span>terminal</span></header>
+    <div class="body">
+      <div id="log" aria-live="polite"><span class="out">type <b>help</b> to list commands.</span></div>
+      <form class="input" id="form" autocomplete="off">
+        <label for="cmd">❯</label>
+        <input id="cmd" type="text" spellcheck="false" autocapitalize="off" aria-label="terminal command">
+      </form>
+      <div class="hint">
+        <button class="chip" data-c="help">help</button><button class="chip" data-c="whoami">whoami</button><button class="chip" data-c="thesis">thesis</button><button class="chip" data-c="club">club</button><button class="chip" data-c="links">links</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>© Josef Hlahulek · signal stable</footer>
+</main>
+
+<script>
+(function () {
+  var log = document.getElementById('log');
+  var form = document.getElementById('form');
+  var input = document.getElementById('cmd');
+
+  var C = {
+    help: 'commands: whoami · thesis · club · links · clear',
+    whoami: 'Josef Hlahulek — Mathematics × Finance.\nStudent at Charles University (Economics & Finance, General Mathematics).',
+    thesis: 'information-theoretic limits of intraday return predictability.\nstatus: in progress',
+    club: 'Prague Quant Club — a student community linking IES and MFF with quantitative finance.',
+    links: 'github.com/JosefHlahulek'
+  };
+
+  function add(cls, text) {
+    var s = document.createElement('div');
+    s.className = cls;
+    s.textContent = text;
+    log.appendChild(s);
+  }
+
+  function run(raw) {
+    var c = raw.trim().toLowerCase();
+    if (!c) return;
+    add('cmd', '❯ ' + raw.trim());
+    if (c === 'clear') { log.textContent = ''; return; }
+    add('out', Object.prototype.hasOwnProperty.call(C, c) ? C[c] : 'command not found: ' + c + ' (try help)');
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    run(input.value);
+    input.value = '';
+  });
+
+  document.querySelectorAll('.chip').forEach(function (b) {
+    b.addEventListener('click', function () { run(b.getAttribute('data-c')); });
+  });
+})();
+</script>
+</body>
+</html>

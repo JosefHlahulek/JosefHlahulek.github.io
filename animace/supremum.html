@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Supremum množiny · Josef Hlahulek</title>
+<meta name="description" content="Interaktivní animace definice suprema: která podmínka není splněna?">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  body { padding-bottom: 60px; }
+  .top { display: flex; justify-content: space-between; align-items: center; height: 76px; font-size: 14px; color: var(--muted); }
+  .top a:hover { color: var(--ink); }
+  h1 { font-size: clamp(32px, 5vw, 56px); max-width: 22ch; margin: 18px 0 14px; }
+  .lead2 { color: var(--muted); max-width: 62ch; margin: 0 0 26px; }
+  .tabs { display: flex; gap: 8px 26px; flex-wrap: wrap; margin: 0 0 6px; }
+  .tab { background: none; border: 0; border-bottom: 1px solid transparent; padding: 4px 0; font: inherit; font-family: var(--serif);
+         font-size: 20px; color: var(--muted); cursor: pointer; transition: color .2s, border-color .2s; }
+  .tab:hover { color: var(--ink); }
+  .tab[aria-pressed="true"] { color: var(--ink); border-color: var(--accent); }
+  .plot { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: 18px; }
+  canvas#cv { display: block; width: 100%; height: 300px; }
+
+  .ctl { display: grid; grid-template-columns: 1fr auto; gap: 12px 28px; align-items: center; margin: 24px 0 0; }
+  .ctl label { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  .ctl .val { font-family: var(--serif); font-style: italic; font-size: 22px; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .presets { display: flex; gap: 22px; flex-wrap: wrap; font-size: 15px; margin-top: 4px; grid-column: 1 / -1; }
+  .link { background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 0 0 1px; font: inherit; font-size: 15px; font-weight: 500;
+          cursor: pointer; color: var(--ink); transition: color .2s, border-color .2s; }
+  .link:hover { color: var(--accent); border-color: var(--accent); }
+
+  .defs { margin: 34px 0 0; display: grid; gap: 10px; }
+  .d { display: flex; align-items: baseline; gap: 18px; padding: 8px 12px; margin-left: -12px; border-radius: 6px; transition: background .35s, color .35s; }
+  .d .f { font-family: var(--serif); font-style: italic; font-size: clamp(19px, 2.6vw, 24px); flex: 1; }
+  .d .tag { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); min-width: 8ch; text-align: right; }
+  .d.ok .tag { color: #12805c; }
+  .d.bad { background: rgba(180,68,58,.10); }
+  .d.bad .f, .d.bad .tag { color: #b4443a; }
+  .d.bad { animation: pulse .6s ease; }
+  @keyframes pulse { 0% { background: rgba(180,68,58,.30); } 100% { background: rgba(180,68,58,.10); } }
+
+  .read { margin-top: 26px; }
+  .read .big { font-family: var(--serif); font-size: clamp(22px, 3.2vw, 32px); line-height: 1.25; margin: 0 0 8px; max-width: none; }
+  .read p { color: var(--muted); max-width: 72ch; }
+  .game { display: none; margin-top: 8px; }
+  .game.on { display: block; }
+  .legend { display: flex; gap: 22px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 12px; }
+  .legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; background: var(--c); }
+  @media (prefers-reduced-motion: reduce) { .d.bad { animation: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href="../cviceni.html">← Cvičení z analýzy</a>
+    <a href="../index.html">Josef Hlahulek</a>
+  </div>
+
+  <div class="eyebrow">Animace · Supremum</div>
+  <h1>Supremum: která část definice <em>selhala</em>?</h1>
+  <p class="lead2">Vyber množinu A a zkus tipnout s. Pokud s není supremum, animace ukáže, která ze dvou podmínek není splněna. Když tipneš správně, můžeš si zahrát hru s nepřítelem.</p>
+
+  <div class="tabs" role="group" aria-label="Volba množiny" id="tabs"></div>
+
+  <div class="plot"><canvas id="cv" role="img" aria-label="Číselná osa s množinou A a číslem s"></canvas></div>
+
+  <div class="legend">
+    <span style="--c:#0b6e8a">prvky množiny A</span>
+    <span style="--c:#b4443a">část, která podmínku porušuje</span>
+    <span style="--c:#12805c">podmínka splněna</span>
+  </div>
+
+  <div class="ctl">
+    <label for="s">Tvůj tip s</label><span class="val" id="sval"></span>
+    <input id="s" type="range" min="0" max="2.4" step="0.001" value="0.9" aria-label="Hodnota s">
+    <span></span>
+    <div class="presets">
+      <button class="link" type="button" data-s="0.5">s = 0,5</button>
+      <button class="link" type="button" data-s="0.9">s = 0,9</button>
+      <button class="link" type="button" data-s="1">s = 1</button>
+      <button class="link" type="button" data-s="2">s = 2</button>
+    </div>
+  </div>
+
+  <div class="defs" aria-label="Definice suprema">
+    <div class="d" id="d1"><span class="f">(i) ∀a ∈ A: a ≤ s</span><span class="tag" id="t1"></span></div>
+    <div class="d" id="d2"><span class="f">(ii) ∀t &lt; s ∃a ∈ A: a &gt; t</span><span class="tag" id="t2"></span></div>
+  </div>
+
+  <div class="read" aria-live="polite">
+    <p class="big" id="r1"></p>
+    <p id="r2"></p>
+    <div class="game" id="game">
+      <div class="ctl" style="margin-top:14px;">
+        <label for="t">Nepřítel volí t &lt; s</label><span class="val" id="tval"></span>
+        <input id="t" type="range" min="-0.2" max="1" step="0.001" value="0.9" aria-label="Hodnota t">
+        <button class="link" id="playgame" type="button">Přehrát: t → s</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var XMIN = -0.2, XMAX = 2.4, SNAP = 0.006;
+
+  function mid(x) { return (Math.max(x, 0) + 1) / 2; }
+
+  /* A set is described by how to draw it, its supremum, whether the supremum belongs to it,
+     and wit(x): an element of A greater than x (or null if there is none). */
+  var SETS = [
+    { name: '(0, 1)', sup: 1, inA: false,
+      iv: [{ a: 0, b: 1, la: false, lb: false }], pts: [],
+      wit: function (x) { return x >= 1 ? null : mid(x); } },
+    { name: '⟨0, 1⟩', sup: 1, inA: true,
+      iv: [{ a: 0, b: 1, la: true, lb: true }], pts: [],
+      wit: function (x) { return x >= 1 ? null : mid(x); } },
+    { name: '(0, 1) ∪ {2}', sup: 2, inA: true,
+      iv: [{ a: 0, b: 1, la: false, lb: false }], pts: [2],
+      wit: function (x) { return x >= 2 ? null : 2; } },
+    { name: '{1/n : n ∈ ℕ}', sup: 1, inA: true,
+      iv: [], pts: (function () { var p = []; for (var n = 1; n <= 300; n++) p.push(1 / n); return p; })(),
+      wit: function (x) { return x >= 1 ? null : 1; } },
+    { name: '{1 − 1/n : n ∈ ℕ}', sup: 1, inA: false,
+      iv: [], pts: (function () { var p = []; for (var n = 1; n <= 300; n++) p.push(1 - 1 / n); return p; })(),
+      wit: function (x) {
+        if (x >= 1) return null; if (x < 0) return 0;
+        var n = Math.floor(1 / (1 - x)) + 1;
+        while (1 - 1 / n <= x) n++;                // guards against rounding error
+        return 1 - 1 / n;
+      } }
+  ];
+
+  var cur = 0, s = 0.9, t = 0.9, anim = null;
+  var cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  var tabs = document.getElementById('tabs'), slider = document.getElementById('s'), tslider = document.getElementById('t');
+  var sval = document.getElementById('sval'), tval = document.getElementById('tval');
+  var d1 = document.getElementById('d1'), d2 = document.getElementById('d2'), t1 = document.getElementById('t1'), t2 = document.getElementById('t2');
+  var r1 = document.getElementById('r1'), r2 = document.getElementById('r2'), game = document.getElementById('game');
+  var playBtn = document.getElementById('playgame');
+  var W = 0, H = 0, lastState = '';
+
+  function num(x, d) { return x.toLocaleString('cs-CZ', { maximumFractionDigits: d == null ? 3 : d }); }
+
+  SETS.forEach(function (set, i) {
+    var b = document.createElement('button');
+    b.className = 'tab'; b.type = 'button'; b.textContent = set.name; b.setAttribute('aria-pressed', i === cur);
+    b.addEventListener('click', function () {
+      cur = i; [].forEach.call(tabs.children, function (c, k) { c.setAttribute('aria-pressed', k === cur); });
+      stopGame(); lastState = ''; render();
+    });
+    tabs.appendChild(b);
+  });
+
+  function size() {
+    var dpr = window.devicePixelRatio || 1, b = cv.getBoundingClientRect();
+    W = b.width; H = b.height; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  var BLUE = '#0b6e8a', RED = '#b4443a', GREEN = '#12805c', INK = '#0d1b2a', BG = '#f6f5f1';
+
+  function state() {
+    var set = SETS[cur];
+    if (s < set.sup - SNAP) return 'low';          // (i) fails
+    if (s > set.sup + SNAP) return 'high';         // (ii) fails
+    return 'sup';                                  // both hold
+  }
+
+  function render() {
+    var set = SETS[cur];
+    // snap onto the supremum so that it can be hit exactly
+    if (Math.abs(s - set.sup) <= SNAP) { s = set.sup; slider.value = s; }
+    var st = state();
+
+    // --- canvas ---
+    var pad = 30, axisY = H * 0.60;
+    function X(v) { return pad + (W - 2 * pad) * (v - XMIN) / (XMAX - XMIN); }
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.font = '12px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'center'; ctx.fillStyle = '#3b4752'; ctx.strokeStyle = 'rgba(13,27,42,.55)'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(pad - 10, axisY); ctx.lineTo(W - pad + 10, axisY); ctx.stroke();
+    [0, 0.5, 1, 1.5, 2].forEach(function (v) {
+      ctx.beginPath(); ctx.moveTo(X(v), axisY - 4); ctx.lineTo(X(v), axisY + 4); ctx.stroke();
+      ctx.fillText(num(v, 1), X(v), axisY + 22);
+    });
+
+    // witness / region for the current state
+    var witA = null, tt = null, witT = null;
+    if (st === 'low') witA = set.wit(s);
+    if (st === 'high') tt = (set.sup + s) / 2;
+    if (st === 'sup') { tt = Math.min(t, s - 0.0005); witT = set.wit(tt); }
+
+    if (st === 'high') {                           // empty zone (t, s)
+      ctx.fillStyle = 'rgba(180,68,58,.13)';
+      ctx.fillRect(X(tt), axisY - 70, X(s) - X(tt), 70);
+      ctx.fillStyle = RED; ctx.textAlign = 'center';
+      ctx.fillText('žádný prvek A', (X(tt) + X(s)) / 2, axisY - 78);
+    }
+
+    function colorFor(v) { return (st === 'low' && v > s) ? RED : BLUE; }
+
+    // intervals
+    set.iv.forEach(function (iv) {
+      ctx.lineWidth = 7; ctx.lineCap = 'butt';
+      ctx.strokeStyle = BLUE; ctx.beginPath(); ctx.moveTo(X(iv.a), axisY); ctx.lineTo(X(iv.b), axisY); ctx.stroke();
+      if (st === 'low' && iv.b > s) {
+        ctx.strokeStyle = RED; ctx.beginPath(); ctx.moveTo(X(Math.max(iv.a, s)), axisY); ctx.lineTo(X(iv.b), axisY); ctx.stroke();
+      }
+      [[iv.a, iv.la], [iv.b, iv.lb]].forEach(function (e) {
+        var col = colorFor(e[0] - 1e-9);
+        ctx.beginPath(); ctx.arc(X(e[0]), axisY, 5.5, 0, 6.2832);
+        ctx.fillStyle = e[1] ? col : BG; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = col; ctx.stroke();
+      });
+    });
+    // points
+    set.pts.forEach(function (v) {
+      var big = set.iv.length > 0 || set.pts.length < 5;
+      ctx.beginPath(); ctx.arc(X(v), axisY, big ? 5.5 : 3.4, 0, 6.2832); ctx.fillStyle = colorFor(v); ctx.fill();
+    });
+
+    // s marker
+    var sc = st === 'sup' ? GREEN : RED;
+    ctx.strokeStyle = sc; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(X(s), axisY - 62); ctx.lineTo(X(s), axisY + 30); ctx.stroke();
+    ctx.fillStyle = sc; ctx.textAlign = 'center'; ctx.font = 'italic 17px Newsreader, Georgia, serif';
+    ctx.fillText('s = ' + num(s), X(s), axisY - 70);
+    ctx.font = '12px ' + getComputedStyle(document.body).fontFamily;
+
+    // witnesses
+    if (witA != null) {
+      ctx.fillStyle = RED; ctx.strokeStyle = RED; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(X(witA), axisY - 8); ctx.lineTo(X(witA), axisY + 46); ctx.stroke();
+      ctx.beginPath(); ctx.arc(X(witA), axisY, 7.5, 0, 6.2832); ctx.stroke();
+      ctx.font = 'italic 16px Newsreader, Georgia, serif'; ctx.textAlign = 'center';
+      ctx.fillText('a = ' + num(witA, 4), X(witA), axisY + 64);
+    }
+    if (st === 'high') {
+      ctx.strokeStyle = RED; ctx.fillStyle = RED; ctx.lineWidth = 1.4; ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(X(tt), axisY - 70); ctx.lineTo(X(tt), axisY + 30); ctx.stroke(); ctx.setLineDash([]);
+      ctx.font = 'italic 16px Newsreader, Georgia, serif'; ctx.textAlign = 'center';
+      ctx.fillText('t = ' + num(tt, 4), X(tt), axisY + 52);
+    }
+    if (st === 'sup') {
+      ctx.strokeStyle = INK; ctx.fillStyle = INK; ctx.lineWidth = 1.4; ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(X(tt), axisY - 50); ctx.lineTo(X(tt), axisY + 30); ctx.stroke(); ctx.setLineDash([]);
+      ctx.font = 'italic 16px Newsreader, Georgia, serif'; ctx.textAlign = 'center';
+      ctx.fillText('t = ' + num(tt, 4), X(tt), axisY + 52);
+      if (witT != null) {
+        ctx.strokeStyle = GREEN; ctx.fillStyle = GREEN; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(X(witT), axisY, 9, 0, 6.2832); ctx.stroke();
+        ctx.fillText('a = ' + num(witT, 4), X(witT), axisY + 74);
+      }
+    }
+
+    // --- definition rows ---
+    var ok1 = st !== 'low', ok2 = st !== 'high';
+    d1.className = 'd ' + (ok1 ? 'ok' : 'bad'); d2.className = 'd ' + (ok2 ? 'ok' : 'bad');
+    t1.textContent = ok1 ? 'platí' : 'selhala'; t2.textContent = ok2 ? 'platí' : 'selhala';
+    if (st !== lastState) {                        // restart the pulse when the verdict changes
+      [d1, d2].forEach(function (e) { if (e.classList.contains('bad')) { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; } });
+      lastState = st;
+    }
+
+    // --- text ---
+    sval.textContent = 's = ' + num(s);
+    game.className = 'game' + (st === 'sup' ? ' on' : '');
+    if (st === 'low') {
+      r1.textContent = 'Podmínka (i) selhala: s není horní závora.';
+      r2.textContent = 'V množině A leží prvek a = ' + num(witA, 4) + ', který je větší než s = ' + num(s) + '. Podmínka (ii) tady platí, protože nad každým t < s leží aspoň tento prvek, ale bez (i) to na supremum nestačí.';
+    } else if (st === 'high') {
+      r1.textContent = 'Podmínka (ii) selhala: s není nejmenší horní závora.';
+      r2.textContent = 'Podmínka (i) platí, protože s je horní závora. Nepřítel ale zvolí t = ' + num(tt, 4) + ' < s a v A není žádný prvek větší než t. Číslo t je tedy také horní závora, a je menší než s.';
+    } else {
+      tslider.max = String(s - 0.001);
+      if (t > s - 0.001) { t = s - 0.001; tslider.value = t; }
+      var verdict = set.inA
+        ? 'Navíc sup A ∈ A, takže maximum existuje a max A = ' + num(s) + '.'
+        : 'Číslo sup A do množiny A nepatří, takže maximum neexistuje.';
+      r1.textContent = 'Obě podmínky platí: s = sup A.';
+      r2.textContent = 'Na každý tah nepřítele umíme odpovědět. ' + verdict;
+      tval.textContent = 't = ' + num(Math.min(t, s), 4) + ',  a = ' + (witT != null ? num(witT, 4) : '—');
+    }
+  }
+
+  slider.addEventListener('input', function () { s = parseFloat(slider.value); render(); });
+  tslider.addEventListener('input', function () { stopGame(); t = parseFloat(tslider.value); render(); });
+  [].forEach.call(document.querySelectorAll('[data-s]'), function (b) {
+    b.addEventListener('click', function () { s = parseFloat(b.getAttribute('data-s')); slider.value = s; render(); });
+  });
+
+  function stopGame() { if (anim) { cancelAnimationFrame(anim); anim = null; } playBtn.textContent = 'Přehrát: t → s'; }
+  playBtn.addEventListener('click', function () {
+    if (anim) { stopGame(); return; }
+    if (state() !== 'sup') return;
+    var from = -0.2, t0 = null, target = s - 0.0005;
+    playBtn.textContent = 'Zastavit';
+    (function step(now) {
+      if (t0 === null) t0 = now;
+      var p = Math.min(1, (now - t0) / 7000), e = 1 - Math.pow(1 - p, 4);   // fast at first, then slowing down towards s
+      t = from + (target - from) * e; tslider.value = t; render();
+      if (p < 1 && state() === 'sup') anim = requestAnimationFrame(step); else stopGame();
+    })(performance.now());
+  });
+
+  window.addEventListener('resize', function () { size(); render(); });
+  size(); render();
+})();
+</script>
+</body>
+</html>

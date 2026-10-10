@@ -120,11 +120,28 @@
     if (!ready) { yLo = lo; yHi = hi; nShow = nMax; ready = true; }
     else { yLo += (lo - yLo) * 0.35; yHi += (hi - yHi) * 0.35; nShow += (nMax - nShow) * 0.35; }
 
-    var padL = 46, padR = 16, padT = 14, padB = 30;
+    var padL = 64, padR = 18, padT = 18, padB = 38;
     function X(k) { return padL + (W - padL - padR) * (k - 0.5) / nShow; }
     function Y(val) { return padT + (H - padT - padB) * (1 - (val - yLo) / (yHi - yLo)); }
 
     ctx.clearRect(0, 0, W, H);
+
+    // y axis: light grid, ticks and clearly readable values
+    var font = getComputedStyle(document.body).fontFamily;
+    var raw = (yHi - yLo) / 6, pw = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / pw;
+    var ystep = (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * pw;
+    ctx.font = '13px ' + font; ctx.textAlign = 'right';
+    for (var yy = Math.ceil(yLo / ystep) * ystep; yy <= yHi; yy += ystep) {
+      ctx.strokeStyle = 'rgba(13,27,42,.09)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(padL, Y(yy)); ctx.lineTo(W - padR, Y(yy)); ctx.stroke();
+      ctx.strokeStyle = 'rgba(13,27,42,.6)'; ctx.beginPath(); ctx.moveTo(padL - 5, Y(yy)); ctx.lineTo(padL, Y(yy)); ctx.stroke();
+      ctx.fillStyle = '#26323d'; ctx.fillText(num(Math.round(yy / ystep) * ystep), padL - 10, Y(yy) + 4);
+    }
+    ctx.strokeStyle = 'rgba(13,27,42,.7)'; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(padL, padT - 4); ctx.lineTo(padL, H - padB); ctx.lineTo(W - padR + 4, H - padB); ctx.stroke();
+    ctx.fillStyle = '#26323d'; ctx.font = 'italic 16px Newsreader, Georgia, serif'; ctx.textAlign = 'left';
+    ctx.fillText('aₙ', padL + 8, padT + 6);
+    ctx.textAlign = 'right'; ctx.fillText('n', W - padR, H - padB - 8);
 
     // ε-neighbourhood
     ctx.fillStyle = 'rgba(11,110,138,.10)';
@@ -150,14 +167,18 @@
       ctx.fillStyle = out ? '#b4443a' : '#0b6e8a'; ctx.fill();
     }
 
-    // axes labels
-    ctx.fillStyle = '#5b6672'; ctx.font = '12px ' + getComputedStyle(document.body).fontFamily;
-    ctx.textAlign = 'right'; ctx.fillText('L = ' + num(s.L), padL - 8, Y(s.L) + 4);
-    ctx.textAlign = 'center';
+    // x axis ticks and labels, limit label, N label
+    ctx.font = '13px ' + font; ctx.textAlign = 'center';
     var tick = nShow > 120 ? 50 : nShow > 60 ? 20 : nShow > 30 ? 10 : 5;
-    for (n = tick; n <= nShow; n += tick) ctx.fillText('n = ' + n, X(n), H - 10);
+    for (n = tick; n <= nShow; n += tick) {
+      ctx.strokeStyle = 'rgba(13,27,42,.6)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(X(n), H - padB); ctx.lineTo(X(n), H - padB + 5); ctx.stroke();
+      ctx.fillStyle = '#26323d'; ctx.fillText(String(n), X(n), H - padB + 20);
+    }
+    ctx.textAlign = 'right'; ctx.fillStyle = '#0d1b2a';
+    ctx.fillText('L = ' + num(s.L), W - padR - 4, Y(s.L) - 8);
     ctx.textAlign = 'left';
-    if (N > 0 && N < nShow) { ctx.fillStyle = '#0d1b2a'; ctx.fillText('N = ' + N, X(N + 0.5) + 6, padT + 12); }
+    if (N > 0 && N < nShow) { ctx.fillStyle = '#0d1b2a'; ctx.fillText('N = ' + N, X(N + 0.5) + 6, padT + 14); }
 
     // text
     r1.innerHTML = 'ε = <i>' + num(e) + '</i> &nbsp;→&nbsp; N = <i>' + N + '</i>';

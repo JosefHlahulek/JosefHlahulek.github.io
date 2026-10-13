@@ -56,6 +56,7 @@
   svg .hole { fill: var(--bg); stroke: var(--accent); stroke-width: 1.8; }
   svg .fillp { fill: var(--accent); }
   svg .dot { fill: var(--accent); }
+  svg .halo { fill: rgba(11,110,138,.16); stroke: rgba(11,110,138,.35); stroke-width: 1; }
   svg .trk { stroke: var(--accent); stroke-width: 1.3; stroke-dasharray: 3 3; fill: none; }
   svg .hlt { fill: var(--accent) !important; font-weight: 600; }
 
@@ -246,21 +247,26 @@
   /* the traced point: x -> g(x) -> f(g(x)) */
   var tL = grp(svgL, 'T-L'), tR = grp(svgR, 'T-R');
   var tvl = line(tL, 0, 0, 0, 0, 'trk'), thl = line(tL, 0, 0, 0, 0, 'trk'), tdl = mk('circle', { r: 4.2, 'class': 'dot' }, tL), txl = text(tL, 0, 0, 'x', 'tT', 'middle');
-  var tvr = line(tR, 0, 0, 0, 0, 'trk'), thr = line(tR, 0, 0, 0, 0, 'trk'), tdr = mk('circle', { r: 4.2, 'class': 'dot' }, tR);
+  var tvr = line(tR, 0, 0, 0, 0, 'trk'), thr = line(tR, 0, 0, 0, 0, 'trk'), hlr = mk('circle', { r: 10, 'class': 'halo' }, tR), tdr = mk('circle', { r: 5, 'class': 'dot' }, tR);
   var tgr = text(tR, 0, 0, 'g(x)', 'tT', 'middle'), tfr = text(tR, 0, 0, 'f(g(x))', 'tT', 'end');
   var traceX = 7.5;
+  // x runs to the right; on the left the point stops at the edge of the picture ("x -> infinity"),
+  // on the right the point keeps moving (the true value g(x) approaches D) so the motion is clearly visible
   function placeTrace(x) {
     traceX = x;
-    var y = g(x), z = f(y);
-    tvl.setAttribute('x1', X(x)); tvl.setAttribute('x2', X(x)); tvl.setAttribute('y1', PB); tvl.setAttribute('y2', Y(y));
-    thl.setAttribute('x1', X(x)); thl.setAttribute('x2', PL);   thl.setAttribute('y1', Y(y)); thl.setAttribute('y2', Y(y));
-    tdl.setAttribute('cx', X(x)); tdl.setAttribute('cy', Y(y));
-    txl.setAttribute('x', X(x) + 7); txl.setAttribute('y', PB - 8); txl.setAttribute('text-anchor', 'start');
+    var xl = Math.min(x, XMAX - 0.3), clamped = x > XMAX - 0.3;
+    var yl = g(xl), y = g(x), z = f(y);
+    tvl.setAttribute('x1', X(xl)); tvl.setAttribute('x2', X(xl)); tvl.setAttribute('y1', PB); tvl.setAttribute('y2', Y(yl));
+    thl.setAttribute('x1', X(xl)); thl.setAttribute('x2', PL);    thl.setAttribute('y1', Y(yl)); thl.setAttribute('y2', Y(yl));
+    tdl.setAttribute('cx', X(xl)); tdl.setAttribute('cy', Y(yl));
+    txl.textContent = clamped ? 'x → ∞' : 'x';
+    txl.setAttribute('x', clamped ? X(xl) - 8 : X(xl) + 7); txl.setAttribute('y', PB - 26); txl.setAttribute('text-anchor', clamped ? 'end' : 'start');
     tvr.setAttribute('x1', XR(y)); tvr.setAttribute('x2', XR(y)); tvr.setAttribute('y1', PB); tvr.setAttribute('y2', Z(z));
-    thr.setAttribute('x1', XR(y)); thr.setAttribute('x2', PL);   thr.setAttribute('y1', Z(z)); thr.setAttribute('y2', Z(z));
+    thr.setAttribute('x1', XR(y)); thr.setAttribute('x2', PL);    thr.setAttribute('y1', Z(z)); thr.setAttribute('y2', Z(z));
     tdr.setAttribute('cx', XR(y)); tdr.setAttribute('cy', Z(z));
-    tgr.setAttribute('x', XR(y) + 7); tgr.setAttribute('y', PB - 8); tgr.setAttribute('text-anchor', 'start');
-    tfr.setAttribute('x', PL - 8); tfr.setAttribute('y', Z(z) + 4);
+    hlr.setAttribute('cx', XR(y)); hlr.setAttribute('cy', Z(z));
+    tgr.setAttribute('x', XR(y) + 8); tgr.setAttribute('y', PB - 8); tgr.setAttribute('text-anchor', 'start');
+    tfr.setAttribute('x', XR(y) + 11); tfr.setAttribute('y', Z(z) - 11); tfr.setAttribute('text-anchor', 'start');
   }
   placeTrace(7.5);
 
@@ -397,9 +403,9 @@
   var last = 0;
   function frame(t) {
     if (slideOn) {                                          // the traced point moves to the right and back (only an illustration)
-      var ph = (t / 9000) % 2, u = ph < 1 ? ph : 2 - ph;
-      var e = u * u * (3 - 2 * u);
-      placeTrace(DEL_X + 0.3 + e * (XMAX - 0.3 - DEL_X - 0.3));
+      var ph = (t / 12000) % 2, u = ph < 1 ? ph : 2 - ph;
+      var e = u * u * (3 - 2 * u), x0 = DEL_X + 0.3;
+      placeTrace(x0 * Math.pow(40 / x0, e));          // from the edge of P(c,δ) towards infinity
     }
     requestAnimationFrame(frame);
   }

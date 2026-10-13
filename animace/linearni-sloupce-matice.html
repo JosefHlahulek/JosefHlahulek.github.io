@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sloupce matice a natažení roviny · Josef Hlahulek</title>
+<meta name="description" content="Interaktivní animace: soustava dvou rovnic jako kombinace sloupců matice a natažení roviny maticí.">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  nav ul a.cur { color: var(--ink); }
+  body { padding-bottom: 80px; }
+  .top { display: flex; justify-content: space-between; align-items: center; height: 76px; font-size: 14px; color: var(--muted); }
+  .top a:hover { color: var(--ink); }
+  .katex { font-size: 1.06em; }
+
+  .setup { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 22px; margin: 0 0 14px; font-family: var(--serif); font-size: 26px; color: var(--ink); }
+  .mat { display: grid; gap: 6px 8px; padding: 4px 12px; border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); border-radius: 3px; }
+  .mat.two { grid-template-columns: repeat(2, auto); }
+  .mat.one { grid-template-columns: auto; }
+  .mat input { width: 64px; padding: 6px 4px; text-align: center; font: 500 18px var(--mono); color: var(--ink); background: transparent;
+               border: 0; border-bottom: 1px solid var(--line); border-radius: 0; outline: none; transition: border-color .2s, color .2s; }
+  .mat input:focus { border-color: var(--accent); }
+  .mat input.bad { color: #a33; border-color: #a33; }
+  .mat .x { font-family: var(--serif); font-size: 24px; text-align: center; min-width: 64px; padding: 6px 4px; }
+  .mat input, .mat .x { height: 40px; box-sizing: border-box; line-height: 26px; }
+  .op { color: var(--muted); }
+
+  .presets { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; font-size: 14px; color: var(--muted); margin: 0 0 22px; }
+  .link { background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 0 0 1px; font: inherit; font-size: 14px; font-weight: 500;
+          cursor: pointer; color: var(--ink); transition: color .2s, border-color .2s; }
+  .link:hover { color: var(--accent); border-color: var(--accent); }
+
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; border-top: 1px solid var(--line); padding: 18px 0 8px; }
+  .panel h2 { font-family: var(--serif); font-weight: 500; font-size: 22px; margin: 0 0 4px; color: var(--ink); }
+  .panel p.sub { margin: 0 0 8px; color: var(--muted); font-size: 14.5px; max-width: 46ch; }
+  .panel svg { display: block; width: 100%; height: auto; max-width: 520px; touch-action: none; }
+  .ctl { display: flex; align-items: center; gap: 14px; margin: 8px 0 0; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
+  .ctl input[type=range] { flex: 1; min-width: 140px; max-width: 280px; accent-color: var(--accent); }
+  .ctl .val { font-family: var(--mono); font-size: 13px; color: var(--ink); min-width: 3.4em; }
+
+  svg text { font-family: var(--sans); font-size: 12px; fill: var(--muted); }
+  svg .lab { fill: var(--ink); font-size: 14px; font-weight: 500; }
+  svg .labT { fill: var(--accent); font-size: 14px; font-weight: 500; }
+
+  .notes { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 20px; font-family: var(--serif); font-size: clamp(18px, 2.2vw, 21px); line-height: 1.55; color: var(--ink); max-width: 78ch; }
+  .notes p { margin: 0 0 12px; }
+  .notes .eq { margin: 6px 0 14px; overflow-x: auto; }
+  .notes .warn { color: var(--accent); }
+
+  @media (max-width: 860px) { .panels { grid-template-columns: 1fr; } .setup { font-size: 22px; } .mat input { width: 56px; } }
+</style>
+</head>
+<body>
+<div class="wrap la">
+  <div class="top">
+    <a href="../linearni-algebra.html">← Lineární algebra</a>
+    <a href="../index.html">Josef Hlahulek</a>
+  </div>
+  <h1 class="sm" style="margin:6px 0 10px">Soustava rovnic jako <em>sloupce matice</em></h1>
+  <p class="lead" style="margin:0 0 26px">Přepište matici soustavy i pravou stranu. Vlevo se bod b složí ze sloupců matice, vpravo je vidět, jak matice natahuje čtvercovou síť.</p>
+
+    <div class="setup">
+      <div class="mat two" id="matA">
+        <input id="a11" value="-1" inputmode="decimal" aria-label="a11">
+        <input id="a12" value="3" inputmode="decimal" aria-label="a12">
+        <input id="a21" value="1" inputmode="decimal" aria-label="a21">
+        <input id="a22" value="4" inputmode="decimal" aria-label="a22">
+      </div>
+      <div class="mat one">
+        <div class="x" id="xs1">x₁</div>
+        <div class="x" id="xs2">x₂</div>
+      </div>
+      <span class="op">=</span>
+      <div class="mat one">
+        <input id="b1" value="5" inputmode="decimal" aria-label="b1">
+        <input id="b2" value="9" inputmode="decimal" aria-label="b2">
+      </div>
+    </div>
+
+    <div class="presets">
+      <button class="link" type="button" data-p="-1,3,1,4,5,9">Výchozí</button>
+      <button class="link" type="button" data-p="0,-1,1,0,-2,3">Otočení o 90°</button>
+      <button class="link" type="button" data-p="2,0,0,0.5,3,1">Natažení os</button>
+      <button class="link" type="button" data-p="1,1,0,1,3,2">Smyk</button>
+      <button class="link" type="button" data-p="1,2,2,4,3,6">Závislé sloupce</button>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <h2>Sloupcový pohled</h2>
+        <p class="sub">Kolikrát je třeba vzít sloupec a₁ a kolikrát sloupec a₂, abychom došli do bodu b.</p>
+        <svg id="svgL" viewBox="0 0 440 440" role="img" aria-label="Sloupcový pohled"></svg>
+        <div class="ctl"><button class="link" id="replay" type="button">Znovu</button></div>
+      </div>
+      <div class="panel">
+        <h2>Natažení roviny</h2>
+        <p class="sub">Čtvercová síť se mění z jednotkové na síť zadanou sloupci matice.</p>
+        <svg id="svgR" viewBox="0 0 440 440" role="img" aria-label="Natažení roviny"></svg>
+        <div class="ctl">
+          <button class="link" id="play" type="button">Přehrát</button>
+          <input id="tt" type="range" min="0" max="1" step="0.005" value="1" aria-label="Míra deformace">
+          <span class="val" id="tval">1</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes" id="notes"></div>
+
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script src="../assets/site.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var TEAL = '#0b6e8a', INK = '#0d1b2a', LINE = '#d9d7ce', MUTED = '#6b7782';
+  var BOX = 200, C = 220;
+
+  var A = [[-1, 3], [1, 4]], B = [5, 9];
+  var tval = 1, P = 1, anim = 0, playRaf = 0;
+  var ids = ['a11', 'a12', 'a21', 'a22', 'b1', 'b2'];
+
+  function parse(s) {
+    s = String(s).replace(/\s+/g, '').replace(/−/g, '-').replace(',', '.');
+    if (s === '' || !/^[-+]?(\d+\.?\d*|\.\d+)$/.test(s)) return NaN;
+    return parseFloat(s);
+  }
+  function r3(x) { return Math.round(x * 1000) / 1000; }
+  function fm(x) { x = r3(x); if (Object.is(x, -0)) x = 0; return String(x).replace('.', ',').replace('-', '−'); }
+  function ft(x) { x = r3(x); if (Object.is(x, -0)) x = 0; return String(x).replace('.', '{,}'); }
+  function nice(r) { var p = Math.pow(10, Math.floor(Math.log10(r))), m = r / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p; }
+  function f1(x) { return x.toFixed(1); }
+
+  function solve() {
+    var det = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+    var sc = Math.max(1, Math.abs(A[0][0]), Math.abs(A[0][1]), Math.abs(A[1][0]), Math.abs(A[1][1]));
+    var sing = Math.abs(det) < 1e-9 * sc * sc;
+    var x = null;
+    if (!sing) x = [(B[0] * A[1][1] - A[0][1] * B[1]) / det, (A[0][0] * B[1] - B[0] * A[1][0]) / det];
+    return { det: det, sing: sing, x: x };
+  }
+
+  var R = 4, S = 50;
+  function setView(sol) {
+    var m = 2;
+    [A[0][0], A[0][1], A[1][0], A[1][1], B[0], B[1]].forEach(function (v) { m = Math.max(m, Math.abs(v)); });
+    var lim = m;
+    if (sol.x) {
+      var cs = [sol.x[0] * A[0][0], sol.x[0] * A[1][0]];
+      cs.forEach(function (v) { if (Math.abs(v) <= 2.5 * m) lim = Math.max(lim, Math.abs(v)); });
+    }
+    R = lim * 1.2; S = BOX / R;
+  }
+  function X(x) { return C + S * x; }
+  function Y(y) { return C - S * y; }
+  function pt(x, y) { return f1(X(x)) + ',' + f1(Y(y)); }
+  function line(x1, y1, x2, y2, st, w, extra) {
+    return '<line x1="' + f1(X(x1)) + '" y1="' + f1(Y(y1)) + '" x2="' + f1(X(x2)) + '" y2="' + f1(Y(y2)) + '" stroke="' + st + '" stroke-width="' + w + '"' + (extra || '') + '/>';
+  }
+  function defs() {
+    function mk(id, col) { return '<marker id="' + id + '" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="' + col + '"/></marker>'; }
+    return '<defs>' + mk('mT', TEAL) + mk('mI', INK) + mk('mM', MUTED) + '<clipPath id="clipX"><rect x="' + (C - BOX) + '" y="' + (C - BOX) + '" width="' + (2 * BOX) + '" height="' + (2 * BOX) + '"/></clipPath></defs>';
+  }
+  function stdGrid(faint) {
+    var step = nice(R / 5), n = Math.floor(R / step), g = '', k, v;
+    for (k = -n; k <= n; k++) {
+      if (k === 0) continue; v = k * step;
+      g += line(v, -R, v, R, faint, 1) + line(-R, v, R, v, faint, 1);
+    }
+    return { grid: g, step: step, n: n };
+  }
+  function axes(step, n, drawTicks) {
+    var g = line(-R, 0, R, 0, INK, 1.2) + line(0, -R, 0, R, INK, 1.2), k, v, t = '';
+    if (drawTicks) for (k = -n; k <= n; k++) {
+      if (k === 0) continue; v = k * step;
+      t += '<text x="' + f1(X(v)) + '" y="' + f1(C + 15) + '" text-anchor="middle" style="font-size:11px">' + fm(v) + '</text>';
+      t += '<text x="' + f1(C - 6) + '" y="' + f1(Y(v) + 4) + '" text-anchor="end" style="font-size:11px">' + fm(v) + '</text>';
+    }
+    return { g: g, t: t };
+  }
+  function frame() { return '<rect x="' + (C - BOX) + '" y="' + (C - BOX) + '" width="' + (2 * BOX) + '" height="' + (2 * BOX) + '" fill="none" stroke="' + LINE + '" stroke-width="1"/>'; }
+
+  function vec(x, y, col, w, mk, dash) {
+    return line(0, 0, x, y, col, w, ' marker-end="url(#' + mk + ')"' + (dash ? ' stroke-dasharray="' + dash + '"' : ''));
+  }
+  function txt(x, y, s, cls, anchor) {
+    return '<text class="' + (cls || '') + '" x="' + f1(x) + '" y="' + f1(y) + '" text-anchor="' + (anchor || 'start') + '">' + s + '</text>';
+  }
+
+  /* ---------- left panel ---------- */
+  function drawLeft(sol) {
+    var a1 = [A[0][0], A[1][0]], a2 = [A[0][1], A[1][1]];
+    var sg = stdGrid('#e8e6dd'), ax = axes(sg.step, sg.n, true);
+    var g = defs() + '<g clip-path="url(#clipX)">' + sg.grid;
+    var n1 = Math.hypot(a1[0], a1[1]), n2 = Math.hypot(a2[0], a2[1]), k;
+    if (!sol.sing) {
+      var N1 = Math.min(30, Math.ceil(3 * R / Math.max(n1, 1e-6))), N2 = Math.min(30, Math.ceil(3 * R / Math.max(n2, 1e-6)));
+      var T1 = 6 * R / Math.max(n2, 1e-6), T2 = 6 * R / Math.max(n1, 1e-6);
+      for (k = -N1; k <= N1; k++) g += line(k * a1[0] - T1 * a2[0], k * a1[1] - T1 * a2[1], k * a1[0] + T1 * a2[0], k * a1[1] + T1 * a2[1], 'rgba(11,110,138,.28)', k === 0 ? 1.3 : 1);
+      for (k = -N2; k <= N2; k++) g += line(k * a2[0] - T2 * a1[0], k * a2[1] - T2 * a1[1], k * a2[0] + T2 * a1[0], k * a2[1] + T2 * a1[1], 'rgba(11,110,138,.28)', k === 0 ? 1.3 : 1);
+    } else {
+      var d = n1 >= n2 ? a1 : a2, nn = Math.max(n1, n2);
+      if (nn > 1e-9) g += line(-d[0] * 60 / nn * R, -d[1] * 60 / nn * R, d[0] * 60 / nn * R, d[1] * 60 / nn * R, 'rgba(11,110,138,.55)', 2.2);
+    }
+    g += ax.g + '</g>' + frame() + ax.t;
+
+    /* columns */
+    g += '<g clip-path="url(#clipX)">';
+    g += vec(a1[0], a1[1], TEAL, 2.2, 'mT') + vec(a2[0], a2[1], INK, 2.2, 'mI');
+    g += '</g>';
+    g += txt(X(a1[0]) + (a1[0] >= 0 ? 8 : -8), Y(a1[1]) + (a1[1] >= 0 ? -8 : 16), 'a₁', 'labT', a1[0] >= 0 ? 'start' : 'end');
+    g += txt(X(a2[0]) + (a2[0] >= 0 ? 8 : -8), Y(a2[1]) + (a2[1] >= 0 ? -8 : 16), 'a₂', 'lab', a2[0] >= 0 ? 'start' : 'end');
+
+    /* target + path */
+    g += '<g clip-path="url(#clipX)">';
+    if (sol.x) {
+      var p1 = [sol.x[0] * a1[0], sol.x[0] * a1[1]];
+      var leg1 = Math.min(1, P * 2), leg2 = Math.max(0, P * 2 - 1);
+      if (leg1 > 0) g += line(0, 0, p1[0] * leg1, p1[1] * leg1, TEAL, 4, ' stroke-linecap="round"' + (leg1 >= 1 ? '' : ''));
+      if (leg2 > 0) g += line(p1[0], p1[1], p1[0] + sol.x[1] * a2[0] * leg2, p1[1] + sol.x[1] * a2[1] * leg2, INK, 4, ' stroke-linecap="round"');
+      if (leg1 > 0.3 && P >= 0.5) g += '<circle cx="' + f1(X(p1[0])) + '" cy="' + f1(Y(p1[1])) + '" r="3.5" fill="' + TEAL + '"/>';
+    }
+    g += '</g>';
+    g += '<circle cx="' + f1(X(B[0])) + '" cy="' + f1(Y(B[1])) + '" r="5.5" fill="' + INK + '"/>';
+    g += txt(X(B[0]) + 9, Y(B[1]) - 9, 'b', 'lab');
+    if (sol.x && P > 0.02) {
+      var q1 = [sol.x[0] * a1[0], sol.x[0] * a1[1]], q2 = [q1[0] + sol.x[1] * a2[0], q1[1] + sol.x[1] * a2[1]];
+      var cen = [(q2[0]) / 3, (q2[1]) / 3];
+      var side = function (from, to, text, cls) {
+        var mx = (from[0] + to[0]) / 2, my = (from[1] + to[1]) / 2, dx = to[0] - from[0], dy = to[1] - from[1], L = Math.hypot(dx, dy) || 1;
+        var nx = -dy / L, ny = dx / L;
+        if (nx * (mx - cen[0]) + ny * (my - cen[1]) < 0) { nx = -nx; ny = -ny; }
+        var px = X(mx) + nx * 16, py = Y(my) - ny * 16;
+        return txt(px, py + 4, text, cls, 'middle');
+      };
+      g += side([0, 0], q1, fm(sol.x[0]) + '·a₁', 'labT');
+      if (P >= 0.55) g += side(q1, q2, fm(sol.x[1]) + '·a₂', 'lab');
+    }
+    $('svgL').innerHTML = g;
+  }
+
+  /* ---------- right panel ---------- */
+  function Mt(t) { return [[1 - t + t * A[0][0], t * A[0][1]], [t * A[1][0], 1 - t + t * A[1][1]]]; }
+  function ap(M, u, v) { return [M[0][0] * u + M[0][1] * v, M[1][0] * u + M[1][1] * v]; }
+  function drawRight(sol) {
+    var M = Mt(tval), g = defs(), k, G = Math.min(40, Math.ceil(R * 1.5) + 2), L = 60, p, q;
+    g += '<g clip-path="url(#clipX)">';
+    for (k = -G; k <= G; k++) {
+      p = ap(M, k, -L); q = ap(M, k, L);
+      g += line(p[0], p[1], q[0], q[1], k === 0 ? INK : 'rgba(13,27,42,.20)', k === 0 ? 1.4 : 1);
+      p = ap(M, -L, k); q = ap(M, L, k);
+      g += line(p[0], p[1], q[0], q[1], k === 0 ? INK : 'rgba(13,27,42,.20)', k === 0 ? 1.4 : 1);
+    }
+    var o = [0, 0], e1 = ap(M, 1, 0), e2 = ap(M, 0, 1), s = ap(M, 1, 1);
+    g += '<polygon points="' + pt(0, 0) + ' ' + pt(e1[0], e1[1]) + ' ' + pt(s[0], s[1]) + ' ' + pt(e2[0], e2[1]) + '" fill="rgba(11,110,138,.20)" stroke="' + TEAL + '" stroke-width="1.4"/>';
+    g += '<polygon points="' + pt(0, 0) + ' ' + pt(1, 0) + ' ' + pt(1, 1) + ' ' + pt(0, 1) + '" fill="none" stroke="' + MUTED + '" stroke-width="1" stroke-dasharray="4 4"/>';
+    g += vec(e1[0], e1[1], TEAL, 2.4, 'mT') + vec(e2[0], e2[1], INK, 2.4, 'mI');
+    if (sol.x) {
+      var tr = '', i, z;
+      for (i = 0; i <= 30; i++) { z = Mt(tval * i / 30); var w = ap(z, sol.x[0], sol.x[1]); tr += pt(w[0], w[1]) + ' '; }
+      g += '<polyline points="' + tr + '" fill="none" stroke="' + TEAL + '" stroke-width="1.4" stroke-dasharray="3 3"/>';
+      var cur = ap(M, sol.x[0], sol.x[1]);
+      g += '<circle cx="' + f1(X(cur[0])) + '" cy="' + f1(Y(cur[1])) + '" r="12" fill="rgba(11,110,138,.16)"/>';
+      g += '<circle cx="' + f1(X(cur[0])) + '" cy="' + f1(Y(cur[1])) + '" r="5.5" fill="' + TEAL + '"/>';
+    }
+    var rt = rot();
+    if (rt && Math.abs(rt.th) > 1e-6) {
+      var cc1 = ap(M, 1, 0), tht = Math.atan2(cc1[1], cc1[0]), rr = 0.2 * R;
+      g += arc(rr, tht, '#b5651d');
+      g += '<line x1="' + f1(X(0)) + '" y1="' + f1(Y(0)) + '" x2="' + f1(X(0.3 * R)) + '" y2="' + f1(Y(0)) + '" stroke="' + MUTED + '" stroke-width="1" stroke-dasharray="4 4"/>';
+    }
+    g += '</g>' + frame();
+    if (rt && Math.abs(rt.th) > 1e-6 && tval > 0.99) {
+      var mid = rt.th / 2, lr = 0.2 * R + 0.07 * R;
+      g += txt(X(lr * Math.cos(mid)), Y(lr * Math.sin(mid)) + 4, 'θ', 'lab', 'middle');
+    }
+    if (tval < 0.01) {
+      g += txt(X(e1[0]) + 6, Y(e1[1]) + 16, 'e₁', 'labT') + txt(X(e2[0]) - 6, Y(e2[1]) - 6, 'e₂', 'lab', 'end');
+    } else if (tval > 0.99) {
+      g += txt(X(e1[0]) + (e1[0] >= 0 ? 8 : -8), Y(e1[1]) + (e1[1] >= 0 ? -8 : 16), 'a₁', 'labT', e1[0] >= 0 ? 'start' : 'end');
+      g += txt(X(e2[0]) + (e2[0] >= 0 ? 8 : -8), Y(e2[1]) + (e2[1] >= 0 ? -8 : 16), 'a₂', 'lab', e2[0] >= 0 ? 'start' : 'end');
+    }
+    if (sol.x) {
+      var cc = ap(M, sol.x[0], sol.x[1]);
+      var lbl = tval < 0.01 ? 'x' : tval > 0.99 ? 'b' : '';
+      if (lbl) g += txt(X(cc[0]) + 12, Y(cc[1]) - 10, lbl, 'labT');
+    }
+    $('svgR').innerHTML = g;
+    $('tval').textContent = fm(tval);
+  }
+
+  /* ---------- text ---------- */
+  function ren(s, el, disp) { try { katex.render(s, el, { throwOnError: false, displayMode: !!disp }); } catch (e) { el.textContent = s; } }
+  function pm(a, b, c, d) { return '\\begin{pmatrix}' + ft(a) + ' & ' + ft(b) + '\\\\ ' + ft(c) + ' & ' + ft(d) + '\\end{pmatrix}'; }
+  function cv(a, b) { return '\\begin{pmatrix}' + ft(a) + '\\\\ ' + ft(b) + '\\end{pmatrix}'; }
+  function rot() {
+    var a = A[0][0], b = A[0][1], c = A[1][0], d = A[1][1], r = Math.hypot(a, c);
+    if (r < 1e-9) return null;
+    if (Math.abs(a - d) < 1e-9 * r && Math.abs(b + c) < 1e-9 * r) return { r: r, th: Math.atan2(c, a) };
+    return null;
+  }
+  function arc(rad, th, col) {
+    var n = 40, i, s = '', ang;
+    for (i = 0; i <= n; i++) { ang = th * i / n; s += pt(rad * Math.cos(ang), rad * Math.sin(ang)) + ' '; }
+    return '<polyline points="' + s + '" fill="none" stroke="' + col + '" stroke-width="2"/>';
+  }
+  function notes(sol) {
+    var box = $('notes'), h = '', M = Mt(tval);
+    var a1 = cv(A[0][0], A[1][0]), a2 = cv(A[0][1], A[1][1]), bb = cv(B[0], B[1]);
+    box.innerHTML = '<p>Sloupce matice jsou vektory <span data-t="a_1 = ' + a1 + '"></span> a <span data-t="a_2 = ' + a2 + '"></span>. Soustava požaduje najít čísla <span data-t="x_1, x_2"></span> taková, že</p>' +
+      '<div class="eq" data-d="x_1 ' + a1 + ' + x_2 ' + a2 + ' = ' + bb + '"></div>';
+    if (sol.x) {
+      box.innerHTML += '<p>Řešením je <span data-t="x_1 = ' + ft(sol.x[0]) + ',\\quad x_2 = ' + ft(sol.x[1]) + '"></span>. Do bodu <span data-t="b"></span> se tedy dojde tak, že se sloupec <span data-t="a_1"></span> vezme ' + fm(sol.x[0]) + '× a sloupec <span data-t="a_2"></span> ' + fm(sol.x[1]) + '×.</p>' +
+        '<div class="eq" data-d="' + ft(sol.x[0]) + '\\cdot ' + a1 + ' + ' + ft(sol.x[1]) + '\\cdot ' + a2 + ' = ' + bb + '"></div>';
+      box.innerHTML += '<p>Determinant <span data-t="\\det A = ' + ft(sol.det) + '"></span> říká, že jednotkový čtverec se zobrazí na rovnoběžník o obsahu ' + fm(Math.abs(sol.det)) + '. ' +
+        (sol.det < 0 ? 'Determinant je záporný, takže matice rovinu zároveň překlopí (pořadí vektorů <span data-t="a_1, a_2"></span> je opačné než u <span data-t="e_1, e_2"></span>).' : 'Determinant je kladný, orientace roviny se zachová.') + '</p>';
+      var rt2 = rot();
+      if (rt2) {
+        var deg = rt2.th * 180 / Math.PI;
+        box.innerHTML += '<p>Matice je otočení' + (Math.abs(rt2.r - 1) > 1e-9 ? ' spojené s natažením ' + fm(rt2.r) + '×' : '') + '. Úhel otočení se čte z prvního sloupce: <span data-t="\\cos\\theta = \\frac{' + ft(A[0][0]) + '}{' + ft(rt2.r) + '},\\quad \\sin\\theta = \\frac{' + ft(A[1][0]) + '}{' + ft(rt2.r) + '}"></span>, tedy <span data-t="\\theta = \\operatorname{atan2}(' + ft(A[1][0]) + ',' + ft(A[0][0]) + ') = ' + ft(deg) + '^\\circ"></span> (vpravo oranžový oblouk mezi <span data-t="e_1"></span> a <span data-t="a_1"></span>).</p>';
+      }
+      if (tval > 0.005 && tval < 0.995) box.innerHTML += '<p>Pro právě zobrazenou míru deformace je obsah čtverce ' + fm(Math.abs(M[0][0] * M[1][1] - M[0][1] * M[1][0])) + '.</p>';
+    } else {
+      var onLine = true, n = A, c1 = [A[0][0], A[1][0]], c2 = [A[0][1], A[1][1]];
+      var d = Math.hypot(c1[0], c1[1]) >= Math.hypot(c2[0], c2[1]) ? c1 : c2;
+      if (Math.hypot(d[0], d[1]) < 1e-9) onLine = Math.hypot(B[0], B[1]) < 1e-9;
+      else onLine = Math.abs(d[0] * B[1] - d[1] * B[0]) < 1e-9 * Math.max(1, Math.hypot(d[0], d[1]) * Math.hypot(B[0], B[1]));
+      box.innerHTML += '<p><span class="warn">Determinant je nula.</span> Sloupce leží na jedné přímce, takže jejich kombinace nikdy nevyplní celou rovinu a matice čtverec zploští na úsečku. ' +
+        (onLine ? 'Bod <span data-t="b"></span> na této přímce leží, takže řešení je nekonečně mnoho.' : 'Bod <span data-t="b"></span> na této přímce neleží, takže soustava nemá žádné řešení.') + '</p>';
+    }
+    box.querySelectorAll('[data-t]').forEach(function (e) { ren(e.getAttribute('data-t'), e, false); });
+    box.querySelectorAll('[data-d]').forEach(function (e) { ren(e.getAttribute('data-d'), e, true); });
+  }
+
+  /* ---------- control ---------- */
+  var cur;
+  function redraw() { drawLeft(cur); drawRight(cur); }
+  function update(replay) {
+    cur = solve(); setView(cur);
+    if (replay) startAnim();
+    redraw(); notes(cur);
+  }
+  function startAnim() {
+    cancelAnimationFrame(anim);
+    var t0 = null;
+    P = 0;
+    function step(ts) {
+      if (t0 === null) t0 = ts;
+      var u = Math.min(1, (ts - t0) / 2800);
+      P = u < 0.5 ? 0.5 * (1 - Math.pow(1 - 2 * u, 2)) : 0.5 + 0.5 * (1 - Math.pow(1 - (2 * u - 1), 2));
+      /* two legs each with ease-out */
+      drawLeft(cur);
+      if (u < 1) anim = requestAnimationFrame(step); else { P = 1; drawLeft(cur); }
+    }
+    anim = requestAnimationFrame(step);
+  }
+  function readInputs() {
+    var vals = ids.map(function (i) { var v = parse($(i).value); $(i).classList.toggle('bad', isNaN(v)); return v; });
+    if (vals.some(isNaN)) return false;
+    A = [[vals[0], vals[1]], [vals[2], vals[3]]]; B = [vals[4], vals[5]];
+    return true;
+  }
+  var deb = 0;
+  ids.forEach(function (i) {
+    $(i).addEventListener('input', function () {
+      if (!readInputs()) return;
+      clearTimeout(deb);
+      cur = solve(); setView(cur); P = 1; cancelAnimationFrame(anim); redraw(); notes(cur);
+      deb = setTimeout(startAnim, 600);
+    });
+  });
+  document.querySelectorAll('[data-p]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var v = b.getAttribute('data-p').split(',');
+      ids.forEach(function (i, k) { $(i).value = String(v[k]).replace('.', ','); $(i).classList.remove('bad'); });
+      readInputs(); update(true);
+    });
+  });
+  $('replay').addEventListener('click', function () { startAnim(); });
+  $('tt').addEventListener('input', function () { cancelAnimationFrame(playRaf); tval = parseFloat(this.value); $('play').textContent = 'Přehrát'; drawRight(cur); notes(cur); });
+  $('play').addEventListener('click', function () {
+    cancelAnimationFrame(playRaf);
+    var from = tval >= 0.995 ? 0 : tval, t0 = null, dur = 3200 * (1 - from) + 400;
+    $('play').textContent = 'Přehrát';
+    function step(ts) {
+      if (t0 === null) t0 = ts;
+      var u = Math.min(1, (ts - t0) / dur), e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+      tval = from + (1 - from) * e; $('tt').value = tval; drawRight(cur);
+      if (u < 1) playRaf = requestAnimationFrame(step); else { tval = 1; $('tt').value = 1; drawRight(cur); notes(cur); }
+    }
+    tval = from; playRaf = requestAnimationFrame(step);
+  });
+
+  update(true);
+})();
+</script>
+</body>
+</html>

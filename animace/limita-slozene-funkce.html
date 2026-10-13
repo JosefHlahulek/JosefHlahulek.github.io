@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Věta 18: limita složené funkce · Josef Hlahulek</title>
+<meta name="description" content="Animace důkazu věty o limitě složené funkce na příkladu lim sin(1+1/x): dva grafy, okolí bodů a řetízek zobrazení.">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  body { padding-bottom: 80px; }
+  .top { display: flex; justify-content: space-between; align-items: center; height: 76px; font-size: 14px; color: var(--muted); }
+  .top a:hover { color: var(--ink); }
+  .tools { display: flex; gap: 8px 24px; flex-wrap: wrap; align-items: baseline; font-size: 14px; color: var(--muted); margin: 0 0 26px; }
+  .link { background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 0 0 1px; font: inherit; font-size: 14px; font-weight: 500;
+          cursor: pointer; color: var(--ink); transition: color .2s, border-color .2s; }
+  .link:hover { color: var(--accent); border-color: var(--accent); }
+  .link[disabled] { opacity: .35; cursor: default; border-color: var(--line); color: var(--muted); }
+  .spd { background: none; border: 0; padding: 0; font: inherit; font-size: 14px; color: var(--muted); cursor: pointer; }
+  .spd[aria-pressed="true"] { color: var(--ink); border-bottom: 1px solid var(--accent); }
+  .stepno { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+
+  .katex { font-size: 1.06em; }
+
+  /* the theorem, always visible; the part that is being used lights up */
+  .thm { font-family: var(--serif); font-size: clamp(16px, 1.9vw, 19px); line-height: 1.6; color: var(--muted); max-width: 84ch; margin: 0 0 22px;
+         padding-left: 16px; border-left: 2px solid var(--line); }
+  .thm b { font-weight: 500; color: var(--ink); font-style: normal; }
+  .thm .p { transition: color .5s, background-size .5s; background: linear-gradient(var(--accent), var(--accent)) 0 100% / 0% 1.5px no-repeat; }
+  .thm .p.hl { color: var(--ink); background-size: 100% 1.5px; }
+
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 12px 0; }
+  .panel svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .panel .cap { font-size: 13px; color: var(--muted); text-align: center; margin: 0; }
+  .panel .cap .katex { font-size: 1em; }
+
+  /* svg parts */
+  svg text { font-family: var(--sans); font-size: 12px; fill: var(--muted); }
+  svg .el { opacity: 0; transition: opacity .7s ease; pointer-events: none; }
+  svg .el.on { opacity: 1; }
+  svg .axis { stroke: var(--ink); stroke-width: 1.2; fill: none; }
+  svg .arr { fill: var(--ink); }
+  svg .curve { stroke: var(--ink); stroke-width: 2; fill: none; stroke-linejoin: round; }
+  svg .lab { fill: var(--ink); font-size: 13px; }
+  svg .tick { stroke: var(--ink); stroke-width: 1; }
+  svg .dash { stroke: var(--accent); stroke-width: 1.3; stroke-dasharray: 4 4; fill: none; }
+  svg .gapl { stroke: var(--accent); stroke-width: 1.4; opacity: .7; }
+  svg .bT { fill: rgba(11,110,138,.15); }          /* neighbourhoods of D */
+  svg .bS { fill: url(#hatch); }                   /* neighbourhoods of c */
+  svg .bN { fill: rgba(13,27,42,.09); }            /* neighbourhoods of A */
+  svg .tT { fill: var(--accent); font-weight: 500; }
+  svg .tS { fill: #55616d; font-weight: 500; }
+  svg .tN { fill: var(--ink); font-weight: 500; }
+  svg .hole { fill: var(--bg); stroke: var(--accent); stroke-width: 1.8; }
+  svg .fillp { fill: var(--accent); }
+  svg .dot { fill: var(--accent); }
+  svg .trk { stroke: var(--accent); stroke-width: 1.3; stroke-dasharray: 3 3; fill: none; }
+  svg .hlt { fill: var(--accent) !important; font-weight: 600; }
+
+  /* explanation under the graphs */
+  .cap-main { min-height: 7.4em; padding-top: 18px; }
+  .cap-main p { margin: 0 0 8px; transition: opacity .25s ease; }
+  .cap-main .m { font-family: var(--serif); font-size: clamp(19px, 2.4vw, 23px); line-height: 1.5; color: var(--ink); max-width: 80ch; }
+  .cap-main .n { font-family: var(--serif); font-style: italic; font-size: clamp(16px, 2vw, 19px); color: var(--muted); max-width: 72ch;
+                 padding-left: 16px; border-left: 2px solid var(--accent); }
+  .cap-main .n:empty { display: none; }
+  .cap-main.sw p { opacity: 0; }
+
+  /* chain of mappings */
+  .chain { display: flex; align-items: center; justify-content: center; gap: 6px 12px; flex-wrap: wrap; margin: 6px 0 0; padding: 14px 0 6px;
+           border-top: 1px solid var(--line); min-height: 6.2em; }
+  .chain .cp { font-size: 1.04em; opacity: .25; transition: opacity .6s ease, color .6s ease; padding: 2px 4px; }
+  .chain .cp.on { opacity: 1; }
+  .chain .cp.now { color: var(--accent); }
+  .chain .ar { display: flex; flex-direction: column; align-items: center; font-size: 12px; color: var(--muted); opacity: .25; transition: opacity .6s ease; min-width: 7em; text-align: center; line-height: 1.3; }
+  .chain .ar.on { opacity: 1; }
+  .chain .ar .sym { font-size: 26px; line-height: 1; color: var(--ink); }
+  .chain .ar .why .katex { font-size: 1em; }
+  .chain-t { font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); font-weight: 500; text-align: center; margin: 14px 0 0; transition: opacity .6s; opacity: 0; }
+  .chain-t.on { opacity: 1; }
+
+  @media (max-width: 860px) {
+    .panels { grid-template-columns: 1fr; }
+    .chain .ar { min-width: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { svg .el, .chain .cp, .chain .ar { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href="../cviceni.html">← Cvičení z analýzy</a>
+    <a href="../index.html">Josef Hlahulek</a>
+  </div>
+
+  <div class="tools">
+    <button class="link" id="pause" type="button">Pozastavit</button>
+    <button class="link" id="prev" type="button">← Zpět</button>
+    <button class="link" id="next" type="button">Dál →</button>
+    <button class="link" id="again" type="button">Znovu</button>
+    <span class="stepno" id="stepno"></span>
+    <span>Rychlost:</span>
+    <button class="spd" data-v="0.7" type="button" aria-pressed="false">pomalu</button>
+    <button class="spd" data-v="1" type="button" aria-pressed="true">normálně</button>
+    <button class="spd" data-v="1.7" type="button" aria-pressed="false">rychle</button>
+  </div>
+
+  <div class="thm" id="thm"></div>
+
+  <div class="panels">
+    <div class="panel">
+      <svg id="svgL" viewBox="0 0 430 350" role="img" aria-label="Graf funkce g(x) = 1 + 1/x"></svg>
+    </div>
+    <div class="panel">
+      <svg id="svgR" viewBox="0 0 430 350" role="img" aria-label="Graf funkce f(y) = sin y"></svg>
+    </div>
+  </div>
+
+  <div class="cap-main" id="capmain"><p class="m" id="m"></p><p class="n" id="n"></p></div>
+
+  <div class="chain" id="chain"></div>
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script>
+(function () {
+  if (!window.katex) { document.getElementById('m').textContent = 'Vzorce se nepodařilo načíst. Zkus stránku obnovit.'; return; }
+  var T = String.raw;
+  function tex(s) { return katex.renderToString(s, { throwOnError: false }); }
+  function rich(str) {                       // $...$ is math
+    var p = str.split('$'), o = '';
+    for (var i = 0; i < p.length; i++) o += (i % 2) ? tex(p[i]) : p[i];
+    return o;
+  }
+
+  /* ---------- the example: lim_{x->inf} sin(1 + 1/x), g(x) = 1 + 1/x, f(y) = sin y ---------- */
+  var D = 1, A = Math.sin(1), EPS = 0.15, PSI = 0.22;
+  var ETA_X = 1.0, DEL_X = 1 / PSI;                       // x > ETA_X is P(c,eta), x > DEL_X is P(c,delta')
+  function g(x) { return 1 + 1 / x; }
+  function f(y) { return Math.sin(y); }
+
+  /* ---------- geometry ---------- */
+  var NS = 'http://www.w3.org/2000/svg';
+  function svgL0() { return document.getElementById('svgL'); }
+  function svgR0() { return document.getElementById('svgR'); }
+  var PL = 70, PR = 410, PT = 28, PB = 312;
+  var XMAX = 13.5, YMIN = 0.5, YMAX = 2.3, ZMIN = 0.4, ZMAX = 1.15;
+  function X(x)  { return PL + x * (PR - PL) / XMAX; }                       // left: x
+  function Y(y)  { return PB - (y - YMIN) * (PB - PT) / (YMAX - YMIN); }       // left: y = g(x)
+  function XR(y) { return PL + (y - YMIN) * (PR - PL) / (YMAX - YMIN); }       // right: y
+  function Z(z)  { return PB - (z - ZMIN) * (PB - PT) / (ZMAX - ZMIN); }       // right: f(y)
+
+  [svgL0(), svgR0()].forEach(function (sv) {
+    var defs = mk('defs', {}, sv), pt = mk('pattern', { id: 'hatch', width: 8, height: 8, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
+    mk('rect', { width: 8, height: 8, fill: 'rgba(107,119,130,.07)' }, pt);
+    mk('line', { x1: 0, y1: 0, x2: 0, y2: 8, stroke: 'rgba(107,119,130,.34)', 'stroke-width': 1.4 }, pt);
+  });
+  var E = {};                                              // named, switchable elements
+  function mk(tag, attrs, parent, text) {
+    var n = document.createElementNS(NS, tag);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (text != null) n.textContent = text;
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  function grp(svg, id) { var g_ = mk('g', {}, svg); g_.classList.add('el'); E[id] = g_; return g_; }
+  function line(par, x1, y1, x2, y2, cls) { return mk('line', { x1: x1, y1: y1, x2: x2, y2: y2, 'class': cls }, par); }
+  function text(par, x, y, s, cls, anchor) { return mk('text', { x: x, y: y, 'class': cls || '', 'text-anchor': anchor || 'start' }, par, s); }
+  function rect(par, x1, y1, x2, y2, cls) { return mk('rect', { x: Math.min(x1, x2), y: Math.min(y1, y2), width: Math.abs(x2 - x1), height: Math.abs(y2 - y1), 'class': cls }, par); }
+  function arrow(par, x, y, dir) {                         // small arrow head at the end of an axis
+    var d = dir === 'right' ? 'M' + x + ',' + y + ' l-8,-3.6 l0,7.2 z' : 'M' + x + ',' + y + ' l-3.6,8 l7.2,0 z';
+    return mk('path', { d: d, 'class': 'arr' }, par);
+  }
+  function path(par, fn, a, b, step, sx, sy, cls) {
+    var d = '', first = true;
+    for (var t = a; t <= b + 1e-9; t += step) { d += (first ? 'M' : 'L') + sx(t).toFixed(1) + ',' + sy(fn(t)).toFixed(1); first = false; }
+    return mk('path', { d: d, 'class': cls }, par);
+  }
+
+  var svgL = document.getElementById('svgL'), svgR = document.getElementById('svgR');
+
+  /* bands first, so the curves lie on top of them */
+  var g_ = grp(svgL, 'L-eta');
+  rect(g_, X(ETA_X), PT, PR, PB, 'bS');
+  text(g_, X(ETA_X) + 8, PT + 14, 'P(c, η)', 'tS');
+  g_ = grp(svgL, 'L-del');
+  rect(g_, X(DEL_X), PT, PR, PB, 'bS');
+  text(g_, X(DEL_X) + 8, PT + 30, "P(c, δ′)", 'tS');
+  g_ = grp(svgL, 'L-delmin');
+  rect(g_, X(DEL_X), PT, PR, PB, 'bS');
+  text(g_, X(DEL_X) + 8, PT + 46, 'P(c, δ)', 'tS');
+  g_ = grp(svgL, 'L-psi');
+  rect(g_, PL, Y(D + PSI), PR, Y(D - PSI), 'bT');
+  text(g_, PR - 6, Y(D + PSI) - 5, 'B(D, ψ)', 'tT', 'end');
+
+  g_ = grp(svgR, 'R-psiP');
+  rect(g_, XR(D - PSI), PT, XR(D + PSI), PB, 'bT');
+  text(g_, XR(D) , PT + 14, 'P(D, ψ)', 'tT', 'middle');
+  g_ = grp(svgR, 'R-psiB');
+  rect(g_, XR(D - PSI), PT, XR(D + PSI), PB, 'bT');
+  text(g_, XR(D), PT + 14, 'B(D, ψ)', 'tT', 'middle');
+  g_ = grp(svgR, 'R-eps');
+  rect(g_, PL, Z(A + EPS), PR, Z(A - EPS), 'bN');
+  text(g_, PR - 6, Z(A + EPS) - 5, 'B(A, ε)', 'tN', 'end');
+
+  /* axes (always the first thing drawn) */
+  function axes(svg, id, xl, yl, ticksX, ticksY) {
+    var a = grp(svg, id);
+    line(a, PL, PB, PR, PB, 'axis'); line(a, PL, PB, PL, PT - 6, 'axis');
+    arrow(a, PR + 6, PB, 'right'); arrow(a, PL, PT - 12, 'up');
+    text(a, PR + 6, PB + 18, xl, 'lab', 'end');
+    text(a, PL + 8, PT - 12, yl, 'lab');
+    ticksX.forEach(function (t) { line(a, t[0], PB, t[0], PB + 4, 'tick'); text(a, t[0], PB + 17, t[1], '', 'middle'); });
+    ticksY.forEach(function (t) { line(a, PL - 4, t[0], PL, t[0], 'tick'); text(a, PL - 8, t[0] + 4, t[1], '', 'end'); });
+    return a;
+  }
+  axes(svgL, 'L-axes', 'x', 'y = g(x)', [[X(5), '5'], [X(10), '10']], [[Y(2), '2']]);
+  axes(svgR, 'R-axes', 'y', 'f(y)', [[XR(2), '2']], [[Z(0.5), '0,5'], [Z(1), '1']]);
+
+  /* curves */
+  g_ = grp(svgL, 'L-curve');
+  path(g_, g, 0.9, XMAX, 0.1, X, Y, 'curve');
+  g_ = grp(svgR, 'R-curve');
+  path(g_, f, YMIN, YMAX, 0.02, XR, Z, 'curve');
+
+  /* left: c, D, gaps */
+  g_ = grp(svgL, 'L-c');
+  text(g_, PR - 2, PB - 10, 'c = +∞', 'tT', 'end');
+  g_.firstChild.setAttribute('class', 'tS');
+  mk('path', { d: 'M' + (PR + 6) + ',' + PB + ' l-8,-3.6 l0,7.2 z', fill: '#55616d' }, g_);
+  g_ = grp(svgL, 'L-D');
+  line(g_, PL, Y(D), PR, Y(D), 'dash');
+  text(g_, PL - 8, Y(D) + 4, 'D = 1', 'tT', 'end');
+  g_ = grp(svgL, 'L-gap');
+  [1.6, 2.2, 3, 4, 5, 6.2, 7.4, 8.6, 9.8, 11, 12.2, 13.2].forEach(function (x) { line(g_, X(x), Y(D), X(x), Y(g(x)), 'gapl'); });
+
+  /* right: D, A, hole */
+  g_ = grp(svgR, 'R-D');
+  line(g_, XR(D), PB, XR(D), Z(A), 'dash');
+  text(g_, XR(D), PB + 32, 'D = 1', 'tT', 'middle');
+  g_ = grp(svgR, 'R-A');
+  line(g_, PL, Z(A), XR(D), Z(A), 'dash');
+  text(g_, PL - 8, Z(A) + 4, 'A = sin 1', 'tN', 'end');
+  g_ = grp(svgR, 'R-hole');
+  mk('circle', { cx: XR(D), cy: Z(A), r: 4.6, 'class': 'hole' }, g_);
+  g_ = grp(svgR, 'R-fill');
+  mk('circle', { cx: XR(D), cy: Z(A), r: 4.6, 'class': 'fillp' }, g_);
+
+  /* the traced point: x -> g(x) -> f(g(x)) */
+  var tL = grp(svgL, 'T-L'), tR = grp(svgR, 'T-R');
+  var tvl = line(tL, 0, 0, 0, 0, 'trk'), thl = line(tL, 0, 0, 0, 0, 'trk'), tdl = mk('circle', { r: 4.2, 'class': 'dot' }, tL), txl = text(tL, 0, 0, 'x', 'tT', 'middle');
+  var tvr = line(tR, 0, 0, 0, 0, 'trk'), thr = line(tR, 0, 0, 0, 0, 'trk'), tdr = mk('circle', { r: 4.2, 'class': 'dot' }, tR);
+  var tgr = text(tR, 0, 0, 'g(x)', 'tT', 'middle'), tfr = text(tR, 0, 0, 'f(g(x))', 'tT', 'end');
+  var traceX = 7.5;
+  function placeTrace(x) {
+    traceX = x;
+    var y = g(x), z = f(y);
+    tvl.setAttribute('x1', X(x)); tvl.setAttribute('x2', X(x)); tvl.setAttribute('y1', PB); tvl.setAttribute('y2', Y(y));
+    thl.setAttribute('x1', X(x)); thl.setAttribute('x2', PL);   thl.setAttribute('y1', Y(y)); thl.setAttribute('y2', Y(y));
+    tdl.setAttribute('cx', X(x)); tdl.setAttribute('cy', Y(y));
+    txl.setAttribute('x', X(x) + 7); txl.setAttribute('y', PB - 8); txl.setAttribute('text-anchor', 'start');
+    tvr.setAttribute('x1', XR(y)); tvr.setAttribute('x2', XR(y)); tvr.setAttribute('y1', PB); tvr.setAttribute('y2', Z(z));
+    thr.setAttribute('x1', XR(y)); thr.setAttribute('x2', PL);   thr.setAttribute('y1', Z(z)); thr.setAttribute('y2', Z(z));
+    tdr.setAttribute('cx', XR(y)); tdr.setAttribute('cy', Z(z));
+    tgr.setAttribute('x', XR(y) + 7); tgr.setAttribute('y', PB - 8); tgr.setAttribute('text-anchor', 'start');
+    tfr.setAttribute('x', PL - 8); tfr.setAttribute('y', Z(z) + 4);
+  }
+  placeTrace(7.5);
+
+  /* ---------- the theorem (parts light up) ---------- */
+  document.getElementById('thm').innerHTML =
+    '<b>Věta 18</b> (limita složené funkce). Nechť ' + tex(T`c,D,A\in\mathbb R^*`) + '. Nechť ' +
+    '<span class="p" id="th-g">' + tex(T`\lim_{x\to c}g(x)=D`) + '</span> a ' +
+    '<span class="p" id="th-f">' + tex(T`\lim_{y\to D}f(y)=A`) + '</span> a platí alespoň jedna z podmínek: ' +
+    '<span class="p" id="th-P">(P) ' + tex(T`\exists\eta>0\ \forall x\in P(c,\eta):\ g(x)\neq D`) + '</span>, ' +
+    '<span class="p" id="th-S">(S) ' + tex(T`f`) + ' je spojitá v bodě ' + tex(T`D`) + '</span>. Potom ' +
+    '<span class="p" id="th-end">' + tex(T`\lim_{x\to c}(f\circ g)(x)=A`) + '</span>.';
+
+  /* ---------- the chain x -> g(x) -> f(g(x)) ---------- */
+  var chain = document.getElementById('chain');
+  chain.innerHTML =
+    '<span class="cp" id="c1">' + tex(T`x\in P(c,\delta)`) + '</span>' +
+    '<span class="ar" id="a1"><span class="sym">⟶</span><span class="why" id="a1t"></span></span>' +
+    '<span class="cp" id="c2"></span>' +
+    '<span class="ar" id="a2"><span class="sym">⟶</span><span class="why" id="a2t"></span></span>' +
+    '<span class="cp" id="c3">' + tex(T`f\bigl(g(x)\bigr)\in B(A,\varepsilon)`) + '</span>';
+  var MID = { P: tex(T`g(x)\in B(D,\psi)\setminus\{D\}`), B: tex(T`g(x)\in B(D,\psi)`), G: tex(T`g(x)\in\ ?`) };
+
+  /* ---------- scenes ---------- */
+  var S = [
+    { m: T`Věta 18 říká, že limitu složené funkce můžeme počítat „zevnitř ven“: stačí znát limitu vnitřní funkce $g$ v bodě $c$, limitu vnější funkce $f$ v bodě $D$ a ověřit podmínku (P) nebo (S). Nejdřív větu rozebereme na příkladu, potom projdeme důkaz.`,
+      n: '', show: [], th: [] },
+
+    { m: T`Příklad: $\displaystyle\lim_{x\to\infty}\sin\Bigl(1+\frac1x\Bigr)$. Vnitřní funkce je $g(x)=1+\dfrac1x$, vnější $f(y)=\sin y$, takže $f\bigl(g(x)\bigr)=\sin\bigl(1+\frac1x\bigr)$.`,
+      n: '', show: ['L-axes', 'R-axes', 'L-curve', 'R-curve'], th: [] },
+
+    { m: T`Vlevo je graf $g$: na vodorovné ose je $x$ a na svislé $y=g(x)$. Vpravo je graf $f$: na vodorovné ose je $y$ (hodnoty, které vyšly vlevo) a na svislé $f(y)$.`,
+      n: T`Svislá osa vlevo a vodorovná osa vpravo jsou „stejná“ osa: číslo $y=g(x)$ z levého obrázku se vpravo stává argumentem funkce $f$.`,
+      show: ['L-axes', 'R-axes', 'L-curve', 'R-curve'], th: [] },
+
+    { m: T`Zajímá nás $x\to c$, tady $c=+\infty$. Bod $c$ leží na vodorovné ose levého grafu, úplně vpravo.`,
+      n: '', show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-c'], th: [] },
+
+    { m: T`Vlevo vidíme $\displaystyle\lim_{x\to c}g(x)=D$: pro $x\to\infty$ se $g(x)=1+\frac1x$ blíží k $D=1$. Bod $D$ leží na svislé ose vlevo.`,
+      n: '', show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-c', 'L-D'], th: ['th-g'] },
+
+    { m: T`Stejné číslo $D=1$ je na vodorovné ose vpravo: je to bod, ve kterém zkoumáme $f$. Platí $\displaystyle\lim_{y\to D}f(y)=A$, kde $A=\sin1\approx0{,}84$ leží na svislé ose vpravo.`,
+      n: T`Prázdný kroužek znamená, že v limitě $y\to D$ se hodnota $f(D)$ nepoužívá.`,
+      show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-c', 'L-D', 'R-D', 'R-A', 'R-hole'], th: ['th-f'] },
+
+    { m: T`Podmínka (P): existuje okolí bodu $c$, ve kterém $g(x)\neq D$. Tady je $g(x)=1+\frac1x>1=D$ pro všechna $x>0$, takže (P) platí.`,
+      n: T`(P) zaručuje, že $g(x)$ nikdy nespadne přímo do bodu $D$, kde by limita funkce $f$ nic neříkala.`,
+      show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-c', 'L-D', 'R-D', 'R-A', 'R-hole', 'L-eta', 'L-gap'], th: ['th-P'] },
+
+    { m: T`Chceme dokázat $\displaystyle\lim_{x\to c}f\bigl(g(x)\bigr)=A$. Ke každému $\varepsilon>0$ tedy hledáme $\delta>0$ takové, že $x\in P(c,\delta)\Rightarrow f(g(x))\in B(A,\varepsilon)$.`,
+      n: T`Řetízek: $x$ blízko $c$ se přes $g$ zobrazí do prstence kolem $D$ (aby fungovala definice limity $f$ v $D$) a ten se přes $f$ zobrazí do okolí $A$.`,
+      show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-c', 'L-D', 'R-D', 'R-A', 'R-hole'], th: ['th-end'],
+      chain: { c1: 0, c2: 0, c3: 0, a1: 0, a2: 0, mid: 'P', title: 1 } },
+
+    { m: T`Zvolme $\varepsilon>0$ libovolně. Vpravo je to okolí $B(A,\varepsilon)$ na svislé ose.`,
+      n: '',
+      show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-c', 'L-D', 'R-D', 'R-A', 'R-hole', 'R-eps'], th: [],
+      chain: { c1: 0, c2: 0, c3: 1, a1: 0, a2: 0, mid: 'P', title: 1 } },
+
+    { m: T`Z $\displaystyle\lim_{y\to D}f(y)=A$ k tomuto $\varepsilon$ existuje $\psi>0$ takové, že $\forall y\in P(D,\psi):\ f(y)\in B(A,\varepsilon)$.`,
+      n: T`Část grafu $f$ nad pásem $P(D,\psi)$ leží celá ve vodorovném pásu $B(A,\varepsilon)$. Bod $y=D$ sám z pásu vynecháme (prázdný kroužek).`,
+      show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-c', 'L-D', 'R-D', 'R-A', 'R-hole', 'R-eps', 'R-psiP'], th: ['th-f'],
+      chain: { c1: 0, c2: 1, c3: 1, a1: 0, a2: 1, mid: 'P', a2t: T`plyne z $\lim_{y\to D}f(y)=A$`, title: 1 } },
+
+    { m: T`Z $\displaystyle\lim_{x\to c}g(x)=D$ k nalezenému $\psi$ existuje $\delta'>0$ takové, že $\forall x\in P(c,\delta'):\ g(x)\in B(D,\psi)$.`,
+      n: T`Vlevo: od jistého $x$ dál leží graf $g$ ve vodorovném pásu $B(D,\psi)$ kolem $D$.`,
+      show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-c', 'L-D', 'R-D', 'R-A', 'R-hole', 'R-eps', 'R-psiP', 'L-psi', 'L-del'], th: ['th-g'],
+      chain: { c1: 1, c2: 1, c3: 1, a1: 1, a2: 1, mid: 'B', a1t: T`plyne z $\lim_{x\to c}g(x)=D$`, a2t: T`plyne z $\lim_{y\to D}f(y)=A$`, title: 1 } },
+
+    { m: T`Položíme $\delta=\min\{\delta',\eta\}$, tedy vezmeme menší z okolí $P(c,\delta')$ a $P(c,\eta)$. Pro každé $x\in P(c,\delta)$ platí zároveň $g(x)\in B(D,\psi)$ i $g(x)\neq D$.`,
+      n: T`První plyne z volby $\delta'$, druhé z podmínky (P). Tady je menší okolí to od $\delta'$.`,
+      show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-c', 'L-D', 'R-D', 'R-A', 'R-hole', 'R-eps', 'R-psiP', 'L-psi', 'L-del', 'L-eta', 'L-delmin'], th: ['th-P'],
+      chain: { c1: 1, c2: 1, c3: 1, a1: 1, a2: 1, mid: 'P', a1t: T`plyne z $\lim g=D$ a z (P)`, a2t: T`plyne z $\lim_{y\to D}f(y)=A$`, title: 1, now: 'c2' } },
+
+    { m: T`Tedy $g(x)\in B(D,\psi)\setminus\{D\}=P(D,\psi)$ a odtud $f\bigl(g(x)\bigr)\in B(A,\varepsilon)$. Tím je důkaz s podmínkou (P) hotov.`,
+      n: T`Sleduj tečku: kdykoli je $x$ v $P(c,\delta)$, přeskočí $g(x)$ do pásu $P(D,\psi)$ a $f(g(x))$ skončí v pásu $B(A,\varepsilon)$.`,
+      show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-c', 'L-D', 'R-D', 'R-A', 'R-hole', 'R-eps', 'R-psiP', 'L-psi', 'L-delmin', 'T-L', 'T-R'], th: ['th-end'],
+      slide: true,
+      chain: { c1: 1, c2: 1, c3: 1, a1: 1, a2: 1, mid: 'P', a1t: T`plyne z $\lim g=D$ a z (P)`, a2t: T`plyne z $\lim_{y\to D}f(y)=A$`, title: 1, now: 'all' } },
+
+    { m: T`Podmínka (S): funkce $f$ je spojitá v bodě $D$, tedy $f(D)=A$. Prázdný kroužek se vyplní a pás $B(D,\psi)$ už nemusí vynechávat bod $D$.`,
+      n: T`Proto z (S) plyne: $\forall y\in B(D,\psi):\ f(y)\in B(A,\varepsilon)$, a to včetně $y=D$.`,
+      show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-c', 'L-D', 'R-D', 'R-A', 'R-fill', 'R-eps', 'R-psiB', 'L-psi', 'L-del'], th: ['th-S'],
+      chain: { c1: 1, c2: 1, c3: 1, a1: 1, a2: 1, mid: 'B', a1t: T`plyne z $\lim_{x\to c}g(x)=D$`, a2t: T`plyne z (S)`, title: 1, now: 'c2' } },
+
+    { m: T`Z $\displaystyle\lim_{x\to c}g(x)=D$ plyne $g(x)\in B(D,\psi)$ pro $x\in P(c,\delta')$ a rovnou $f\bigl(g(x)\bigr)\in B(A,\varepsilon)$. Stačí $\delta=\delta'$ a podmínku $g(x)\neq D$ nepotřebujeme. Tím je důkaz hotov.`,
+      n: T`Kdyby $g(x)$ někdy do bodu $D$ spadlo, nevadí to: $f(D)=A$, takže $f(g(x))=A\in B(A,\varepsilon)$.`,
+      show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-c', 'L-D', 'R-D', 'R-A', 'R-fill', 'R-eps', 'R-psiB', 'L-psi', 'L-del', 'T-L', 'T-R'], th: ['th-end'],
+      slide: true,
+      chain: { c1: 1, c2: 1, c3: 1, a1: 1, a2: 1, mid: 'B', a1t: T`plyne z $\lim_{x\to c}g(x)=D$`, a2t: T`plyne z (S)`, title: 1, now: 'all' } }
+  ];
+
+  /* ---------- rendering of one scene ---------- */
+  var cur = -1, slideOn = false;
+  var thIds = ['th-g', 'th-f', 'th-P', 'th-S', 'th-end'];
+  var mEl = document.getElementById('m'), nEl = document.getElementById('n'), capmain = document.getElementById('capmain');
+  var c1 = document.getElementById('c1'), c2 = document.getElementById('c2'), c3 = document.getElementById('c3');
+  var a1 = document.getElementById('a1'), a2 = document.getElementById('a2');
+  var a1t = document.getElementById('a1t'), a2t = document.getElementById('a2t');
+  var stepno = document.getElementById('stepno');
+
+  function render(i, quick) {
+    var s = S[i];
+    cur = i;
+    function put() {
+      mEl.innerHTML = rich(s.m); nEl.innerHTML = s.n ? rich(s.n) : '';
+      capmain.classList.remove('sw');
+    }
+    if (quick) put(); else { capmain.classList.add('sw'); setTimeout(put, 220); }
+    for (var k in E) E[k].classList.toggle('on', s.show.indexOf(k) >= 0);
+    thIds.forEach(function (id) { document.getElementById(id).classList.toggle('hl', (s.th || []).indexOf(id) >= 0); });
+
+    var ch = s.chain || null;
+    chain.style.opacity = ch ? '1' : '0';
+    var cs = ch || { c1: 0, c2: 0, c3: 0, a1: 0, a2: 0, mid: 'P' };
+    c2.innerHTML = MID[cs.mid];
+    c1.classList.toggle('on', !!ch && !!cs.c1 || !!ch);   // all parts are visible (dim) as soon as the chain appears
+    c2.classList.toggle('on', !!ch); c3.classList.toggle('on', !!ch);
+    a1.classList.toggle('on', !!cs.a1); a2.classList.toggle('on', !!cs.a2);
+    a1t.innerHTML = cs.a1t ? rich(cs.a1t) : ''; a2t.innerHTML = cs.a2t ? rich(cs.a2t) : '';
+    // "established" pieces are fully dark; the rest is dim
+    [[c1, 'c1'], [c2, 'c2'], [c3, 'c3']].forEach(function (p) {
+      var established = ch && cs[p[1]];
+      p[0].style.opacity = !ch ? '' : (established ? '1' : '.3');
+      p[0].classList.toggle('now', ch && (cs.now === p[1] || cs.now === 'all'));
+    });
+    stepno.textContent = 'Krok ' + (i + 1) + ' z ' + S.length;
+    document.getElementById('prev').disabled = i === 0;
+    document.getElementById('next').disabled = i === S.length - 1;
+    slideOn = !!s.slide;
+    if (!slideOn) placeTrace(7.5);
+    elapsed = 0;
+  }
+
+  /* ---------- timeline: auto-advance, pausing, steps ---------- */
+  var speed = 1, paused = false, elapsed = 0, last = 0;
+  var pauseBtn = document.getElementById('pause');
+  function dwell(i) {
+    var plain = (S[i].m + S[i].n).replace(/\$[^$]*\$/g, 'xx').length;
+    return (3800 + plain * 38) / speed;
+  }
+  function frame(t) {
+    if (!last) last = t;
+    var dt = Math.min(100, t - last); last = t;
+    if (!paused) {
+      elapsed += dt;
+      if (cur < S.length - 1 && elapsed >= dwell(cur)) render(cur + 1);
+      if (slideOn) {                                        // the traced point moves to the right and back
+        var ph = (t * speed / 9000) % 2, u = ph < 1 ? ph : 2 - ph;
+        var e = u * u * (3 - 2 * u);
+        placeTrace(DEL_X + 0.3 + e * (XMAX - 0.3 - DEL_X - 0.3));
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  pauseBtn.addEventListener('click', function () { paused = !paused; pauseBtn.textContent = paused ? 'Pokračovat' : 'Pozastavit'; });
+  document.getElementById('again').addEventListener('click', function () { paused = false; pauseBtn.textContent = 'Pozastavit'; render(0, true); });
+  document.getElementById('prev').addEventListener('click', function () { if (cur > 0) render(cur - 1); });
+  document.getElementById('next').addEventListener('click', function () { if (cur < S.length - 1) render(cur + 1); });
+  [].forEach.call(document.querySelectorAll('.spd'), function (b) {
+    b.addEventListener('click', function () {
+      speed = parseFloat(b.getAttribute('data-v'));
+      [].forEach.call(document.querySelectorAll('.spd'), function (o) { o.setAttribute('aria-pressed', o === b); });
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') document.getElementById('next').click();
+    else if (e.key === 'ArrowLeft') document.getElementById('prev').click();
+    else if (e.key === ' ' && e.target === document.body) { e.preventDefault(); pauseBtn.click(); }
+  });
+
+  render(0, true);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

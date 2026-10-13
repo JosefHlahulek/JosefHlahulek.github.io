@@ -20,8 +20,6 @@
           cursor: pointer; color: var(--ink); transition: color .2s, border-color .2s; }
   .link:hover { color: var(--accent); border-color: var(--accent); }
   .link[disabled] { opacity: .35; cursor: default; border-color: var(--line); color: var(--muted); }
-  .spd { background: none; border: 0; padding: 0; font: inherit; font-size: 14px; color: var(--muted); cursor: pointer; }
-  .spd[aria-pressed="true"] { color: var(--ink); border-bottom: 1px solid var(--accent); }
   .stepno { font-family: var(--mono); font-size: 13px; color: var(--muted); }
 
   .katex { font-size: 1.06em; }
@@ -98,15 +96,10 @@
   </div>
 
   <div class="tools">
-    <button class="link" id="pause" type="button">Pozastavit</button>
     <button class="link" id="prev" type="button">← Zpět</button>
     <button class="link" id="next" type="button">Dál →</button>
     <button class="link" id="again" type="button">Znovu</button>
     <span class="stepno" id="stepno"></span>
-    <span>Rychlost:</span>
-    <button class="spd" data-v="0.7" type="button" aria-pressed="false">pomalu</button>
-    <button class="spd" data-v="1" type="button" aria-pressed="true">normálně</button>
-    <button class="spd" data-v="1.7" type="button" aria-pressed="false">rychle</button>
   </div>
 
   <div class="thm" id="thm"></div>
@@ -398,44 +391,25 @@
     document.getElementById('next').disabled = i === S.length - 1;
     slideOn = !!s.slide;
     if (!slideOn) placeTrace(7.5);
-    elapsed = 0;
   }
 
-  /* ---------- timeline: auto-advance, pausing, steps ---------- */
-  var speed = 1, paused = false, elapsed = 0, last = 0;
-  var pauseBtn = document.getElementById('pause');
-  function dwell(i) {
-    var plain = (S[i].m + S[i].n).replace(/\$[^$]*\$/g, 'xx').length;
-    return (3800 + plain * 38) / speed;
-  }
+  /* ---------- steps: the reader moves with the buttons or the arrow keys ---------- */
+  var last = 0;
   function frame(t) {
-    if (!last) last = t;
-    var dt = Math.min(100, t - last); last = t;
-    if (!paused) {
-      elapsed += dt;
-      if (cur < S.length - 1 && elapsed >= dwell(cur)) render(cur + 1);
-      if (slideOn) {                                        // the traced point moves to the right and back
-        var ph = (t * speed / 9000) % 2, u = ph < 1 ? ph : 2 - ph;
-        var e = u * u * (3 - 2 * u);
-        placeTrace(DEL_X + 0.3 + e * (XMAX - 0.3 - DEL_X - 0.3));
-      }
+    if (slideOn) {                                          // the traced point moves to the right and back (only an illustration)
+      var ph = (t / 9000) % 2, u = ph < 1 ? ph : 2 - ph;
+      var e = u * u * (3 - 2 * u);
+      placeTrace(DEL_X + 0.3 + e * (XMAX - 0.3 - DEL_X - 0.3));
     }
     requestAnimationFrame(frame);
   }
-  pauseBtn.addEventListener('click', function () { paused = !paused; pauseBtn.textContent = paused ? 'Pokračovat' : 'Pozastavit'; });
-  document.getElementById('again').addEventListener('click', function () { paused = false; pauseBtn.textContent = 'Pozastavit'; render(0, true); });
+  document.getElementById('again').addEventListener('click', function () { render(0, true); });
   document.getElementById('prev').addEventListener('click', function () { if (cur > 0) render(cur - 1); });
   document.getElementById('next').addEventListener('click', function () { if (cur < S.length - 1) render(cur + 1); });
-  [].forEach.call(document.querySelectorAll('.spd'), function (b) {
-    b.addEventListener('click', function () {
-      speed = parseFloat(b.getAttribute('data-v'));
-      [].forEach.call(document.querySelectorAll('.spd'), function (o) { o.setAttribute('aria-pressed', o === b); });
-    });
-  });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'ArrowRight') document.getElementById('next').click();
     else if (e.key === 'ArrowLeft') document.getElementById('prev').click();
-    else if (e.key === ' ' && e.target === document.body) { e.preventDefault(); pauseBtn.click(); }
+    else if (e.key === ' ' && e.target === document.body) { e.preventDefault(); document.getElementById('next').click(); }
   });
 
   render(0, true);

@@ -19,8 +19,8 @@
   .link { background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 0 0 1px; font: inherit; font-size: 14px; font-weight: 500;
           cursor: pointer; color: var(--ink); transition: color .2s, border-color .2s; }
   .link:hover { color: var(--accent); border-color: var(--accent); }
-  .spd { background: none; border: 0; padding: 0; font: inherit; font-size: 14px; color: var(--muted); cursor: pointer; }
-  .spd[aria-pressed="true"] { color: var(--ink); border-bottom: 1px solid var(--accent); }
+  .link[disabled] { opacity: .35; cursor: default; border-color: var(--line); color: var(--muted); }
+  .stepno { font-family: var(--mono); font-size: 13px; color: var(--muted); }
 
   .katex { font-size: 1.12em; }
   .assign { opacity: 0; transform: translateY(8px); transition: opacity 1.2s ease, transform 1.2s ease; margin-bottom: 8px; }
@@ -83,12 +83,10 @@
   </div>
 
   <div class="tools">
-    <button class="link" id="pause" type="button">Pozastavit</button>
+    <button class="link" id="prev" type="button">← Zpět</button>
+    <button class="link" id="next" type="button">Dál →</button>
     <button class="link" id="again" type="button">Znovu</button>
-    <span>Rychlost:</span>
-    <button class="spd" data-v="0.7" type="button" aria-pressed="false">pomalu</button>
-    <button class="spd" data-v="1" type="button" aria-pressed="true">normálně</button>
-    <button class="spd" data-v="1.7" type="button" aria-pressed="false">rychle</button>
+    <span class="stepno" id="stepno"></span>
   </div>
 
   <div class="assign" id="assign">
@@ -98,11 +96,10 @@
 
   <div id="lines"></div>
 
-  <p class="hint">Klikni na podtržená slova, vyskočí upřesnění (animace se při tom zastaví).</p>
+  <p class="hint">Klikni na podtržená slova, vyskočí upřesnění. Dál a zpět se pohybuješ tlačítky nebo šipkami na klávesnici.</p>
 </div>
 
 <div id="pop" hidden role="dialog" aria-label="Upřesnění pojmu"></div>
-<div class="badge" id="badge">Animace je pozastavena</div>
 
 <script src="../assets/katex/katex.min.js"></script>
 <script>
@@ -204,82 +201,93 @@
   }
 
   var assign = document.getElementById('assign'), ex = document.getElementById('ex'), lines = document.getElementById('lines');
-  var pop = document.getElementById('pop'), badge = document.getElementById('badge'), pauseBtn = document.getElementById('pause');
+  var pop = document.getElementById('pop');
+  var token = 0, popOpen = false, insideShown = false;
+  var goal = 0, passed = 0, waiting = null, replaying = true, curTh = null;
+  var TOTAL = 24;                                    // number of steps of the story
+  var prevBtn = document.getElementById('prev'), nextBtn = document.getElementById('next'), stepno = document.getElementById('stepno');
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var token = 0, speed = 1, manualPause = false, popOpen = false, insideShown = false;
 
-  function paused() { return manualPause || popOpen; }
-  function syncBadge() { badge.className = 'badge' + (paused() ? ' on' : ''); pauseBtn.textContent = manualPause ? 'Pokračovat' : 'Pozastavit'; }
-
-  // sleep that stops while paused and never resolves after a replay
-  function sleep(ms, my) {
-    return new Promise(function (resolve) {
-      var left = ms / speed;
-      (function tick() {
-        if (my !== token) return;
-        if (paused()) { setTimeout(tick, 80); return; }
-        if (left <= 0) { resolve(); return; }
-        left -= 40; setTimeout(tick, 40);
-      })();
-    });
+  function sync() {
+    stepno.textContent = 'Krok ' + Math.min(passed + 1, TOTAL) + ' z ' + TOTAL;
+    prevBtn.disabled = goal === 0;
+    nextBtn.disabled = !waiting;
   }
-  function frame() { return new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); }); }
+  function frame() {
+    if (replaying) return Promise.resolve();
+    return new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); });
+  }
+  function wait(ms, my) { return new Promise(function (res) { setTimeout(function () { if (my === token) res(); }, replaying ? 0 : ms); }); }
   function follow(el) {
+    if (replaying) return;
     var b = el.getBoundingClientRect();
     if (b.bottom > window.innerHeight - 90) window.scrollBy({ top: b.bottom - window.innerHeight + 140, behavior: reduce ? 'auto' : 'smooth' });
   }
   function fadeOut(d) {
     d.classList.remove('in');
+    if (replaying) { if (d.parentNode) d.parentNode.removeChild(d); return; }
     setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 1000);
+  }
+  function clearTh() { if (curTh) { fadeOut(curTh); curTh = null; } }
+
+  // the story stops here until the reader presses "Dál" (when going back, the story is replayed quickly up to the requested step)
+  function gate(my) {
+    return new Promise(function (resolve) {
+      if (my !== token) return;
+      if (passed < goal) { passed++; resolve(); return; }
+      replaying = false;
+      waiting = function () { passed++; waiting = null; resolve(); };
+      sync();
+    });
   }
 
   async function addLine(tex, my, cls, secs, popBtn) {
+    clearTh();
     var d = document.createElement('div'); d.className = 'line' + (cls ? ' ' + cls : '');
     d.innerHTML = '<span class="reveal">' + mathHTML('\\displaystyle ' + tex) + '</span>' +
       (popBtn ? '<button class="term lineterm" data-pop="' + popBtn[0] + '" type="button">' + popBtn[1] + '</button>' : '');
-    d.firstChild.style.setProperty('--dur', (secs / speed) + 's');
+    d.firstChild.style.setProperty('--dur', (replaying ? 0 : secs) + 's');
     lines.appendChild(d); follow(d);
     await frame(); if (my !== token) return;
     d.classList.add('in');
-    await sleep(secs * 1000 + 300, my);
-    d.classList.add('done');
+    var rp = replaying;
+    setTimeout(function () { d.classList.add('done'); }, rp ? 0 : secs * 1000 + 300);
   }
 
-  async function think(key, my, hold, dim, keep) {
+  async function think(key, my, dim, keep) {
+    clearTh();
     var d = document.createElement('div'); d.className = 'th' + (dim ? ' dim' : '');
     d.innerHTML = '<div><p>' + rich(TH[key]) + '</p></div>';
     lines.appendChild(d);
     await frame(); if (my !== token) return;
     d.classList.add('in'); follow(d);
-    if (keep) return;
-    await sleep(hold, my);
-    fadeOut(d);       // fades in the background so the next step can start straight away
+    if (!keep) curTh = d;
   }
 
-  // comment on the left + the same intermediate calculation for A_n and B_n on the right, written at the same time
+  // comment on the left; then the same intermediate calculation for A_n and B_n is written on the right, line by line (A_n and B_n at the same time)
   async function midBlock(my) {
+    clearTh();
     var d = document.createElement('div'); d.className = 'th mid';
     d.innerHTML = '<div><div class="midl"><p>' + rich(TH.midq) + '</p></div>' +
                   '<div class="midr"><div class="blk"></div><div class="blk"></div></div></div>';
     lines.appendChild(d);
     await frame(); if (my !== token) return;
     d.classList.add('in'); follow(d);
-    await sleep(2400, my);
+    curTh = d;
+    await gate(my); if (my !== token) return;
     var blocks = d.querySelectorAll('.blk');
     for (var i = 0; i < MID.a.length; i++) {
       var pair = [MID.a[i], MID.b[i]].map(function (tex, k) {
         var e = document.createElement('div'); e.className = 'ml';
         e.innerHTML = '<span class="reveal">' + mathHTML('\\displaystyle ' + tex) + '</span>';
-        e.firstChild.style.setProperty('--dur', (2.2 / speed) + 's');
+        e.firstChild.style.setProperty('--dur', (replaying ? 0 : 2.2) + 's');
         blocks[k].appendChild(e); return e;
       });
       follow(d);
       await frame(); if (my !== token) return;
       pair.forEach(function (e) { e.classList.add('in'); });
-      await sleep(2800, my);
+      await gate(my); if (my !== token) return;
     }
-    await sleep(7000, my);
-    fadeOut(d);
   }
 
   // "without A_n, B_n": appended below on request
@@ -288,49 +296,45 @@
     var my = token;
     var n = document.createElement('div'); n.className = 'inside-note'; n.innerHTML = '<p>' + rich(TH.note) + '</p>';
     lines.appendChild(n); follow(n);
-    for (var i = 0; i < INSIDE.length; i++) await addLine(INSIDE[i], my, 'inside', 2.8);
+    for (var i = 0; i < INSIDE.length; i++) { await addLine(INSIDE[i], my, 'inside', 2.8); await wait(3100, my); if (my !== token) return; }
   }
 
-  /* ---------- the story ---------- */
-  async function run() {
+  /* ---------- the story: every step waits for the reader ---------- */
+  async function run(target) {
     var my = ++token;
-    insideShown = false;
-    lines.innerHTML = ''; assign.classList.remove('in'); closePop();
+    goal = target || 0; passed = 0; waiting = null; replaying = true; curTh = null; insideShown = false;
+    lines.innerHTML = ''; closePop();
     ex.innerHTML = mathHTML(ASSIGN, false);
-    window.scrollTo(0, 0);
-    await sleep(500, my);
     assign.classList.add('in');
-    await sleep(2200, my);
+    window.scrollTo(0, 0);
+    sync();
 
-    await think('q',    my, 5200);
-    await think('mark', my, 5200);
-    await think('dom',  my, 6400);
-    await think('asym', my, 4600);
-    await midBlock(my);
-    await think('chk',  my, 6000);
-    await think('yes',  my, 6200);
-    await think('no',   my, 6000, true);
-    await think('form', my, 6200);
+    await think('q', my);          await gate(my); if (my !== token) return;
+    await think('mark', my);       await gate(my); if (my !== token) return;
+    await think('dom', my);        await gate(my); if (my !== token) return;
+    await think('asym', my);       await gate(my); if (my !== token) return;
+    await midBlock(my);            if (my !== token) return;
+    await think('chk', my);        await gate(my); if (my !== token) return;
+    await think('yes', my);        await gate(my); if (my !== token) return;
+    await think('no', my, true);   await gate(my); if (my !== token) return;
+    await think('form', my);       await gate(my); if (my !== token) return;
 
-    await addLine(L1, my, '', 4.2, ['subst', 'dosazení']);
-    await think('sub',  my, 5200);
-    await addLine(L2, my, '', 4.6);
-    await think('num',  my, 5200);
-    await think('den',  my, 8200);
-    await think('choice', my, 0, false, true);   // waits for the choice; "bez A_n, B_n" opens its popup instead
-    await new Promise(function (res) { contRes = res; });
-    if (my !== token) return;
-    contRes = null;
+    await addLine(L1, my, '', 3.2, ['subst', 'dosazení']);   await gate(my); if (my !== token) return;
+    await think('sub', my);        await gate(my); if (my !== token) return;
+    await addLine(L2, my, '', 3.6);                          await gate(my); if (my !== token) return;
+    await think('num', my);        await gate(my); if (my !== token) return;
+    await think('den', my);        await gate(my); if (my !== token) return;
+    await think('choice', my, false, true);                  // "Dál" = pokračovat s A_n, B_n; "bez A_n, B_n" opens its popup
+    await gate(my); if (my !== token) return;
     var ch = lines.querySelector('[data-act="cont"]'); if (ch) ch.classList.add('chosen');
-    await addLine(L3, my, '', 3.6);
-    await think('cut',  my, 4200);
-    await think('ref',  my, 6200);
-    await addLine(L4, my, '', 3.6);
-    await sleep(2500, my);
+    await addLine(L3, my, '', 3);  await gate(my); if (my !== token) return;
+    await think('cut', my);        await gate(my); if (my !== token) return;
+    await think('ref', my);        await gate(my); if (my !== token) return;
+    await addLine(L4, my, '', 3);
+    replaying = false; sync();
   }
 
   /* ---------- the clickable phrases ---------- */
-  var contRes = null;
   var ACTIONS = { inside: showInside };
 
   function openPop(btn) {
@@ -342,16 +346,16 @@
     var b = btn.getBoundingClientRect(), pw = pop.offsetWidth;
     var left = Math.max(16, Math.min(window.scrollX + b.left, window.scrollX + window.innerWidth - pw - 16));
     pop.style.left = left + 'px'; pop.style.top = (window.scrollY + b.bottom + 10) + 'px';
-    popOpen = true; syncBadge();
+    popOpen = true;
     pop.querySelector('.x').addEventListener('click', function () { closePop(); });
     var go = pop.querySelector('.do');
     if (go) go.addEventListener('click', function () { closePop(); ACTIONS[P.action[0]](); });
   }
-  function closePop() { pop.hidden = true; popOpen = false; syncBadge(); }
+  function closePop() { pop.hidden = true; popOpen = false; }
 
   document.addEventListener('click', function (e) {
     var c = e.target.closest ? e.target.closest('[data-act="cont"]') : null;
-    if (c) { e.preventDefault(); if (popOpen) closePop(); if (contRes) contRes(); return; }
+    if (c) { e.preventDefault(); if (popOpen) closePop(); stepNext(); return; }
     var t = e.target.closest ? e.target.closest('.term') : null;
     if (t) { e.preventDefault(); if (popOpen) closePop(); else openPop(t); return; }
     if (popOpen && !pop.contains(e.target)) closePop();
@@ -359,17 +363,18 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && popOpen) closePop(); });
 
   /* ---------- controls ---------- */
-  pauseBtn.addEventListener('click', function () { manualPause = !manualPause; syncBadge(); });
-  document.getElementById('again').addEventListener('click', function () { manualPause = false; syncBadge(); run(); });
-  [].forEach.call(document.querySelectorAll('.spd'), function (b) {
-    b.addEventListener('click', function () {
-      speed = parseFloat(b.getAttribute('data-v'));
-      [].forEach.call(document.querySelectorAll('.spd'), function (o) { o.setAttribute('aria-pressed', o === b); });
-    });
+  function stepNext() { if (waiting) { goal++; waiting(); sync(); } }
+  function stepBack() { if (goal > 0) run(goal - 1); }
+  nextBtn.addEventListener('click', stepNext);
+  prevBtn.addEventListener('click', stepBack);
+  document.getElementById('again').addEventListener('click', function () { run(0); });
+  document.addEventListener('keydown', function (e) {
+    if (popOpen) return;
+    if (e.key === 'ArrowRight' || (e.key === ' ' && e.target === document.body)) { e.preventDefault(); stepNext(); }
+    else if (e.key === 'ArrowLeft') stepBack();
   });
 
-  syncBadge();
-  run();
+  run(0);
 })();
 </script>
 </body>

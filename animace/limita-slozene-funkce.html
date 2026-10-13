@@ -55,6 +55,7 @@
   svg .tN { fill: var(--ink); font-weight: 500; }
   svg .hole { fill: var(--bg); stroke: var(--accent); stroke-width: 1.8; }
   svg .fillp { fill: var(--accent); }
+  svg .rng { stroke: var(--accent); stroke-width: 5; stroke-linecap: round; opacity: .55; fill: none; }
   svg .dot { fill: var(--accent); }
   svg .halo { fill: rgba(11,110,138,.16); stroke: rgba(11,110,138,.35); stroke-width: 1; }
   svg .trk { stroke: var(--accent); stroke-width: 1.3; stroke-dasharray: 3 3; fill: none; }
@@ -244,6 +245,19 @@
   g_ = grp(svgR, 'R-fill');
   mk('circle', { cx: XR(D), cy: Z(A), r: 4.6, 'class': 'fillp' }, g_);
 
+  /* the values of g(x) are the inputs of f: range of g on the left axis, the same numbers on the right axis (domain of f) */
+  var GX = [0.9, 1.2, 1.6, 2.2, 3, 4.5, 7, 13.4], GMAX = g(0.9);
+  g_ = grp(svgL, 'L-proj');
+  GX.forEach(function (x) { line(g_, X(x), Y(g(x)), PL, Y(g(x)), 'dash'); mk('circle', { cx: X(x), cy: Y(g(x)), r: 3, 'class': 'dot' }, g_); });
+  g_ = grp(svgL, 'L-range');
+  line(g_, PL, Y(GMAX), PL, Y(D), 'rng');
+  var lt = text(g_, PL - 34, Y(1.55), 'obor hodnot g', 'tT', 'middle'); lt.setAttribute('transform', 'rotate(-90 ' + (PL - 34) + ' ' + Y(1.55) + ')');
+  g_ = grp(svgR, 'R-proj');
+  GX.forEach(function (x) { var y = g(x); line(g_, XR(y), PB, XR(y), Z(f(y)), 'dash'); mk('circle', { cx: XR(y), cy: Z(f(y)), r: 3, 'class': 'dot' }, g_); });
+  g_ = grp(svgR, 'R-dom');
+  line(g_, XR(D), PB, XR(GMAX), PB, 'rng');
+  text(g_, XR(1.72), PB + 32, 'g(x): definiční obor pro f', 'tT', 'middle');
+
   /* the traced point: x -> g(x) -> f(g(x)) */
   var tL = grp(svgL, 'T-L'), tR = grp(svgR, 'T-R');
   var tvl = line(tL, 0, 0, 0, 0, 'trk'), thl = line(tL, 0, 0, 0, 0, 'trk'), tdl = mk('circle', { r: 4.2, 'class': 'dot' }, tL), txl = text(tL, 0, 0, 'x', 'tT', 'middle');
@@ -301,6 +315,14 @@
       n: T`Svislá osa vlevo a vodorovná osa vpravo jsou „stejná“ osa: číslo $y=g(x)$ z levého obrázku se vpravo stává argumentem funkce $f$.`,
       show: ['L-axes', 'R-axes', 'L-curve', 'R-curve'], th: [] },
 
+    { m: T`Svislá osa vlevo ukazuje hodnoty $y=g(x)$. Tlustý úsek na ní je obor hodnot funkce $g$: čísla, kterých $g$ nabývá.`,
+      n: T`Každý bod grafu $g$ se přenese vodorovně na svislou osu.`,
+      show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-proj', 'L-range'], th: [] },
+
+    { m: T`Tatáž čísla $y=g(x)$ vpravo vstupují do funkce $f$. Leží na vodorovné ose, tedy v definičním oboru $f$, a $f$ je převede na hodnoty $f(g(x))$ nahoře.`,
+      n: T`Zobrazení tedy jde zleva doprava: $x\to g(x)\to f(g(x))$. Číslo $g(x)$ je výstup $g$ a zároveň vstup $f$.`,
+      show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-range', 'R-proj', 'R-dom'], th: [] },
+
     { m: T`Zajímá nás $x\to c$, tady $c=+\infty$. Bod $c$ leží na vodorovné ose levého grafu, úplně vpravo.`,
       n: '', show: ['L-axes', 'R-axes', 'L-curve', 'R-curve', 'L-c'], th: [] },
 
@@ -357,6 +379,10 @@
       slide: true,
       chain: { c1: 1, c2: 1, c3: 1, a1: 1, a2: 1, mid: 'B', a1t: T`plyne z $\lim_{x\to c}g(x)=D$`, a2t: T`plyne z (S)`, title: 1, now: 'all' } }
   ];
+
+  S.forEach(function (sc, i) {                       // after the explanation the two segments stay on the axes as a reminder
+    if (i >= 4) { sc.show.push('L-range'); sc.show.push('R-dom'); }
+  });
 
   /* ---------- rendering of one scene ---------- */
   var cur = -1, slideOn = false;

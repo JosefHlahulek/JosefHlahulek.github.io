@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Binomická věta v limitách · Josef Hlahulek</title>
+<meta name="description" content="Animace řešení limity pomocí binomické věty: rozvoj závorek, zbytkové členy a Heineho věta.">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  body { padding-bottom: 80px; }
+  .top { display: flex; justify-content: space-between; align-items: center; height: 76px; font-size: 14px; color: var(--muted); }
+  .top a:hover { color: var(--ink); }
+  .tools { display: flex; gap: 8px 24px; flex-wrap: wrap; align-items: baseline; font-size: 14px; color: var(--muted); margin: 0 0 22px; }
+  .link { background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 0 0 1px; font: inherit; font-size: 14px; font-weight: 500;
+          cursor: pointer; color: var(--ink); transition: color .2s, border-color .2s; }
+  .link:hover { color: var(--accent); border-color: var(--accent); }
+  .link[disabled] { opacity: .35; cursor: default; border-color: var(--line); color: var(--muted); }
+  .stepno { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+  h1.t { font-family: var(--serif); font-weight: 400; font-size: clamp(24px, 3vw, 32px); margin: 0 0 18px; }
+  .katex { font-size: 1.12em; }
+
+  .board { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 20px 0; min-height: 21em; }
+  .ln { margin: 0 0 14px; overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+  .ln.new { animation: fin .6s ease both; }
+  .ln .katex-display { margin: 0; text-align: left; }
+  .chk { display: flex; gap: 14px; align-items: baseline; margin: 0 0 10px; }
+  .chk .ok { color: var(--accent); font-weight: 600; min-width: 1.2em; }
+  .chk .tx { font-family: var(--serif); font-size: clamp(17px, 2vw, 20px); color: var(--ink); }
+  .thm { font-family: var(--serif); font-size: clamp(16px, 1.9vw, 19px); line-height: 1.55; color: var(--muted); max-width: 84ch; margin: 0 0 16px; padding-left: 16px; border-left: 2px solid var(--line); }
+  .thm .katex { font-size: 1em; }
+  .thm b { font-weight: 500; color: var(--ink); }
+  .cap { font-family: var(--serif); font-size: clamp(19px, 2.4vw, 23px); line-height: 1.5; color: var(--ink); max-width: 80ch; padding-top: 18px; min-height: 3.2em; transition: opacity .25s ease; }
+  .cap.sw { opacity: 0; }
+  @keyframes fin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .ln.new { animation: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href="../cviceni.html">← Cvičení z analýzy</a>
+    <a href="../index.html">Josef Hlahulek</a>
+  </div>
+
+  <h1 class="t">Příklad 79: limita s binomickou větou</h1>
+
+  <div class="tools">
+    <button class="link" id="prev" type="button">← Zpět</button>
+    <button class="link" id="next" type="button">Dál →</button>
+    <button class="link" id="again" type="button">Znovu</button>
+    <span class="stepno" id="stepno"></span>
+  </div>
+
+  <div class="board" id="board"></div>
+  <div class="cap" id="cap"></div>
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script>
+(function () {
+  var T = String.raw;
+  var C1 = '#0b6e8a', C2 = '#b5651d', C3 = '#7a4e8a', C4 = '#3d7a52';
+  function col(c, s) { return '\\textcolor{' + c + '}{' + s + '}'; }
+  function D(s) { return { d: true, t: s }; }          // display formula line
+  function H(s) { return { d: false, t: s }; }          // html line (with inline $..$)
+
+  /* --- the four brackets, each with its own colour --- */
+  var a1 = col(C1, T`(1+\tfrac1n)^{120}`), a2 = col(C2, T`(1+\tfrac2n)^{80}`),
+      a3 = col(C3, T`(1-\tfrac1n)^{100}`), a4 = col(C4, T`(1+\tfrac3n)^{100}`);
+
+  var L = {
+    lim: D(T`\lim_{n\to\infty}\dfrac{${a1}-${a2}}{${a3}+${a4}-2}`),
+
+    bin0: D(T`(1+x)^m=\binom m0+\binom m1\,x+\binom m2\,x^2+\dots+\binom mm\,x^m`),
+    bin1: D(T`(1+x)^m=\textcolor{${C1}}{\binom m0}+\binom m1\,x+\binom m2\,x^2+\dots+\binom mm\,x^m`),
+    bin2: D(T`(1+x)^m=\binom m0+\textcolor{${C1}}{\binom m1\,x}+\binom m2\,x^2+\dots+\binom mm\,x^m`),
+    bin3: D(T`(1+x)^m=\binom m0+\binom m1\,x+\textcolor{${C1}}{\binom m2\,x^2+\dots+\binom mm\,x^m}`),
+
+    s1: D(T`${col(C1, T`(1+\tfrac1n)^{120}`)}=\underbrace{\tbinom{120}{0}}_{1}+\dots`),
+    s2: D(T`${col(C1, T`(1+\tfrac1n)^{120}`)}=1+\underbrace{\tbinom{120}{1}\tfrac1n}_{120/n}+\dots`),
+    s3: D(T`${col(C1, T`(1+\tfrac1n)^{120}`)}=1+\tfrac{120}{n}+\underbrace{\tbinom{120}{2}\tfrac1{n^2}+\tbinom{120}{3}\tfrac1{n^3}+\dots}_{Z_n}`),
+
+    r1: D(col(C1, T`(1+\tfrac1n)^{120}=1+\tfrac{120}{n}+Z_n`)),
+    r2: D(col(C2, T`(1+\tfrac2n)^{80}=1+\tfrac{160}{n}+Y_n`)),
+    r3: D(col(C3, T`(1-\tfrac1n)^{100}=1-\tfrac{100}{n}+G_n`)),
+    r4: D(col(C4, T`(1+\tfrac3n)^{100}=1+\tfrac{300}{n}+H_n`)),
+
+    sub: D(T`\lim_{n\to\infty}\dfrac{${col(C1, T`\bigl(1+\tfrac{120}{n}+Z_n\bigr)`)}-${col(C2, T`\bigl(1+\tfrac{160}{n}+Y_n\bigr)`)}}{${col(C3, T`\bigl(1-\tfrac{100}{n}+G_n\bigr)`)}+${col(C4, T`\bigl(1+\tfrac{300}{n}+H_n\bigr)`)}-2}`),
+    canc: D(T`\lim_{n\to\infty}\dfrac{${col(C1, T`\cancel{1}+\tfrac{120}{n}+Z_n`)}${col(C2, T`-\cancel{1}-\tfrac{160}{n}-Y_n`)}}{${col(C3, T`\cancel{1}-\tfrac{100}{n}+G_n`)}${col(C4, T`+\cancel{1}+\tfrac{300}{n}+H_n`)}-\cancel{2}}`),
+    simp: D(T`\lim_{n\to\infty}\dfrac{-\frac{40}{n}+Z_n-Y_n}{\frac{200}{n}+G_n+H_n}`),
+    fac: D(T`\lim_{n\to\infty}\dfrac{\frac1n\bigl(-40+nZ_n-nY_n\bigr)}{\frac1n\bigl(200+nG_n+nH_n\bigr)}=\lim_{n\to\infty}\dfrac{-40+nZ_n-nY_n}{200+nG_n+nH_n}`),
+
+    heine: H('<div class="thm"><b>Heineho věta.</b> Je-li $\\lim_{y\\to0^+}F(y)=L$ a $y_n\\to0$, $y_n\\in D(F)$, $y_n>0$, pak $F(y_n)\\to L$. Zde $y_n=\\tfrac1n$ a $F(y)=\\dfrac{(1+y)^{120}-(1+2y)^{80}}{(1-y)^{100}+(1+3y)^{100}-2}$.</div>'),
+    c1: H('<div class="chk"><span class="ok">✓</span><span class="tx">$y_n=\\tfrac1n\\to0$</span></div>'),
+    c2: H('<div class="chk"><span class="ok">✓</span><span class="tx">$y_n>0$, tedy $y_n\\ne0$</span></div>'),
+    c3: H('<div class="chk"><span class="ok">✓</span><span class="tx">$F$ je definována na $(0,\\delta)$: jmenovatel $=200\\,y+y^2q(y)=y\\,\\bigl(200+y\\,q(y)\\bigr)\\ne0$ pro malé $y>0$</span></div>'),
+
+    poly: D(T`${col(C1, T`Z(y)=\tbinom{120}{2}y^2+\dots+y^{120}=y^2\,p_1(y)`)}\qquad ${col(C2, T`Y(y)=y^2\,p_2(y)`)}\qquad ${col(C3, T`G(y)=y^2\,p_3(y)`)}\qquad ${col(C4, T`H(y)=y^2\,p_4(y)`)}`),
+    F: D(T`F(y)=\dfrac{-40\,y+y^2p_1(y)-y^2p_2(y)}{200\,y+y^2p_3(y)+y^2p_4(y)}=\dfrac{-40+y\,\bigl(p_1-p_2\bigr)(y)}{200+y\,\bigl(p_3+p_4\bigr)(y)}`),
+    res: D(T`\lim_{y\to0^+}F(y)\overset{\mathrm{AL}}{=}\dfrac{-40+0}{200+0}=-\dfrac15`),
+    fin: D(T`\lim_{n\to\infty}\dfrac{\bigl(1+\frac1n\bigr)^{120}-\bigl(1+\frac2n\bigr)^{80}}{\bigl(1-\frac1n\bigr)^{100}+\bigl(1+\frac3n\bigr)^{100}-2}=-\dfrac15`)
+  };
+
+  var S = [
+    { cap: 'Čitatel i jmenovatel jdou k 0, aritmetiku limit nelze použít přímo.', show: ['lim'] },
+    { cap: 'Každou závorku rozvineme podle binomické věty, $x=\\tfrac1n$.', show: ['lim', 'bin0'] },
+    { cap: '$k=0$: první člen je vždy 1.', show: ['bin1', 's1'] },
+    { cap: '$k=1$: dostaneme $m\\,x$, tady $120\\cdot\\tfrac1n$.', show: ['bin2', 's2'] },
+    { cap: 'Od $k=2$ je všechno v $\\tfrac1{n^2},\\tfrac1{n^3},\\dots$ Tomu říkáme zbytek $Z_n$.', show: ['bin3', 's3'] },
+    { cap: 'Stejně rozvineme i ostatní závorky.', show: ['r1', 'r2', 'r3', 'r4'] },
+    { cap: 'Dosadíme do limity.', show: ['sub'] },
+    { cap: 'Jedničky a dvojka se odečtou.', show: ['canc'] },
+    { cap: 'Zůstal dominantní člen $\\tfrac1n$ a zbytky.', show: ['simp'] },
+    { cap: 'Vytkneme $\\tfrac1n$ a zkrátíme.', show: ['fac'] },
+    { cap: 'Zbývá ukázat, že $nZ_n,\\ nY_n,\\ nG_n,\\ nH_n\\to0$. Použijeme substituci $y=\\tfrac1n$.', show: ['fac', 'heine'] },
+    { cap: 'Nejdřív ověříme předpoklady Heineho věty.', show: ['heine', 'c1'] },
+    { cap: 'Druhý předpoklad.', show: ['heine', 'c1', 'c2'] },
+    { cap: 'Třetí předpoklad: $F$ musí být definována na prstencovém okolí 0.', show: ['heine', 'c1', 'c2', 'c3'] },
+    { cap: 'Limita se změnila na $y\\to0^+$. Zbytky jsou polynomy s nejnižší mocninou $y^2$.', show: ['poly'] },
+    { cap: 'Vytkneme $y$ a zkrátíme.', show: ['poly', 'F'] },
+    { cap: 'Polynom je spojitý v 0, takže $y\\,p(y)\\to0\\cdot p(0)=0$. Použijeme AL.', show: ['res'] },
+    { cap: 'Podle Heineho věty je limita posloupnosti stejná. Příklad 85 se řeší stejně.', show: ['fin'] }
+  ];
+
+  var board = document.getElementById('board'), cap = document.getElementById('cap'), stepno = document.getElementById('stepno');
+  var nodes = {}, cur = -1;
+  function rich(s) {
+    return s.replace(/\$([^$]+)\$/g, function (_, m) { try { return katex.renderToString(m, { throwOnError: false }); } catch (e) { return m; } });
+  }
+  function build(k) {
+    var l = L[k], el = document.createElement('div');
+    el.className = 'ln';
+    if (l.d) el.innerHTML = katex.renderToString(l.t, { displayMode: true, throwOnError: false, trust: false });
+    else el.innerHTML = rich(l.t);
+    return el;
+  }
+  function render(i, quick) {
+    var s = S[i], prev = cur >= 0 ? S[cur].show : [];
+    cur = i;
+    board.innerHTML = '';
+    s.show.forEach(function (k) {
+      var el = build(k);
+      if (!quick && prev.indexOf(k) < 0) el.classList.add('new');
+      board.appendChild(el);
+    });
+    function put() { cap.innerHTML = rich(s.cap); cap.classList.remove('sw'); }
+    if (quick) put(); else { cap.classList.add('sw'); setTimeout(put, 200); }
+    stepno.textContent = 'Krok ' + (i + 1) + ' z ' + S.length;
+    document.getElementById('prev').disabled = i === 0;
+    document.getElementById('next').disabled = i === S.length - 1;
+  }
+  document.getElementById('again').addEventListener('click', function () { render(0, true); });
+  document.getElementById('prev').addEventListener('click', function () { if (cur > 0) render(cur - 1, true); });
+  document.getElementById('next').addEventListener('click', function () { if (cur < S.length - 1) render(cur + 1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') document.getElementById('next').click();
+    else if (e.key === 'ArrowLeft') document.getElementById('prev').click();
+    else if (e.key === ' ' && e.target === document.body) { e.preventDefault(); document.getElementById('next').click(); }
+  });
+  render(0, true);
+})();
+</script>
+</body>
+</html>

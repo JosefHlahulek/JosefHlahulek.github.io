@@ -36,6 +36,10 @@
   .thm b { font-weight: 500; color: var(--ink); }
   .cap { font-family: var(--serif); font-size: clamp(19px, 2.4vw, 23px); line-height: 1.5; color: var(--ink); max-width: 80ch; padding-top: 18px; min-height: 3.2em; transition: opacity .25s ease; }
   .cap.sw { opacity: 0; }
+  .more { margin-top: 10px; }
+  .moreBox { margin-top: 14px; padding-left: 16px; border-left: 2px solid var(--accent); font-family: var(--serif); font-size: clamp(17px, 2vw, 20px); line-height: 1.55; color: var(--ink); max-width: 80ch; }
+  .moreBox p { margin: 0 0 8px; }
+  .moreBox .katex { font-size: 1.04em; }
   @keyframes fin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) { .ln.new { animation: none; } }
 </style>
@@ -58,6 +62,10 @@
 
   <div class="board" id="board"></div>
   <div class="cap" id="cap"></div>
+  <div class="more" id="more" hidden>
+    <button class="link" id="moreBtn" type="button" aria-expanded="false">Co je p(y)?</button>
+    <div class="moreBox" id="moreBox" hidden></div>
+  </div>
 </div>
 
 <script src="../assets/katex/katex.min.js"></script>
@@ -150,10 +158,22 @@
     });
     function put() { cap.innerHTML = rich(s.cap); cap.classList.remove('sw'); }
     if (quick) put(); else { cap.classList.add('sw'); setTimeout(put, 200); }
+    more.hidden = i < 14; if (i < 14) { moreBox.hidden = true; moreBtn.setAttribute('aria-expanded', false); }
     stepno.textContent = 'Krok ' + (i + 1) + ' z ' + S.length;
     document.getElementById('prev').disabled = i === 0;
     document.getElementById('next').disabled = i === S.length - 1;
   }
+  var MORE = [
+    'Zbytek po rozvoji první závorky je $Z(y)=\\binom{120}{2}y^2+\\binom{120}{3}y^3+\\dots+y^{120}$.',
+    'Každý jeho člen obsahuje alespoň $y^2$, takže $y^2$ vytkneme: $Z(y)=y^2\\Bigl(\\tbinom{120}{2}+\\tbinom{120}{3}\\,y+\\dots+y^{118}\\Bigr)=y^2\\,p_1(y)$.',
+    '$p_1(y)$ je jen název pro závorku, tedy polynom. Polynom je spojitý v 0, takže $p_1(0)=\\binom{120}{2}$ je konečné číslo a $y\\,p_1(y)\\to0\\cdot p_1(0)=0$.',
+    'Stejně vznikají $p_2,p_3,p_4$ ze zbytků ostatních závorek.'
+  ];
+  var more = document.getElementById('more'), moreBtn = document.getElementById('moreBtn'), moreBox = document.getElementById('moreBox');
+  moreBox.innerHTML = MORE.map(function (t) { return '<p>' + rich(t) + '</p>'; }).join('');
+  moreBtn.addEventListener('click', function () {
+    var open = moreBox.hidden; moreBox.hidden = !open; moreBtn.setAttribute('aria-expanded', open);
+  });
   document.getElementById('again').addEventListener('click', function () { render(0, true); });
   document.getElementById('prev').addEventListener('click', function () { if (cur > 0) render(cur - 1, true); });
   document.getElementById('next').addEventListener('click', function () { if (cur < S.length - 1) render(cur + 1); });

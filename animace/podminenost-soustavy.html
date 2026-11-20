@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Podmíněnost soustavy Ax = b · Josef Hlahulek</title>
+<meta name="description" content="Úloha Ax = b, podmíněnost a číslo podmíněnosti matice.">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  nav ul a.cur { color: var(--ink); }
+  body { padding-bottom: 80px; }
+  .top { display: flex; justify-content: space-between; align-items: center; height: 76px; font-size: 14px; color: var(--muted); }
+  .top a:hover { color: var(--ink); }
+  .katex { font-size: 1.06em; }
+
+  .setup { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 22px; margin: 0 0 14px; font-family: var(--serif); font-size: 26px; color: var(--ink); }
+  .mat { display: grid; gap: 6px 8px; padding: 4px 12px; border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); border-radius: 3px; }
+  .mat.two { grid-template-columns: repeat(2, auto); }
+  .mat.one { grid-template-columns: auto; }
+  .mat input { width: 64px; padding: 6px 4px; text-align: center; font: 500 18px var(--mono); color: var(--ink); background: transparent;
+               border: 0; border-bottom: 1px solid var(--line); border-radius: 0; outline: none; transition: border-color .2s, color .2s; }
+  .mat input:focus { border-color: var(--accent); }
+  .mat input.bad { color: #a33; border-color: #a33; }
+  .mat .x { font-family: var(--serif); font-size: 24px; text-align: center; min-width: 64px; padding: 6px 4px; }
+  .mat input, .mat .x { height: 40px; box-sizing: border-box; line-height: 26px; }
+  .op { color: var(--muted); }
+
+  .presets { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; font-size: 14px; color: var(--muted); margin: 0 0 22px; }
+  .link { background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 0 0 1px; font: inherit; font-size: 14px; font-weight: 500;
+          cursor: pointer; color: var(--ink); transition: color .2s, border-color .2s; }
+  .link:hover { color: var(--accent); border-color: var(--accent); }
+
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; border-top: 1px solid var(--line); padding: 18px 0 8px; }
+  .panel h2 { font-family: var(--serif); font-weight: 500; font-size: 22px; margin: 0 0 4px; color: var(--ink); }
+  .panel p.sub { margin: 0 0 8px; color: var(--muted); font-size: 14.5px; max-width: 46ch; }
+  .panel svg { display: block; width: 100%; height: auto; max-width: 520px; touch-action: none; }
+  .ctl { display: flex; align-items: center; gap: 14px; margin: 8px 0 0; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
+  .ctl input[type=range] { flex: 1; min-width: 140px; max-width: 280px; accent-color: var(--accent); }
+  .ctl .val { font-family: var(--mono); font-size: 13px; color: var(--ink); min-width: 3.4em; }
+
+  svg text { font-family: var(--sans); font-size: 12px; fill: var(--muted); }
+  svg .lab { fill: var(--ink); font-size: 14px; font-weight: 500; }
+  svg .labT { fill: var(--accent); font-size: 14px; font-weight: 500; }
+
+  .notes { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 20px; font-family: var(--serif); font-size: clamp(18px, 2.2vw, 21px); line-height: 1.55; color: var(--ink); max-width: 78ch; }
+  .notes p { margin: 0 0 12px; }
+  .notes .eq { margin: 6px 0 14px; overflow-x: auto; }
+  .notes .warn { color: var(--accent); }
+
+  .read { display: flex; flex-wrap: wrap; gap: 6px 28px; font-size: 15px; color: var(--muted); margin: 6px 0 0; }
+  .read b { font-family: var(--mono); font-weight: 500; color: var(--ink); }
+  .notes h3 { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 0 0 8px; }
+  .notes .blk { margin-bottom: 26px; }
+  @media (max-width: 860px) { .panels { grid-template-columns: 1fr; } .setup { font-size: 22px; } .mat input { width: 56px; } }
+</style>
+</head>
+<body>
+<div class="wrap la">
+  <div class="top">
+    <a href="../numericka-matematika.html">← Numerická matematika</a>
+    <a href="../index.html">Josef Hlahulek</a>
+  </div>
+  <h1 class="sm" style="margin:6px 0 26px;max-width:none">Podmíněnost soustavy <em>Ax = b</em></h1>
+
+  <div class="notes" style="border-top:0;padding-top:0;margin-top:0">
+    <div class="blk">
+      <h3>Úloha</h3>
+      <p>Pro regulární matici $A\in\mathbb R^{n\times n}$ a vektor $b\in\mathbb R^{n}$ najít $x$ tak, aby $Ax=b$.</p>
+      <p><b>Data:</b> $A$, $b$. <b>Řešení:</b> $x=A^{-1}b$.</p>
+    </div>
+    <div class="blk">
+      <h3>Podmíněnost</h3>
+      <p>Úloha je zobrazení dat na řešení. Podmíněnost říká, jak moc se změní řešení při malé změně dat. Relativní číslo podmíněnosti je
+      $$\kappa=\sup\frac{\|\delta x\|/\|x\|}{\|\delta b\|/\|b\|},$$
+      kde $\delta b$ je malá změna dat a $\delta x$ je jí způsobená změna řešení.</p>
+      <p><b>Pro $Ax=b$</b> (data $b$): z $A(x+\delta x)=b+\delta b$ plyne $\delta x=A^{-1}\delta b$, tedy $\|\delta x\|\le\|A^{-1}\|\,\|\delta b\|$. Z $b=Ax$ plyne $\|b\|\le\|A\|\,\|x\|$. Dohromady
+      $$\frac{\|\delta x\|}{\|x\|}\le\|A\|\,\|A^{-1}\|\,\frac{\|\delta b\|}{\|b\|},\qquad \kappa(A)=\|A\|\,\|A^{-1}\|.$$
+      Odhad je ostrý. V 2-normě je $\kappa(A)=\sigma_{\max}/\sigma_{\min}$ (největší a nejmenší singulární číslo).</p>
+    </div>
+  </div>
+
+    <div class="setup">
+      <div class="mat two" id="matA">
+        <input id="a11" value="1" inputmode="decimal" aria-label="a11">
+        <input id="a12" value="1" inputmode="decimal" aria-label="a12">
+        <input id="a21" value="1" inputmode="decimal" aria-label="a21">
+        <input id="a22" value="1.1" inputmode="decimal" aria-label="a22">
+      </div>
+      <div class="mat one">
+        <div class="x">x₁</div>
+        <div class="x">x₂</div>
+      </div>
+      <span class="op">=</span>
+      <div class="mat one">
+        <input id="b1" value="2" inputmode="decimal" aria-label="b1">
+        <input id="b2" value="2.1" inputmode="decimal" aria-label="b2">
+      </div>
+    </div>
+
+    <div class="presets">
+      <button class="link" type="button" data-p="1,1,1,1.1,2,2.1">Špatně podmíněná</button>
+      <button class="link" type="button" data-p="2,0,0,1,2,1">Dobře podmíněná</button>
+      <button class="link" type="button" data-p="1,0,0,1,1,2">Jednotková</button>
+      <button class="link" type="button" data-p="1,2,2,4,3,6">Singulární</button>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <h2>Data</h2>
+        <p class="sub">Vektor b a jeho změna δb.</p>
+        <svg id="svgL" viewBox="0 0 440 440" role="img" aria-label="Prostor dat"></svg>
+      </div>
+      <div class="panel">
+        <h2>Řešení</h2>
+        <p class="sub">Vektor x a změna δx = A⁻¹δb.</p>
+        <svg id="svgR" viewBox="0 0 440 440" role="img" aria-label="Prostor řešení"></svg>
+      </div>
+    </div>
+    <div class="ctl"><span>Směr δb</span><input id="phi" type="range" min="0" max="360" step="1" value="40" aria-label="Směr změny dat"><span class="val" id="phiV">40°</span>
+      <span>Velikost ‖δb‖/‖b‖</span><input id="eps" type="range" min="1" max="20" step="1" value="5" aria-label="Velikost změny dat"><span class="val" id="epsV">5 %</span></div>
+    <div class="read" id="read"></div>
+
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script src="../assets/site.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var TEAL = '#0b6e8a', INK = '#0d1b2a', LINE = '#d9d7ce', MUTED = '#6b7782';
+  var ids = ['a11', 'a12', 'a21', 'a22', 'b1', 'b2'];
+
+  function parse(s) {
+    s = String(s).replace(/\s+/g, '').replace(/−/g, '-').replace(',', '.');
+    if (s === '' || !/^[-+]?(\d+\.?\d*|\.\d+)$/.test(s)) return NaN;
+    return parseFloat(s);
+  }
+  function fmt(v) { if (!isFinite(v)) return '∞'; var a = Math.abs(v); return (a >= 1000 ? v.toExponential(2) : String(Math.round(v * 1000) / 1000)).replace('.', ','); }
+  function svgEl(n, at) { var e = document.createElementNS('http://www.w3.org/2000/svg', n); for (var k in at) e.setAttribute(k, at[k]); return e; }
+
+  function frame(svg, pts) {
+    var xs = [0], ys = [0];
+    pts.forEach(function (p) { xs.push(p[0]); ys.push(p[1]); });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+    var w = Math.max(x1 - x0, 1e-9), h = Math.max(y1 - y0, 1e-9), m = 56, s = Math.min((440 - 2 * m) / w, (440 - 2 * m) / h);
+    var ox = (440 - s * w) / 2 - s * x0, oy = (440 + s * h) / 2 + s * y0;
+    return { s: s, P: function (p) { return [ox + s * p[0], oy - s * p[1]]; } };
+  }
+  function axes(svg, F) {
+    var o = F.P([0, 0]);
+    svg.appendChild(svgEl('line', { x1: 0, y1: o[1], x2: 440, y2: o[1], stroke: LINE, 'stroke-width': 1 }));
+    svg.appendChild(svgEl('line', { x1: o[0], y1: 0, x2: o[0], y2: 440, stroke: LINE, 'stroke-width': 1 }));
+  }
+  function dot(svg, q, col, r) { svg.appendChild(svgEl('circle', { cx: q[0], cy: q[1], r: r, fill: col })); }
+  function txt(svg, q, t, cls) { var right = q[0] > 300, e = svgEl('text', { x: q[0] + (right ? -8 : 8), y: q[1] - 8, 'class': cls || 'lab', 'text-anchor': right ? 'end' : 'start' }); e.textContent = t; svg.appendChild(e); }
+  function poly(svg, F, pts, col, w) {
+    var d = pts.map(function (p, i) { var q = F.P(p); return (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1); }).join('') + 'Z';
+    svg.appendChild(svgEl('path', { d: d, fill: 'none', stroke: col, 'stroke-width': w || 1.4 }));
+  }
+  function seg(svg, F, a, b, col, w) {
+    var p = F.P(a), q = F.P(b);
+    svg.appendChild(svgEl('line', { x1: p[0], y1: p[1], x2: q[0], y2: q[1], stroke: col, 'stroke-width': w || 2 }));
+  }
+
+  function draw() {
+    var v = ids.map(function (i) { return parse($(i).value); });
+    ids.forEach(function (i, k) { $(i).classList.toggle('bad', isNaN(v[k])); });
+    var L = $('svgL'), R = $('svgR'); L.innerHTML = ''; R.innerHTML = '';
+    var phi = +$('phi').value, eps = +$('eps').value / 100;
+    $('phiV').textContent = phi + '°'; $('epsV').textContent = $('eps').value + ' %';
+    if (v.some(isNaN)) { $('read').innerHTML = 'Zadejte čísla.'; return; }
+    var a = v[0], b = v[1], c = v[2], d = v[3], b1 = v[4], b2 = v[5];
+    var det = a * d - b * c;
+    var nb = Math.hypot(b1, b2);
+    var sc = Math.max(Math.abs(a), Math.abs(b), Math.abs(c), Math.abs(d), 1e-12);
+    if (Math.abs(det) < 1e-12 * sc * sc) { $('read').innerHTML = 'Matice A je singulární: úloha nemá jednoznačné řešení, κ(A) = ∞.'; return; }
+    if (nb === 0) { $('read').innerHTML = 'Pro b = 0 je x = 0, relativní změna není definována.'; return; }
+    var Ai = [[d / det, -b / det], [-c / det, a / det]];
+    var x = [Ai[0][0] * b1 + Ai[0][1] * b2, Ai[1][0] * b1 + Ai[1][1] * b2];
+    var t = phi * Math.PI / 180, db = [eps * nb * Math.cos(t), eps * nb * Math.sin(t)];
+    var dx = [Ai[0][0] * db[0] + Ai[0][1] * db[1], Ai[1][0] * db[0] + Ai[1][1] * db[1]];
+    var circ = [], ell = [], N = 120, k;
+    for (k = 0; k < N; k++) {
+      var u = 2 * Math.PI * k / N, e = [eps * nb * Math.cos(u), eps * nb * Math.sin(u)];
+      circ.push([b1 + e[0], b2 + e[1]]);
+      ell.push([x[0] + Ai[0][0] * e[0] + Ai[0][1] * e[1], x[1] + Ai[1][0] * e[0] + Ai[1][1] * e[1]]);
+    }
+    var FL = frame(L, circ.concat([[b1, b2]])), FR = frame(R, ell.concat([x]));
+    axes(L, FL); axes(R, FR);
+    poly(L, FL, circ, LINE, 1.6); poly(R, FR, ell, LINE, 1.6);
+    seg(L, FL, [0, 0], [b1, b2], INK, 2); seg(R, FR, [0, 0], x, INK, 2);
+    seg(L, FL, [b1, b2], [b1 + db[0], b2 + db[1]], TEAL, 2.4);
+    seg(R, FR, x, [x[0] + dx[0], x[1] + dx[1]], TEAL, 2.4);
+    dot(L, FL.P([b1, b2]), INK, 4); dot(L, FL.P([b1 + db[0], b2 + db[1]]), TEAL, 4.5);
+    dot(R, FR.P(x), INK, 4); dot(R, FR.P([x[0] + dx[0], x[1] + dx[1]]), TEAL, 4.5);
+    txt(L, FL.P([b1, b2]), 'b'); txt(R, FR.P(x), 'x');
+    txt(L, FL.P([b1 + db[0], b2 + db[1]]), 'b + δb', 'labT'); txt(R, FR.P([x[0] + dx[0], x[1] + dx[1]]), 'x + δx', 'labT');
+    // 2-norma: singulární čísla z AᵀA
+    var p = a * a + c * c, q = a * b + c * d, r = b * b + d * d, tr = p + r, dd = p * r - q * q;
+    var disc = Math.sqrt(Math.max(tr * tr / 4 - dd, 0)), l1 = tr / 2 + disc, l2 = Math.max(tr / 2 - disc, 0);
+    var kap = Math.sqrt(l1) / Math.sqrt(l2);
+    var rb = Math.hypot(db[0], db[1]) / nb, rx = Math.hypot(dx[0], dx[1]) / Math.hypot(x[0], x[1]);
+    $('read').innerHTML = '<span>‖δb‖/‖b‖ = <b>' + fmt(rb) + '</b></span><span>‖δx‖/‖x‖ = <b>' + fmt(rx) + '</b></span><span>poměr = <b>' + fmt(rx / rb) + '</b></span><span>κ(A) = <b>' + fmt(kap) + '</b> (2-norma)</span>';
+  }
+
+  ids.forEach(function (i) { $(i).addEventListener('input', draw); });
+  $('phi').addEventListener('input', draw); $('eps').addEventListener('input', draw);
+  Array.prototype.forEach.call(document.querySelectorAll('.presets [data-p]'), function (bt) {
+    bt.addEventListener('click', function () { bt.getAttribute('data-p').split(',').forEach(function (s, k) { $(ids[k]).value = s; }); draw(); });
+  });
+
+  // KaTeX v textu
+  var M = document.querySelector('.notes');
+  M.innerHTML = M.innerHTML.replace(/\$\$([\s\S]+?)\$\$/g, function (_, m) { return katex.renderToString(m, { displayMode: true, throwOnError: false }); })
+                           .replace(/\$([^$]+?)\$/g, function (_, m) { return katex.renderToString(m.replace(/&lt;/g, '<'), { throwOnError: false }); });
+  draw();
+})();
+</script>
+</body>
+</html>

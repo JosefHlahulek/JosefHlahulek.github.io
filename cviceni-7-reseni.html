@@ -93,10 +93,10 @@
 </div></details>
 <details class="sol"><summary><span class="no">6.</span> <span class="fm">$f(x)=x^2e^{-|x-1|}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$.</p>
-<p><b>2. Derivace na otevřených intervalech.</b> Pro $x&gt;1$ je $|x-1|=x-1$, $f(x)=x^2e^{1-x}$, $f'(x)=e^{1-x}(2x-x^2)$. Pro $x&lt;1$ je $f(x)=x^2e^{x-1}$, $f'(x)=e^{x-1}(2x+x^2)$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Použijeme $(|t|)'=\operatorname{sgn}t$ pro $t\ne0$: pro $x\ne1$ je $f'(x)=2xe^{-|x-1|}-x^2e^{-|x-1|}\operatorname{sgn}(x-1)=x\,e^{-|x-1|}\bigl(2-x\operatorname{sgn}(x-1)\bigr)$.</p>
 <p><b>3. Podezřelé body.</b> Bod $x=1$ (zde se láme absolutní hodnota).</p>
-<p><b>4. Derivace v podezřelých bodech.</b> $f$ je v $1$ spojitá, $\lim_{x\to1+}f'(x)=1\cdot(2-1)=1$, $\lim_{x\to1-}f'(x)=1\cdot(2+1)=3$. Podle věty o limitě derivace $f'_+(1)=1$, $f'_-(1)=3$.</p>
-<p><b>5. Závěr.</b> $f'(x)=e^{1-x}(2x-x^2)$ pro $x&gt;1$, $f'(x)=e^{x-1}(2x+x^2)$ pro $x&lt;1$; v $1$ derivace neexistuje.</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je v $1$ spojitá, $\lim_{x\to1+}f'(x)=1\cdot(2-1)=1$ ($\operatorname{sgn}=1$), $\lim_{x\to1-}f'(x)=1\cdot(2+1)=3$ ($\operatorname{sgn}=-1$). Podle věty o limitě derivace $f'_+(1)=1$, $f'_-(1)=3$.</p>
+<p><b>5. Závěr.</b> $f'(x)=x\,e^{-|x-1|}\bigl(2-x\operatorname{sgn}(x-1)\bigr)$ pro $x\ne1$; v $1$ derivace neexistuje (jednostranné jsou $3$ a $1$).</p>
 </div></details>
 <details class="sol"><summary><span class="no">7.</span> <span class="fm">$f(x)=(x+15)^3(x-17)^{10}x^9$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Polynom: $D_f=\mathbb R$.</p>
@@ -164,10 +164,10 @@
 </div></details>
 <details class="sol"><summary><span class="no">17.</span> <span class="fm">$f(x)=|x^2-3x+2|$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$. Platí $x^2-3x+2=(x-1)(x-2)$.</p>
-<p><b>2. Derivace na otevřených intervalech.</b> Uvnitř je záporné jen na $(1,2)$. Proto $f'(x)=2x-3$ na $(-\infty,1)\cup(2,\infty)$ a $f'(x)=-(2x-3)$ na $(1,2)$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Pro $x\ne1,2$ je $f'(x)=\operatorname{sgn}(x^2-3x+2)\,(2x-3)$.</p>
 <p><b>3. Podezřelé body.</b> Body $x=1$ a $x=2$ (kde je výraz nula).</p>
-<p><b>4. Derivace v podezřelých bodech.</b> $f$ je spojitá. V $1$: $f'_-(1)=2-3=-1$, $f'_+(1)=-(2-3)=1$. V $2$: $f'_-(2)=-(4-3)=-1$, $f'_+(2)=4-3=1$.</p>
-<p><b>5. Závěr.</b> $f'$ existuje na $\mathbb R\setminus\{1,2\}$; v $1$ a $2$ derivace neexistuje (jednostranné derivace jsou $-1$ a $1$).</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je spojitá. Znaménko $x^2-3x+2$ je $+$ na $(-\infty,1)$, $-$ na $(1,2)$, $+$ na $(2,\infty)$. V $1$: $f'_-(1)=(+1)(2-3)=-1$, $f'_+(1)=(-1)(2-3)=1$. V $2$: $f'_-(2)=(-1)(4-3)=-1$, $f'_+(2)=(+1)(4-3)=1$.</p>
+<p><b>5. Závěr.</b> $f'(x)=\operatorname{sgn}(x^2-3x+2)(2x-3)$ na $\mathbb R\setminus\{1,2\}$; v $1$ a $2$ derivace neexistuje (jednostranné derivace jsou $-1$ a $1$).</p>
 </div></details>
 <details class="sol"><summary><span class="no">18.</span> <span class="fm">$f(x)=\operatorname{arctg}\sqrt{x^2-1}-\dfrac{\ln x}{\sqrt{x^2-1}}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $\sqrt{x^2-1}$ a jmenovatel: $x^2&gt;1$, $\ln x$: $x&gt;0$. Tedy $D_f=(1,\infty)$.</p>

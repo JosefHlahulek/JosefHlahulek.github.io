@@ -56,14 +56,6 @@
 
   <main class="wrap">
     <div style="padding: 40px 0 70px; border-top: 1px solid var(--line);">
-      <h2 class="sec">Algoritmus</h2>
-      <ol class="alg">
-        <li>Určíme definiční obor $D_f$. Na této množině pak hledáme derivaci.</li>
-        <li>Zderivujeme mechanicky tam, kde to lze (na otevřených intervalech).</li>
-        <li>Prokontrolujeme podmínky derivování: krajní body definičního oboru, zlomky, místa, kde se láme předpis, a identifikujeme problémové body (časté: $\arcsin t$, $\arccos t$, $\operatorname{sgn}t$, $|t|$, $\max$, $\min$, odmocniny, funkce zadané „vidličkou“).</li>
-        <li>V problémových bodech najdeme derivaci z definice nebo z věty o limitě derivace. Neexistuje-li derivace, zkusíme najít alespoň jednostranné derivace.</li>
-        <li>Uděláme závěr.</li>
-      </ol>
       <div class="thm">
         <p><b>Věta o limitě derivace.</b> Je-li $f$ v bodě $a$ spojitá zprava a existuje-li $\lim_{x\to a+}f'(x)=A$ (vlastní i nevlastní), pak $f'_+(a)=A$. Analogicky zleva: z $\lim_{x\to a-}f'(x)=A$ plyne $f'_-(a)=A$.</p>
         <p>Značení: $f'_+(a)$ a $f'_-(a)$ jsou derivace zprava a zleva, tj. limity $\frac{f(x)-f(a)}{x-a}$ pro $x\to a+$ a $x\to a-$; $\operatorname{sgn}t$ je $1,0,-1$ podle znaménka $t$.</p>
@@ -72,214 +64,214 @@
       <div class="tools"><button id="openAll" type="button">Rozbalit vše</button><button id="closeAll" type="button">Sbalit vše</button><a href="cviceni.html" style="border-bottom:1px solid var(--ink)">Zpět na cvičení</a></div>
 <details class="sol"><summary><span class="no">1.</span> <span class="fm">$f(x)=(x^2+51x+119)^{87}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Polynom: $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Řetězové pravidlo: $f'(x)=87\,(x^2+51x+119)^{86}(2x+51)$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Řetězové pravidlo: $f'(x)=87\,(x^2+51x+119)^{86}(2x+51)$.</p>
 <p><b>5. Závěr.</b> $f'(x)=87\,(x^2+51x+119)^{86}(2x+51)$ pro každé $x\in\mathbb R$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">2.</span> <span class="fm">$f(x)=\arccos(1-x^2)$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $\arccos$ je definován pro argument z $\langle-1,1\rangle$: $|1-x^2|\le1\iff x^2\le2$, tedy $D_f=\langle-\sqrt2,\sqrt2\rangle$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Derivaci $\arccos t$ máme jen pro $t\in(-1,1)$, tj. $1-x^2\in(-1,1)\iff x\in(-\sqrt2,\sqrt2),\ x\ne0$. Tam $f'(x)=\dfrac{-1}{\sqrt{1-(1-x^2)^2}}\cdot(-2x)=\dfrac{2x}{\sqrt{2x^2-x^4}}=\dfrac{2x}{|x|\sqrt{2-x^2}}=\dfrac{2\operatorname{sgn}x}{\sqrt{2-x^2}}$.</p>
-<p><b>3. Problémové body.</b> $x=0$ (argument je $1$, kraj definičního oboru $\arccos$) a krajní body $\pm\sqrt2$.</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je v $0$ spojitá a $\lim_{x\to0\pm}f'(x)=\pm\sqrt2$, podle věty o limitě derivace $f'_+(0)=\sqrt2$, $f'_-(0)=-\sqrt2$. V krajních bodech: $f'_-(\sqrt2)=\lim_{x\to\sqrt2-}\frac{2}{\sqrt{2-x^2}}=+\infty$, $f'_+(-\sqrt2)=-\infty$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Derivaci $\arccos t$ máme jen pro $t\in(-1,1)$, tj. $1-x^2\in(-1,1)\iff x\in(-\sqrt2,\sqrt2),\ x\ne0$. Tam $f'(x)=\dfrac{-1}{\sqrt{1-(1-x^2)^2}}\cdot(-2x)=\dfrac{2x}{\sqrt{2x^2-x^4}}=\dfrac{2x}{|x|\sqrt{2-x^2}}=\dfrac{2\operatorname{sgn}x}{\sqrt{2-x^2}}$.</p>
+<p><b>3. Podezřelé body.</b> $x=0$ (argument je $1$, kraj definičního oboru $\arccos$) a krajní body $\pm\sqrt2$.</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je v $0$ spojitá a $\lim_{x\to0\pm}f'(x)=\pm\sqrt2$, podle věty o limitě derivace $f'_+(0)=\sqrt2$, $f'_-(0)=-\sqrt2$. V krajních bodech: $f'_-(\sqrt2)=\lim_{x\to\sqrt2-}\frac{2}{\sqrt{2-x^2}}=+\infty$, $f'_+(-\sqrt2)=-\infty$.</p>
 <p><b>5. Závěr.</b> $f'(x)=\dfrac{2\operatorname{sgn}x}{\sqrt{2-x^2}}$ na $(-\sqrt2,\sqrt2)\setminus\{0\}$; v $0$ derivace neexistuje (jednostranné jsou $\pm\sqrt2$).</p>
 </div></details>
 <details class="sol"><summary><span class="no">3.</span> <span class="fm">$f(x)=x^x$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Obecná mocnina $x^x=e^{x\ln x}$ vyžaduje $x&gt;0$: $D_f=(0,\infty)$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> $f(x)=e^{x\ln x}$, tedy $f'(x)=e^{x\ln x}(\ln x+1)=x^x(\ln x+1)$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> $f(x)=e^{x\ln x}$, tedy $f'(x)=e^{x\ln x}(\ln x+1)=x^x(\ln x+1)$.</p>
 <p><b>5. Závěr.</b> $f'(x)=x^x(\ln x+1)$ pro každé $x&gt;0$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">4.</span> <span class="fm">$f(x)=\min\{x,\,x^3\}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Porovnáme: $x^3-x=x(x-1)(x+1)\ge0\iff x\in\langle-1,0\rangle\cup\langle1,\infty)$. Tam je $f(x)=x$, jinak ($x\in(-\infty,-1\rangle\cup\langle0,1\rangle$) je $f(x)=x^3$. Na otevřených intervalech: $f'=3x^2$ na $(-\infty,-1)\cup(0,1)$ a $f'=1$ na $(-1,0)\cup(1,\infty)$.</p>
-<p><b>3. Problémové body.</b> Body, kde se předpis láme: $-1,\ 0,\ 1$.</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je spojitá, tak z jednostranných limit $f'$: v $-1$ je $f'_-=3$, $f'_+=1$; v $0$ je $f'_-=1$, $f'_+=0$; v $1$ je $f'_-=3$, $f'_+=1$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Porovnáme: $x^3-x=x(x-1)(x+1)\ge0\iff x\in\langle-1,0\rangle\cup\langle1,\infty)$. Tam je $f(x)=x$, jinak ($x\in(-\infty,-1\rangle\cup\langle0,1\rangle$) je $f(x)=x^3$. Na otevřených intervalech: $f'=3x^2$ na $(-\infty,-1)\cup(0,1)$ a $f'=1$ na $(-1,0)\cup(1,\infty)$.</p>
+<p><b>3. Podezřelé body.</b> Body, kde se předpis láme: $-1,\ 0,\ 1$.</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je spojitá, tak z jednostranných limit $f'$: v $-1$ je $f'_-=3$, $f'_+=1$; v $0$ je $f'_-=1$, $f'_+=0$; v $1$ je $f'_-=3$, $f'_+=1$.</p>
 <p><b>5. Závěr.</b> $f'$ existuje na $\mathbb R\setminus\{-1,0,1\}$ ($3x^2$ resp. $1$ podle výše); v bodech $-1,0,1$ derivace neexistuje.</p>
 </div></details>
 <details class="sol"><summary><span class="no">5.</span> <span class="fm">$f(x)=\ln\bigl(x+\sqrt{x^2+4}\bigr)$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Protože $\sqrt{x^2+4}&gt;|x|$, je $x+\sqrt{x^2+4}&gt;0$ pro všechna $x$: $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> $f'(x)=\dfrac{1+\frac{x}{\sqrt{x^2+4}}}{x+\sqrt{x^2+4}}=\dfrac{\frac{\sqrt{x^2+4}+x}{\sqrt{x^2+4}}}{x+\sqrt{x^2+4}}=\dfrac1{\sqrt{x^2+4}}$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> $f'(x)=\dfrac{1+\frac{x}{\sqrt{x^2+4}}}{x+\sqrt{x^2+4}}=\dfrac{\frac{\sqrt{x^2+4}+x}{\sqrt{x^2+4}}}{x+\sqrt{x^2+4}}=\dfrac1{\sqrt{x^2+4}}$.</p>
 <p><b>5. Závěr.</b> $f'(x)=\dfrac1{\sqrt{x^2+4}}$ pro každé $x\in\mathbb R$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">6.</span> <span class="fm">$f(x)=x^2e^{-|x-1|}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Pro $x&gt;1$ je $|x-1|=x-1$, $f(x)=x^2e^{1-x}$, $f'(x)=e^{1-x}(2x-x^2)$. Pro $x&lt;1$ je $f(x)=x^2e^{x-1}$, $f'(x)=e^{x-1}(2x+x^2)$.</p>
-<p><b>3. Problémové body.</b> Bod $x=1$ (zde se láme absolutní hodnota).</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je v $1$ spojitá, $\lim_{x\to1+}f'(x)=1\cdot(2-1)=1$, $\lim_{x\to1-}f'(x)=1\cdot(2+1)=3$. Podle věty o limitě derivace $f'_+(1)=1$, $f'_-(1)=3$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Pro $x&gt;1$ je $|x-1|=x-1$, $f(x)=x^2e^{1-x}$, $f'(x)=e^{1-x}(2x-x^2)$. Pro $x&lt;1$ je $f(x)=x^2e^{x-1}$, $f'(x)=e^{x-1}(2x+x^2)$.</p>
+<p><b>3. Podezřelé body.</b> Bod $x=1$ (zde se láme absolutní hodnota).</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je v $1$ spojitá, $\lim_{x\to1+}f'(x)=1\cdot(2-1)=1$, $\lim_{x\to1-}f'(x)=1\cdot(2+1)=3$. Podle věty o limitě derivace $f'_+(1)=1$, $f'_-(1)=3$.</p>
 <p><b>5. Závěr.</b> $f'(x)=e^{1-x}(2x-x^2)$ pro $x&gt;1$, $f'(x)=e^{x-1}(2x+x^2)$ pro $x&lt;1$; v $1$ derivace neexistuje.</p>
 </div></details>
 <details class="sol"><summary><span class="no">7.</span> <span class="fm">$f(x)=(x+15)^3(x-17)^{10}x^9$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Polynom: $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Součinové pravidlo, vytkneme společné mocniny: $f'(x)=(x+15)^2(x-17)^9x^8\bigl[3x(x-17)+10x(x+15)+9(x+15)(x-17)\bigr]=(x+15)^2(x-17)^9x^8\,(22x^2+81x-2295)$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Součinové pravidlo, vytkneme společné mocniny: $f'(x)=(x+15)^2(x-17)^9x^8\bigl[3x(x-17)+10x(x+15)+9(x+15)(x-17)\bigr]=(x+15)^2(x-17)^9x^8\,(22x^2+81x-2295)$.</p>
 <p><b>5. Závěr.</b> $f'(x)=(x+15)^2(x-17)^9x^8\,(22x^2+81x-2295)$ pro každé $x\in\mathbb R$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">8.</span> <span class="fm">$f(x)=\sqrt[3]{\sin x}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Třetí odmocnina je definovaná na celém $\mathbb R$: $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> $f(x)=(\sin x)^{1/3}$, pro $\sin x\ne0$ je $f'(x)=\dfrac{\cos x}{3\,(\sin x)^{2/3}}$.</p>
-<p><b>3. Problémové body.</b> Body $x=k\pi$, $k\in\mathbb Z$ (tam je $\sin x=0$ a třetí odmocnina nemá vlastní derivaci).</p>
-<p><b>4. Derivace v problémových bodech.</b> $\dfrac{f(x)-f(k\pi)}{x-k\pi}=\dfrac{\sqrt[3]{\sin x}}{x-k\pi}$. Protože $\sin x\sim(-1)^k(x-k\pi)$, je tento podíl $\sim(-1)^k\,|x-k\pi|^{-2/3}\to(-1)^k\cdot\infty$ z obou stran.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> $f(x)=(\sin x)^{1/3}$, pro $\sin x\ne0$ je $f'(x)=\dfrac{\cos x}{3\,(\sin x)^{2/3}}$.</p>
+<p><b>3. Podezřelé body.</b> Body $x=k\pi$, $k\in\mathbb Z$ (tam je $\sin x=0$ a třetí odmocnina nemá vlastní derivaci).</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $\dfrac{f(x)-f(k\pi)}{x-k\pi}=\dfrac{\sqrt[3]{\sin x}}{x-k\pi}$. Protože $\sin x\sim(-1)^k(x-k\pi)$, je tento podíl $\sim(-1)^k\,|x-k\pi|^{-2/3}\to(-1)^k\cdot\infty$ z obou stran.</p>
 <p><b>5. Závěr.</b> $f'(x)=\dfrac{\cos x}{3(\sin x)^{2/3}}$ pro $x\ne k\pi$; v $x=k\pi$ vlastní derivace neexistuje (nevlastní derivace je $(-1)^k\cdot\infty$).</p>
 </div></details>
 <details class="sol"><summary><span class="no">9.</span> <span class="fm">$f(x)=(\sin x)^{\cos x}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $f(x)=e^{\cos x\ln\sin x}$, potřebujeme $\sin x&gt;0$: $D_f=\bigcup_{k\in\mathbb Z}(2k\pi,(2k+1)\pi)$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> $f'(x)=(\sin x)^{\cos x}\Bigl(-\sin x\,\ln\sin x+\dfrac{\cos^2x}{\sin x}\Bigr)$ na každém z těchto otevřených intervalů.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> $f'(x)=(\sin x)^{\cos x}\Bigl(-\sin x\,\ln\sin x+\dfrac{\cos^2x}{\sin x}\Bigr)$ na každém z těchto otevřených intervalů.</p>
 <p><b>5. Závěr.</b> $f'(x)=(\sin x)^{\cos x}\bigl(-\sin x\ln\sin x+\frac{\cos^2x}{\sin x}\bigr)$ pro každé $x\in D_f$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">10.</span> <span class="fm">$f(x)=\operatorname{sgn}(x^2+x-2)\,\bigl(\operatorname{arctg}(x+2)\bigr)^4$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$. Platí $x^2+x-2=(x+2)(x-1)$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Pro $x\ne-2,1$ je $\operatorname{sgn}$ konstantní ($+1$ na $(-\infty,-2)\cup(1,\infty)$, $-1$ na $(-2,1)$), tedy $f'(x)=\operatorname{sgn}\bigl((x+2)(x-1)\bigr)\dfrac{4\operatorname{arctg}^3(x+2)}{1+(x+2)^2}$.</p>
-<p><b>3. Problémové body.</b> Body $x=-2$ a $x=1$ (tam se mění znaménko, $\operatorname{sgn}0=0$).</p>
-<p><b>4. Derivace v problémových bodech.</b> V $-2$: $f(-2)=0$ a $\left|\dfrac{f(x)}{x+2}\right|=\dfrac{\operatorname{arctg}^4(x+2)}{|x+2|}\to0$, tedy $f'(-2)=0$. V $1$: $f(1)=0$, ale $\lim_{x\to1\pm}f(x)=\pm\operatorname{arctg}^43\ne0$, $f$ není v $1$ spojitá, vlastní derivace neexistuje (diferenční podíl jde z obou stran k $+\infty$, jde jen o nevlastní derivaci).</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Pro $x\ne-2,1$ je $\operatorname{sgn}$ konstantní ($+1$ na $(-\infty,-2)\cup(1,\infty)$, $-1$ na $(-2,1)$), tedy $f'(x)=\operatorname{sgn}\bigl((x+2)(x-1)\bigr)\dfrac{4\operatorname{arctg}^3(x+2)}{1+(x+2)^2}$.</p>
+<p><b>3. Podezřelé body.</b> Body $x=-2$ a $x=1$ (tam se mění znaménko, $\operatorname{sgn}0=0$).</p>
+<p><b>4. Derivace v podezřelých bodech.</b> V $-2$: $f(-2)=0$ a $\left|\dfrac{f(x)}{x+2}\right|=\dfrac{\operatorname{arctg}^4(x+2)}{|x+2|}\to0$, tedy $f'(-2)=0$. V $1$: $f(1)=0$, ale $\lim_{x\to1\pm}f(x)=\pm\operatorname{arctg}^43\ne0$, $f$ není v $1$ spojitá, vlastní derivace neexistuje (diferenční podíl jde z obou stran k $+\infty$, jde jen o nevlastní derivaci).</p>
 <p><b>5. Závěr.</b> $f'(-2)=0$, $f'(x)=\operatorname{sgn}(x^2+x-2)\frac{4\operatorname{arctg}^3(x+2)}{1+(x+2)^2}$ pro $x\ne-2,1$; v $1$ vlastní derivace neexistuje.</p>
 </div></details>
 <details class="sol"><summary><span class="no">11.</span> <span class="fm">$f(x)=\arcsin(\sin x)$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Pro $|\sin x|&lt;1$, tj. $x\ne\frac\pi2+k\pi$: $f'(x)=\dfrac{\cos x}{\sqrt{1-\sin^2x}}=\dfrac{\cos x}{|\cos x|}=\operatorname{sgn}(\cos x)$.</p>
-<p><b>3. Problémové body.</b> Body $x=\frac\pi2+k\pi$, $k\in\mathbb Z$ (argument arcsin je $\pm1$).</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je spojitá. V $x=\frac\pi2+2k\pi$: $\cos x&gt;0$ zleva, $&lt;0$ zprava, tedy $f'_-=1$, $f'_+=-1$; v $x=\frac{3\pi}2+2k\pi$ naopak $f'_-=-1$, $f'_+=1$ (věta o limitě derivace).</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Pro $|\sin x|&lt;1$, tj. $x\ne\frac\pi2+k\pi$: $f'(x)=\dfrac{\cos x}{\sqrt{1-\sin^2x}}=\dfrac{\cos x}{|\cos x|}=\operatorname{sgn}(\cos x)$.</p>
+<p><b>3. Podezřelé body.</b> Body $x=\frac\pi2+k\pi$, $k\in\mathbb Z$ (argument arcsin je $\pm1$).</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je spojitá. V $x=\frac\pi2+2k\pi$: $\cos x&gt;0$ zleva, $&lt;0$ zprava, tedy $f'_-=1$, $f'_+=-1$; v $x=\frac{3\pi}2+2k\pi$ naopak $f'_-=-1$, $f'_+=1$ (věta o limitě derivace).</p>
 <p><b>5. Závěr.</b> $f'(x)=\operatorname{sgn}(\cos x)$ pro $x\ne\frac\pi2+k\pi$; v bodech $\frac\pi2+k\pi$ derivace neexistuje (jednostranné jsou $\pm1$). Graf je „pila“.</p>
 </div></details>
 <details class="sol"><summary><span class="no">12.</span> <span class="fm">$f(x)=\begin{cases}x^2\sin\dfrac1{\sqrt[3]{x}}, &amp; x\ne0,\\ 0, &amp; x=0\end{cases}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Pro $x\ne0$: $f'(x)=2x\sin x^{-1/3}+x^2\cos x^{-1/3}\cdot\bigl(-\tfrac13x^{-4/3}\bigr)=2x\sin x^{-1/3}-\tfrac13x^{2/3}\cos x^{-1/3}$.</p>
-<p><b>3. Problémové body.</b> Bod $x=0$ (kde se mění předpis).</p>
-<p><b>4. Derivace v problémových bodech.</b> Z definice: $\dfrac{f(x)-f(0)}{x-0}=x\sin x^{-1/3}$, a protože $|\sin|\le1$, je limita $0$ (omezená krát nula). Tedy $f'(0)=0$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Pro $x\ne0$: $f'(x)=2x\sin x^{-1/3}+x^2\cos x^{-1/3}\cdot\bigl(-\tfrac13x^{-4/3}\bigr)=2x\sin x^{-1/3}-\tfrac13x^{2/3}\cos x^{-1/3}$.</p>
+<p><b>3. Podezřelé body.</b> Bod $x=0$ (kde se mění předpis).</p>
+<p><b>4. Derivace v podezřelých bodech.</b> Z definice: $\dfrac{f(x)-f(0)}{x-0}=x\sin x^{-1/3}$, a protože $|\sin|\le1$, je limita $0$ (omezená krát nula). Tedy $f'(0)=0$.</p>
 <p><b>5. Závěr.</b> $f'(x)=2x\sin x^{-1/3}-\frac13x^{2/3}\cos x^{-1/3}$ pro $x\ne0$, $f'(0)=0$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">13.</span> <span class="fm">$f(x)=\operatorname{arctg}\dfrac{1+x}{1-x}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Jmenovatel: $D_f=\mathbb R\setminus\{1\}$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> $f'(x)=\dfrac{1}{1+\left(\frac{1+x}{1-x}\right)^2}\cdot\dfrac{2}{(1-x)^2}=\dfrac{2}{(1-x)^2+(1+x)^2}=\dfrac{1}{1+x^2}$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> $f'(x)=\dfrac{1}{1+\left(\frac{1+x}{1-x}\right)^2}\cdot\dfrac{2}{(1-x)^2}=\dfrac{2}{(1-x)^2+(1+x)^2}=\dfrac{1}{1+x^2}$.</p>
 <p><b>5. Závěr.</b> $f'(x)=\dfrac1{1+x^2}$ pro každé $x\in D_f$ (bod $1$ do $D_f$ nepatří; $f$ se na obou intervalech liší od $\operatorname{arctg}x$ o konstantu).</p>
 </div></details>
 <details class="sol"><summary><span class="no">14.</span> <span class="fm">$f(x)=\sqrt{1-e^{-x^2}}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $e^{-x^2}\le1$, tedy $1-e^{-x^2}\ge0$ vždy: $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Pro $1-e^{-x^2}&gt;0$, tj. $x\ne0$: $f'(x)=\dfrac{2xe^{-x^2}}{2\sqrt{1-e^{-x^2}}}=\dfrac{xe^{-x^2}}{\sqrt{1-e^{-x^2}}}$.</p>
-<p><b>3. Problémové body.</b> Bod $x=0$ (odmocnina z nuly).</p>
-<p><b>4. Derivace v problémových bodech.</b> $\dfrac{f(x)-f(0)}{x}=\dfrac{\sqrt{1-e^{-x^2}}}{x}=\dfrac{|x|}{x}\sqrt{\dfrac{1-e^{-x^2}}{x^2}}\to\pm1$ pro $x\to0\pm$, protože $\frac{1-e^{-x^2}}{x^2}\to1$ (elementární limita). Tedy $f'_+(0)=1$, $f'_-(0)=-1$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Pro $1-e^{-x^2}&gt;0$, tj. $x\ne0$: $f'(x)=\dfrac{2xe^{-x^2}}{2\sqrt{1-e^{-x^2}}}=\dfrac{xe^{-x^2}}{\sqrt{1-e^{-x^2}}}$.</p>
+<p><b>3. Podezřelé body.</b> Bod $x=0$ (odmocnina z nuly).</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $\dfrac{f(x)-f(0)}{x}=\dfrac{\sqrt{1-e^{-x^2}}}{x}=\dfrac{|x|}{x}\sqrt{\dfrac{1-e^{-x^2}}{x^2}}\to\pm1$ pro $x\to0\pm$, protože $\frac{1-e^{-x^2}}{x^2}\to1$ (elementární limita). Tedy $f'_+(0)=1$, $f'_-(0)=-1$.</p>
 <p><b>5. Závěr.</b> $f'(x)=\dfrac{xe^{-x^2}}{\sqrt{1-e^{-x^2}}}$ pro $x\ne0$; v $0$ derivace neexistuje (jednostranné jsou $\pm1$).</p>
 </div></details>
 <details class="sol"><summary><span class="no">15.</span> <span class="fm">$f(x)=\ln\arccos x$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Potřebujeme $x\in\langle-1,1\rangle$ a $\arccos x&gt;0\iff x&lt;1$: $D_f=\langle-1,1)$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Na $(-1,1)$: $f'(x)=\dfrac{1}{\arccos x}\cdot\dfrac{-1}{\sqrt{1-x^2}}$.</p>
-<p><b>3. Problémové body.</b> Krajní bod $x=-1\in D_f$.</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je v $-1$ zprava spojitá a $\lim_{x\to-1+}f'(x)=\dfrac{-1}{\pi\cdot0^+}=-\infty$, tedy $f'_+(-1)=-\infty$ (nevlastní).</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Na $(-1,1)$: $f'(x)=\dfrac{1}{\arccos x}\cdot\dfrac{-1}{\sqrt{1-x^2}}$.</p>
+<p><b>3. Podezřelé body.</b> Krajní bod $x=-1\in D_f$.</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je v $-1$ zprava spojitá a $\lim_{x\to-1+}f'(x)=\dfrac{-1}{\pi\cdot0^+}=-\infty$, tedy $f'_+(-1)=-\infty$ (nevlastní).</p>
 <p><b>5. Závěr.</b> $f'(x)=-\dfrac1{\arccos x\,\sqrt{1-x^2}}$ pro $x\in(-1,1)$; v $-1$ je derivace zprava $-\infty$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">16.</span> <span class="fm">$f(x)=\arcsin\dfrac{1-x^2}{1+x^2}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Argument leží v $(-1,1\rangle$ ($=1$ pouze pro $x=0$): $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Pro $x\ne0$ je argument $u\in(-1,1)$, $u'=\dfrac{-4x}{(1+x^2)^2}$, $1-u^2=\dfrac{4x^2}{(1+x^2)^2}$, tedy $f'(x)=\dfrac{-4x}{(1+x^2)^2}\cdot\dfrac{1+x^2}{2|x|}=\dfrac{-2\operatorname{sgn}x}{1+x^2}$.</p>
-<p><b>3. Problémové body.</b> Bod $x=0$ (argument je $1$).</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je spojitá a $\lim_{x\to0\pm}f'(x)=\mp2$, tedy $f'_+(0)=-2$, $f'_-(0)=2$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Pro $x\ne0$ je argument $u\in(-1,1)$, $u'=\dfrac{-4x}{(1+x^2)^2}$, $1-u^2=\dfrac{4x^2}{(1+x^2)^2}$, tedy $f'(x)=\dfrac{-4x}{(1+x^2)^2}\cdot\dfrac{1+x^2}{2|x|}=\dfrac{-2\operatorname{sgn}x}{1+x^2}$.</p>
+<p><b>3. Podezřelé body.</b> Bod $x=0$ (argument je $1$).</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je spojitá a $\lim_{x\to0\pm}f'(x)=\mp2$, tedy $f'_+(0)=-2$, $f'_-(0)=2$.</p>
 <p><b>5. Závěr.</b> $f'(x)=\dfrac{-2\operatorname{sgn}x}{1+x^2}$ pro $x\ne0$; v $0$ derivace neexistuje (jednostranné jsou $\mp2$).</p>
 </div></details>
 <details class="sol"><summary><span class="no">17.</span> <span class="fm">$f(x)=|x^2-3x+2|$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$. Platí $x^2-3x+2=(x-1)(x-2)$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Uvnitř je záporné jen na $(1,2)$. Proto $f'(x)=2x-3$ na $(-\infty,1)\cup(2,\infty)$ a $f'(x)=-(2x-3)$ na $(1,2)$.</p>
-<p><b>3. Problémové body.</b> Body $x=1$ a $x=2$ (kde je výraz nula).</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je spojitá. V $1$: $f'_-(1)=2-3=-1$, $f'_+(1)=-(2-3)=1$. V $2$: $f'_-(2)=-(4-3)=-1$, $f'_+(2)=4-3=1$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Uvnitř je záporné jen na $(1,2)$. Proto $f'(x)=2x-3$ na $(-\infty,1)\cup(2,\infty)$ a $f'(x)=-(2x-3)$ na $(1,2)$.</p>
+<p><b>3. Podezřelé body.</b> Body $x=1$ a $x=2$ (kde je výraz nula).</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je spojitá. V $1$: $f'_-(1)=2-3=-1$, $f'_+(1)=-(2-3)=1$. V $2$: $f'_-(2)=-(4-3)=-1$, $f'_+(2)=4-3=1$.</p>
 <p><b>5. Závěr.</b> $f'$ existuje na $\mathbb R\setminus\{1,2\}$; v $1$ a $2$ derivace neexistuje (jednostranné derivace jsou $-1$ a $1$).</p>
 </div></details>
 <details class="sol"><summary><span class="no">18.</span> <span class="fm">$f(x)=\operatorname{arctg}\sqrt{x^2-1}-\dfrac{\ln x}{\sqrt{x^2-1}}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $\sqrt{x^2-1}$ a jmenovatel: $x^2&gt;1$, $\ln x$: $x&gt;0$. Tedy $D_f=(1,\infty)$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> $\bigl(\operatorname{arctg}\sqrt{x^2-1}\bigr)'=\dfrac{1}{x^2}\cdot\dfrac{x}{\sqrt{x^2-1}}=\dfrac1{x\sqrt{x^2-1}}$ a $\Bigl(\dfrac{\ln x}{\sqrt{x^2-1}}\Bigr)'=\dfrac1{x\sqrt{x^2-1}}-\dfrac{x\ln x}{(x^2-1)^{3/2}}$. Rozdíl: $f'(x)=\dfrac{x\ln x}{(x^2-1)^{3/2}}$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> $\bigl(\operatorname{arctg}\sqrt{x^2-1}\bigr)'=\dfrac{1}{x^2}\cdot\dfrac{x}{\sqrt{x^2-1}}=\dfrac1{x\sqrt{x^2-1}}$ a $\Bigl(\dfrac{\ln x}{\sqrt{x^2-1}}\Bigr)'=\dfrac1{x\sqrt{x^2-1}}-\dfrac{x\ln x}{(x^2-1)^{3/2}}$. Rozdíl: $f'(x)=\dfrac{x\ln x}{(x^2-1)^{3/2}}$.</p>
 <p><b>5. Závěr.</b> $f'(x)=\dfrac{x\ln x}{(x^2-1)^{3/2}}$ pro každé $x&gt;1$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">19.</span> <span class="fm">$f(x)=\max\Bigl\{\min\Bigl\{\cos x,\dfrac12\Bigr\},-\dfrac12\Bigr\}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$. Funkce „ořízne“ $\cos x$ do pásu $\langle-\frac12,\frac12\rangle$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> $f(x)=\frac12$ pro $\cos x\ge\frac12$, $f(x)=-\frac12$ pro $\cos x\le-\frac12$, jinak $f(x)=\cos x$. Na otevřených intervalech: $f'(x)=0$ pro $|\cos x|&gt;\frac12$ a $f'(x)=-\sin x$ pro $|\cos x|&lt;\frac12$.</p>
-<p><b>3. Problémové body.</b> Body $x=\pm\frac\pi3+2k\pi$ a $x=\pm\frac{2\pi}3+2k\pi$ (kde $\cos x=\pm\frac12$).</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je spojitá. V $\frac\pi3+2k\pi$: zleva $0$, zprava $-\sin\frac\pi3=-\frac{\sqrt3}2$. V $-\frac\pi3+2k\pi$: zleva $-\sin(-\frac\pi3)=\frac{\sqrt3}2$, zprava $0$. V $\frac{2\pi}3+2k\pi$: zleva $-\frac{\sqrt3}2$, zprava $0$. V $-\frac{2\pi}3+2k\pi$: zleva $0$, zprava $\frac{\sqrt3}2$ (věta o limitě derivace).</p>
+<p><b>2. Derivace na otevřených intervalech.</b> $f(x)=\frac12$ pro $\cos x\ge\frac12$, $f(x)=-\frac12$ pro $\cos x\le-\frac12$, jinak $f(x)=\cos x$. Na otevřených intervalech: $f'(x)=0$ pro $|\cos x|&gt;\frac12$ a $f'(x)=-\sin x$ pro $|\cos x|&lt;\frac12$.</p>
+<p><b>3. Podezřelé body.</b> Body $x=\pm\frac\pi3+2k\pi$ a $x=\pm\frac{2\pi}3+2k\pi$ (kde $\cos x=\pm\frac12$).</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je spojitá. V $\frac\pi3+2k\pi$: zleva $0$, zprava $-\sin\frac\pi3=-\frac{\sqrt3}2$. V $-\frac\pi3+2k\pi$: zleva $-\sin(-\frac\pi3)=\frac{\sqrt3}2$, zprava $0$. V $\frac{2\pi}3+2k\pi$: zleva $-\frac{\sqrt3}2$, zprava $0$. V $-\frac{2\pi}3+2k\pi$: zleva $0$, zprava $\frac{\sqrt3}2$ (věta o limitě derivace).</p>
 <p><b>5. Závěr.</b> $f'$ je $0$ resp. $-\sin x$ podle výše; v bodech $\pm\frac\pi3+2k\pi$, $\pm\frac{2\pi}3+2k\pi$ derivace neexistuje (jednostranné jsou $0$ a $\pm\frac{\sqrt3}2$).</p>
 </div></details>
 <details class="sol"><summary><span class="no">20.</span> <span class="fm">$f(x)=\dfrac{e^{x^2+1}\cos x}{(x+1)^2\ln(x^2+x+1)}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Jmenovatel nulový pro $x=-1$ a pro $\ln(x^2+x+1)=0\iff x^2+x=0\iff x\in\{-1,0\}$. Argument logaritmu je vždy kladný. $D_f=\mathbb R\setminus\{-1,0\}$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Podílové pravidlo s $u=e^{x^2+1}\cos x$, $v=(x+1)^2\ln(x^2+x+1)$: $u'=e^{x^2+1}(2x\cos x-\sin x)$, $v'=2(x+1)\ln(x^2+x+1)+\dfrac{(x+1)^2(2x+1)}{x^2+x+1}$, $f'=\dfrac{u'v-uv'}{v^2}$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Podílové pravidlo s $u=e^{x^2+1}\cos x$, $v=(x+1)^2\ln(x^2+x+1)$: $u'=e^{x^2+1}(2x\cos x-\sin x)$, $v'=2(x+1)\ln(x^2+x+1)+\dfrac{(x+1)^2(2x+1)}{x^2+x+1}$, $f'=\dfrac{u'v-uv'}{v^2}$.</p>
 <p><b>5. Závěr.</b> $f'=\dfrac{u'v-uv'}{v^2}$ pro každé $x\in D_f$ (pro $\cos x\ne0$ lze psát $f'=f\cdot\bigl[2x-\operatorname{tg}x-\frac2{x+1}-\frac{2x+1}{(x^2+x+1)\ln(x^2+x+1)}\bigr]$).</p>
 </div></details>
 <details class="sol"><summary><span class="no">21.</span> <span class="fm">$f(x)=\begin{cases}\operatorname{arctg}(\operatorname{tg}^2x), &amp; x\ne\frac\pi2+k\pi,\\ \frac\pi2, &amp; x=\frac\pi2+k\pi\end{cases}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$ (v bodech $\frac\pi2+k\pi$ je funkce dodefinována).</p>
-<p><b>2. Derivace tam, kde to jde.</b> Pro $x\ne\frac\pi2+k\pi$ s $t=\operatorname{tg}x$: $f'(x)=\dfrac{1}{1+\operatorname{tg}^4x}\cdot\dfrac{2\operatorname{tg}x}{\cos^2x}=\dfrac{2\operatorname{tg}x\,(1+\operatorname{tg}^2x)}{1+\operatorname{tg}^4x}$.</p>
-<p><b>3. Problémové body.</b> Body $x=\frac\pi2+k\pi$.</p>
-<p><b>4. Derivace v problémových bodech.</b> Spojitost: $\lim_{x\to\frac\pi2}\operatorname{arctg}(\operatorname{tg}^2x)=\frac\pi2=f(\tfrac\pi2)$, $f$ je spojitá. Dále $\left|f'(x)\right|\sim\dfrac{2\,|t|^3}{t^4}\to0$ pro $|t|=|\operatorname{tg}x|\to\infty$. Podle věty o limitě derivace $f'(\tfrac\pi2+k\pi)=0$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Pro $x\ne\frac\pi2+k\pi$ s $t=\operatorname{tg}x$: $f'(x)=\dfrac{1}{1+\operatorname{tg}^4x}\cdot\dfrac{2\operatorname{tg}x}{\cos^2x}=\dfrac{2\operatorname{tg}x\,(1+\operatorname{tg}^2x)}{1+\operatorname{tg}^4x}$.</p>
+<p><b>3. Podezřelé body.</b> Body $x=\frac\pi2+k\pi$.</p>
+<p><b>4. Derivace v podezřelých bodech.</b> Spojitost: $\lim_{x\to\frac\pi2}\operatorname{arctg}(\operatorname{tg}^2x)=\frac\pi2=f(\tfrac\pi2)$, $f$ je spojitá. Dále $\left|f'(x)\right|\sim\dfrac{2\,|t|^3}{t^4}\to0$ pro $|t|=|\operatorname{tg}x|\to\infty$. Podle věty o limitě derivace $f'(\tfrac\pi2+k\pi)=0$.</p>
 <p><b>5. Závěr.</b> $f'(x)=\dfrac{2\operatorname{tg}x(1+\operatorname{tg}^2x)}{1+\operatorname{tg}^4x}$ pro $x\ne\frac\pi2+k\pi$ a $f'(\tfrac\pi2+k\pi)=0$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">22.</span> <span class="fm">$f(x)=x^{\sin x}\quad(x&gt;0)$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $f(x)=e^{\sin x\ln x}$, $D_f=(0,\infty)$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> $f'(x)=x^{\sin x}\Bigl(\cos x\ln x+\dfrac{\sin x}{x}\Bigr)$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> $f'(x)=x^{\sin x}\Bigl(\cos x\ln x+\dfrac{\sin x}{x}\Bigr)$.</p>
 <p><b>5. Závěr.</b> $f'(x)=x^{\sin x}\bigl(\cos x\ln x+\frac{\sin x}{x}\bigr)$ pro každé $x&gt;0$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">23.</span> <span class="fm">$f(x)=\max\{x^2,\,2-x\}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> $x^2\ge2-x\iff(x+2)(x-1)\ge0\iff x\le-2$ nebo $x\ge1$. Tam je $f(x)=x^2$, na $(-2,1)$ je $f(x)=2-x$. Tedy $f'=2x$ na $(-\infty,-2)\cup(1,\infty)$ a $f'=-1$ na $(-2,1)$.</p>
-<p><b>3. Problémové body.</b> Body $x=-2$ a $x=1$.</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je spojitá. V $-2$: $f'_-=-4$, $f'_+=-1$. V $1$: $f'_-=-1$, $f'_+=2$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> $x^2\ge2-x\iff(x+2)(x-1)\ge0\iff x\le-2$ nebo $x\ge1$. Tam je $f(x)=x^2$, na $(-2,1)$ je $f(x)=2-x$. Tedy $f'=2x$ na $(-\infty,-2)\cup(1,\infty)$ a $f'=-1$ na $(-2,1)$.</p>
+<p><b>3. Podezřelé body.</b> Body $x=-2$ a $x=1$.</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je spojitá. V $-2$: $f'_-=-4$, $f'_+=-1$. V $1$: $f'_-=-1$, $f'_+=2$.</p>
 <p><b>5. Závěr.</b> $f'$ existuje na $\mathbb R\setminus\{-2,1\}$; v $-2$ a $1$ derivace neexistuje.</p>
 </div></details>
 <details class="sol"><summary><span class="no">24.</span> <span class="fm">$f(x)=\arccos\dfrac1{1+x^2}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Argument leží v $(0,1\rangle$ ($=1$ pouze pro $x=0$): $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Pro $x\ne0$: $u=\frac1{1+x^2}$, $u'=\frac{-2x}{(1+x^2)^2}$, $1-u^2=\frac{x^2(x^2+2)}{(1+x^2)^2}$. Tedy $f'(x)=\dfrac{-1}{\sqrt{1-u^2}}u'=\dfrac{2x}{(1+x^2)^2}\cdot\dfrac{1+x^2}{|x|\sqrt{x^2+2}}=\dfrac{2\operatorname{sgn}x}{(1+x^2)\sqrt{x^2+2}}$.</p>
-<p><b>3. Problémové body.</b> Bod $x=0$.</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je spojitá a $\lim_{x\to0\pm}f'(x)=\pm\dfrac{2}{\sqrt2}=\pm\sqrt2$, tedy $f'_+(0)=\sqrt2$, $f'_-(0)=-\sqrt2$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Pro $x\ne0$: $u=\frac1{1+x^2}$, $u'=\frac{-2x}{(1+x^2)^2}$, $1-u^2=\frac{x^2(x^2+2)}{(1+x^2)^2}$. Tedy $f'(x)=\dfrac{-1}{\sqrt{1-u^2}}u'=\dfrac{2x}{(1+x^2)^2}\cdot\dfrac{1+x^2}{|x|\sqrt{x^2+2}}=\dfrac{2\operatorname{sgn}x}{(1+x^2)\sqrt{x^2+2}}$.</p>
+<p><b>3. Podezřelé body.</b> Bod $x=0$.</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je spojitá a $\lim_{x\to0\pm}f'(x)=\pm\dfrac{2}{\sqrt2}=\pm\sqrt2$, tedy $f'_+(0)=\sqrt2$, $f'_-(0)=-\sqrt2$.</p>
 <p><b>5. Závěr.</b> $f'(x)=\dfrac{2\operatorname{sgn}x}{(1+x^2)\sqrt{x^2+2}}$ pro $x\ne0$; v $0$ derivace neexistuje (jednostranné jsou $\pm\sqrt2$).</p>
 </div></details>
 <details class="sol"><summary><span class="no">25.</span> <span class="fm">$f(x)=(\operatorname{arctg}x)^{\arcsin x}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Obecná mocnina: $\operatorname{arctg}x&gt;0\iff x&gt;0$, $\arcsin x$: $x\le1$. $D_f=(0,1\rangle$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> $f(x)=e^{\arcsin x\,\ln\operatorname{arctg}x}$; na $(0,1)$: $f'(x)=(\operatorname{arctg}x)^{\arcsin x}\Bigl(\dfrac{\ln\operatorname{arctg}x}{\sqrt{1-x^2}}+\dfrac{\arcsin x}{(1+x^2)\operatorname{arctg}x}\Bigr)$.</p>
-<p><b>3. Problémové body.</b> Krajní bod $x=1\in D_f$.</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je v $1$ zleva spojitá. Druhý sčítanec má v $1$ konečnou limitu, první $\dfrac{\ln(\pi/4)}{\sqrt{1-x^2}}\to-\infty$ (neboť $\ln\frac\pi4&lt;0$). Tedy $f'_-(1)=-\infty$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> $f(x)=e^{\arcsin x\,\ln\operatorname{arctg}x}$; na $(0,1)$: $f'(x)=(\operatorname{arctg}x)^{\arcsin x}\Bigl(\dfrac{\ln\operatorname{arctg}x}{\sqrt{1-x^2}}+\dfrac{\arcsin x}{(1+x^2)\operatorname{arctg}x}\Bigr)$.</p>
+<p><b>3. Podezřelé body.</b> Krajní bod $x=1\in D_f$.</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je v $1$ zleva spojitá. Druhý sčítanec má v $1$ konečnou limitu, první $\dfrac{\ln(\pi/4)}{\sqrt{1-x^2}}\to-\infty$ (neboť $\ln\frac\pi4&lt;0$). Tedy $f'_-(1)=-\infty$.</p>
 <p><b>5. Závěr.</b> $f'$ je dáno vzorcem výše na $(0,1)$; v $1$ je derivace zleva $-\infty$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">26.</span> <span class="fm">$f(x)=\begin{cases}x^2\Bigl(\sin\dfrac1x+\cos\dfrac1x\Bigr), &amp; x\ne0,\\ 0, &amp; x=0\end{cases}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Pro $x\ne0$: $f'(x)=2x\Bigl(\sin\frac1x+\cos\frac1x\Bigr)+x^2\Bigl(-\dfrac{\cos\frac1x}{x^2}+\dfrac{\sin\frac1x}{x^2}\Bigr)=2x\Bigl(\sin\frac1x+\cos\frac1x\Bigr)+\sin\frac1x-\cos\frac1x$.</p>
-<p><b>3. Problémové body.</b> Bod $x=0$.</p>
-<p><b>4. Derivace v problémových bodech.</b> Z definice: $\dfrac{f(x)-f(0)}{x}=x\bigl(\sin\frac1x+\cos\frac1x\bigr)\to0$ (omezená krát nula). Tedy $f'(0)=0$. Přitom $\lim_{x\to0}f'(x)$ neexistuje ($\sin\frac1x-\cos\frac1x$ osciluje), takže $f'$ není v $0$ spojitá.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Pro $x\ne0$: $f'(x)=2x\Bigl(\sin\frac1x+\cos\frac1x\Bigr)+x^2\Bigl(-\dfrac{\cos\frac1x}{x^2}+\dfrac{\sin\frac1x}{x^2}\Bigr)=2x\Bigl(\sin\frac1x+\cos\frac1x\Bigr)+\sin\frac1x-\cos\frac1x$.</p>
+<p><b>3. Podezřelé body.</b> Bod $x=0$.</p>
+<p><b>4. Derivace v podezřelých bodech.</b> Z definice: $\dfrac{f(x)-f(0)}{x}=x\bigl(\sin\frac1x+\cos\frac1x\bigr)\to0$ (omezená krát nula). Tedy $f'(0)=0$. Přitom $\lim_{x\to0}f'(x)$ neexistuje ($\sin\frac1x-\cos\frac1x$ osciluje), takže $f'$ není v $0$ spojitá.</p>
 <p><b>5. Závěr.</b> $f'(0)=0$ a $f'(x)=2x(\sin\frac1x+\cos\frac1x)+\sin\frac1x-\cos\frac1x$ pro $x\ne0$. Derivace existuje všude, ale není spojitá v $0$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">27.</span> <span class="fm">$f(x)=x\arcsin\sqrt{\dfrac{x}{x+1}}+\operatorname{arctg}\sqrt x-\sqrt x$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $\sqrt x$: $x\ge0$; pak $\frac{x}{x+1}\in\langle0,1)$. $D_f=\langle0,\infty)$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Na $(0,\infty)$: $\Bigl(\arcsin\sqrt{\tfrac{x}{x+1}}\Bigr)'=\sqrt{x+1}\cdot\dfrac{1}{2\sqrt x\,(x+1)^{3/2}}=\dfrac{1}{2\sqrt x\,(x+1)}$, takže $f'(x)=\arcsin\sqrt{\tfrac{x}{x+1}}+\dfrac{x}{2\sqrt x\,(x+1)}+\dfrac{1}{2\sqrt x\,(1+x)}-\dfrac1{2\sqrt x}$. Protože $\dfrac{x}{2\sqrt x(x+1)}+\dfrac{1}{2\sqrt x(x+1)}=\dfrac1{2\sqrt x}$, poslední tři členy se vyruší.</p>
-<p><b>3. Problémové body.</b> Krajní bod $x=0\in D_f$.</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je v $0$ zprava spojitá a $\lim_{x\to0+}f'(x)=\arcsin0=0$, tedy $f'_+(0)=0$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Na $(0,\infty)$: $\Bigl(\arcsin\sqrt{\tfrac{x}{x+1}}\Bigr)'=\sqrt{x+1}\cdot\dfrac{1}{2\sqrt x\,(x+1)^{3/2}}=\dfrac{1}{2\sqrt x\,(x+1)}$, takže $f'(x)=\arcsin\sqrt{\tfrac{x}{x+1}}+\dfrac{x}{2\sqrt x\,(x+1)}+\dfrac{1}{2\sqrt x\,(1+x)}-\dfrac1{2\sqrt x}$. Protože $\dfrac{x}{2\sqrt x(x+1)}+\dfrac{1}{2\sqrt x(x+1)}=\dfrac1{2\sqrt x}$, poslední tři členy se vyruší.</p>
+<p><b>3. Podezřelé body.</b> Krajní bod $x=0\in D_f$.</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je v $0$ zprava spojitá a $\lim_{x\to0+}f'(x)=\arcsin0=0$, tedy $f'_+(0)=0$.</p>
 <p><b>5. Závěr.</b> $f'(x)=\arcsin\sqrt{\dfrac{x}{x+1}}$ pro $x&gt;0$ a $f'_+(0)=0$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">28.</span> <span class="fm">$f(x)=\begin{cases}x^3\cos\dfrac1x, &amp; x\ne0,\\ 0, &amp; x=0\end{cases}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Pro $x\ne0$: $f'(x)=3x^2\cos\frac1x+x^3\cdot\dfrac{\sin\frac1x}{x^2}=3x^2\cos\frac1x+x\sin\frac1x$.</p>
-<p><b>3. Problémové body.</b> Bod $x=0$.</p>
-<p><b>4. Derivace v problémových bodech.</b> Z definice: $\dfrac{f(x)-f(0)}{x}=x^2\cos\frac1x\to0$, tedy $f'(0)=0$. Navíc $|f'(x)|\le3x^2+|x|\to0$, tedy $\lim_{x\to0}f'(x)=0=f'(0)$: $f'$ je v $0$ spojitá.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Pro $x\ne0$: $f'(x)=3x^2\cos\frac1x+x^3\cdot\dfrac{\sin\frac1x}{x^2}=3x^2\cos\frac1x+x\sin\frac1x$.</p>
+<p><b>3. Podezřelé body.</b> Bod $x=0$.</p>
+<p><b>4. Derivace v podezřelých bodech.</b> Z definice: $\dfrac{f(x)-f(0)}{x}=x^2\cos\frac1x\to0$, tedy $f'(0)=0$. Navíc $|f'(x)|\le3x^2+|x|\to0$, tedy $\lim_{x\to0}f'(x)=0=f'(0)$: $f'$ je v $0$ spojitá.</p>
 <p><b>5. Závěr.</b> $f'(0)=0$, $f'(x)=3x^2\cos\frac1x+x\sin\frac1x$ pro $x\ne0$; $f'$ je spojitá v $0$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">29.</span> <span class="fm">$f(x)=\max\{x+4\arctan(\sin x),\,x\}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $D_f=\mathbb R$. Platí $f(x)=x+4\max\{\operatorname{arctg}(\sin x),0\}$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Pro $\sin x&gt;0$ je $f(x)=x+4\operatorname{arctg}(\sin x)$, $f'(x)=1+\dfrac{4\cos x}{1+\sin^2x}$. Pro $\sin x&lt;0$ je $f(x)=x$, $f'(x)=1$.</p>
-<p><b>3. Problémové body.</b> Body $x=k\pi$ (kde $\sin x=0$).</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je spojitá. V $x=2k\pi$ ($\sin$ přechází z $-$ na $+$): $f'_-=1$, $f'_+=1+4=5$. V $x=(2k+1)\pi$ ($\sin$ přechází z $+$ na $-$): $f'_-=1+\frac{4(-1)}{1}=-3$, $f'_+=1$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Pro $\sin x&gt;0$ je $f(x)=x+4\operatorname{arctg}(\sin x)$, $f'(x)=1+\dfrac{4\cos x}{1+\sin^2x}$. Pro $\sin x&lt;0$ je $f(x)=x$, $f'(x)=1$.</p>
+<p><b>3. Podezřelé body.</b> Body $x=k\pi$ (kde $\sin x=0$).</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je spojitá. V $x=2k\pi$ ($\sin$ přechází z $-$ na $+$): $f'_-=1$, $f'_+=1+4=5$. V $x=(2k+1)\pi$ ($\sin$ přechází z $+$ na $-$): $f'_-=1+\frac{4(-1)}{1}=-3$, $f'_+=1$.</p>
 <p><b>5. Závěr.</b> $f'$ je dáno výše na $x\ne k\pi$; v $x=k\pi$ derivace neexistuje.</p>
 </div></details>
 <details class="sol"><summary><span class="no">30.</span> <span class="fm">$f(x)=e^{\frac1{\ln|x|}}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $x\ne0$ a $\ln|x|\ne0\iff|x|\ne1$: $D_f=\mathbb R\setminus\{-1,0,1\}$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> $f'(x)=e^{\frac1{\ln|x|}}\cdot\Bigl(-\dfrac1{\ln^2|x|}\Bigr)\cdot\dfrac1x$, protože $(\ln|x|)'=\frac1x$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> $f'(x)=e^{\frac1{\ln|x|}}\cdot\Bigl(-\dfrac1{\ln^2|x|}\Bigr)\cdot\dfrac1x$, protože $(\ln|x|)'=\frac1x$.</p>
 <p><b>5. Závěr.</b> $f'(x)=-\dfrac{e^{1/\ln|x|}}{x\ln^2|x|}$ pro každé $x\in D_f$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">31.</span> <span class="fm">$f(x)=\operatorname{arctg}e^x-\ln\sqrt{\dfrac{e^{2x}}{e^{2x}+1}}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Zlomek je vždy kladný: $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Zjednodušíme: $\ln\sqrt{\frac{e^{2x}}{e^{2x}+1}}=x-\frac12\ln(e^{2x}+1)$, tedy $f(x)=\operatorname{arctg}e^x-x+\frac12\ln(e^{2x}+1)$ a $f'(x)=\dfrac{e^x}{1+e^{2x}}-1+\dfrac{e^{2x}}{e^{2x}+1}=\dfrac{e^x-1}{1+e^{2x}}$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Zjednodušíme: $\ln\sqrt{\frac{e^{2x}}{e^{2x}+1}}=x-\frac12\ln(e^{2x}+1)$, tedy $f(x)=\operatorname{arctg}e^x-x+\frac12\ln(e^{2x}+1)$ a $f'(x)=\dfrac{e^x}{1+e^{2x}}-1+\dfrac{e^{2x}}{e^{2x}+1}=\dfrac{e^x-1}{1+e^{2x}}$.</p>
 <p><b>5. Závěr.</b> $f'(x)=\dfrac{e^x-1}{1+e^{2x}}$ pro každé $x\in\mathbb R$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">32.</span> <span class="fm">$f(x)=\sin\Bigl(\cos\bigl((x^3+17x^2-56x+1)^{18}\bigr)\Bigr)$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> Složení spojitě diferencovatelných funkcí: $D_f=\mathbb R$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Označíme $P(x)=x^3+17x^2-56x+1$, $P'(x)=3x^2+34x-56$. Řetězové pravidlo: $f'(x)=\cos\bigl(\cos P^{18}\bigr)\cdot\bigl(-\sin P^{18}\bigr)\cdot18\,P^{17}\cdot P'$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Označíme $P(x)=x^3+17x^2-56x+1$, $P'(x)=3x^2+34x-56$. Řetězové pravidlo: $f'(x)=\cos\bigl(\cos P^{18}\bigr)\cdot\bigl(-\sin P^{18}\bigr)\cdot18\,P^{17}\cdot P'$.</p>
 <p><b>5. Závěr.</b> $f'(x)=-18\,P^{17}(x)\,P'(x)\,\sin\bigl(P^{18}(x)\bigr)\cos\bigl(\cos P^{18}(x)\bigr)$ pro každé $x\in\mathbb R$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">33.</span> <span class="fm">$f(x)=\arcsin\bigl(2x\sqrt{1-x^2}\bigr)$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $\sqrt{1-x^2}$: $|x|\le1$. Navíc $2|x|\sqrt{1-x^2}\le x^2+(1-x^2)=1$, tedy argument leží v $\langle-1,1\rangle$. $D_f=\langle-1,1\rangle$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> Pro $u=2x\sqrt{1-x^2}$ je $u'=\dfrac{2(1-2x^2)}{\sqrt{1-x^2}}$ a $1-u^2=(1-2x^2)^2$. Pro $|u|&lt;1$ ($x\ne\pm\frac1{\sqrt2}$, $|x|&lt;1$): $f'(x)=\dfrac{2(1-2x^2)}{\sqrt{1-x^2}\,|1-2x^2|}=\dfrac{2\operatorname{sgn}(1-2x^2)}{\sqrt{1-x^2}}$.</p>
-<p><b>3. Problémové body.</b> Body $x=\pm\frac1{\sqrt2}$ ($|u|=1$) a krajní body $\pm1$.</p>
-<p><b>4. Derivace v problémových bodech.</b> $f$ je spojitá. V $\frac1{\sqrt2}$: $f'_-=2\sqrt2$, $f'_+=-2\sqrt2$; v $-\frac1{\sqrt2}$: $f'_-=-2\sqrt2$, $f'_+=2\sqrt2$. V krajních bodech: $f'_-(1)=\lim_{x\to1-}\frac{-2}{\sqrt{1-x^2}}=-\infty$, $f'_+(-1)=-\infty$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> Pro $u=2x\sqrt{1-x^2}$ je $u'=\dfrac{2(1-2x^2)}{\sqrt{1-x^2}}$ a $1-u^2=(1-2x^2)^2$. Pro $|u|&lt;1$ ($x\ne\pm\frac1{\sqrt2}$, $|x|&lt;1$): $f'(x)=\dfrac{2(1-2x^2)}{\sqrt{1-x^2}\,|1-2x^2|}=\dfrac{2\operatorname{sgn}(1-2x^2)}{\sqrt{1-x^2}}$.</p>
+<p><b>3. Podezřelé body.</b> Body $x=\pm\frac1{\sqrt2}$ ($|u|=1$) a krajní body $\pm1$.</p>
+<p><b>4. Derivace v podezřelých bodech.</b> $f$ je spojitá. V $\frac1{\sqrt2}$: $f'_-=2\sqrt2$, $f'_+=-2\sqrt2$; v $-\frac1{\sqrt2}$: $f'_-=-2\sqrt2$, $f'_+=2\sqrt2$. V krajních bodech: $f'_-(1)=\lim_{x\to1-}\frac{-2}{\sqrt{1-x^2}}=-\infty$, $f'_+(-1)=-\infty$.</p>
 <p><b>5. Závěr.</b> $f'(x)=\dfrac{2\operatorname{sgn}(1-2x^2)}{\sqrt{1-x^2}}$ pro $x\in(-1,1)\setminus\{\pm\frac1{\sqrt2}\}$; v $\pm\frac1{\sqrt2}$ derivace neexistuje, v $\pm1$ jsou jednostranné derivace $-\infty$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">34.</span> <span class="fm">$f(x)=\Bigl(\dfrac1x\Bigr)^{\frac1x}$</span></summary><div class="body">
 <p><b>1. Definiční obor.</b> $f(x)=e^{\frac1x\ln\frac1x}=e^{-\frac{\ln x}{x}}$, $D_f=(0,\infty)$.</p>
-<p><b>2. Derivace tam, kde to jde.</b> $f'(x)=e^{-\frac{\ln x}{x}}\cdot\Bigl(-\dfrac{1-\ln x}{x^2}\Bigr)=\Bigl(\dfrac1x\Bigr)^{\frac1x}\dfrac{\ln x-1}{x^2}$.</p>
+<p><b>2. Derivace na otevřených intervalech.</b> $f'(x)=e^{-\frac{\ln x}{x}}\cdot\Bigl(-\dfrac{1-\ln x}{x^2}\Bigr)=\Bigl(\dfrac1x\Bigr)^{\frac1x}\dfrac{\ln x-1}{x^2}$.</p>
 <p><b>5. Závěr.</b> $f'(x)=\bigl(\frac1x\bigr)^{1/x}\dfrac{\ln x-1}{x^2}$ pro každé $x&gt;0$.</p>
 </div></details>
 <details class="sol"><summary><span class="no">35.</span> <span class="fm">$\lim_{x\to a}\dfrac{x^x-a^a}{x-a},\quad a&gt;0$</span></summary><div class="body"><p>Jde o limitu diferenčního podílu $g(x)=x^x$ v bodě $a$: $\dfrac{g(x)-g(a)}{x-a}\to g'(a)$. Z příkladu 3: $g'(x)=x^x(\ln x+1)$. Limita je $a^a(\ln a+1)$.</p></div></details>

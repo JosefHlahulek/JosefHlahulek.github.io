@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LU rozklad · Josef Hlahulek</title>
+<meta name="description" content="LU rozklad pomocí Gaussovy eliminace: elementární matice, jejich inverze a součin.">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  nav ul a.cur { color: var(--ink); }
+  body { padding-bottom: 80px; }
+  .top { display: flex; justify-content: space-between; align-items: center; height: 76px; font-size: 14px; color: var(--muted); }
+  .top a:hover { color: var(--ink); }
+  .katex { font-size: 1.06em; }
+
+  .setup { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 22px; margin: 0 0 14px; font-family: var(--serif); font-size: 26px; color: var(--ink); }
+  .mat { display: grid; gap: 6px 8px; padding: 4px 12px; border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); border-radius: 3px; }
+  .mat.two { grid-template-columns: repeat(2, auto); }
+  .mat.one { grid-template-columns: auto; }
+  .mat input { width: 64px; padding: 6px 4px; text-align: center; font: 500 18px var(--mono); color: var(--ink); background: transparent;
+               border: 0; border-bottom: 1px solid var(--line); border-radius: 0; outline: none; transition: border-color .2s, color .2s; }
+  .mat input:focus { border-color: var(--accent); }
+  .mat input.bad { color: #a33; border-color: #a33; }
+  .mat .x { font-family: var(--serif); font-size: 24px; text-align: center; min-width: 64px; padding: 6px 4px; }
+  .mat input, .mat .x { height: 40px; box-sizing: border-box; line-height: 26px; }
+  .op { color: var(--muted); }
+
+  .presets { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; font-size: 14px; color: var(--muted); margin: 0 0 22px; }
+  .link { background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 0 0 1px; font: inherit; font-size: 14px; font-weight: 500;
+          cursor: pointer; color: var(--ink); transition: color .2s, border-color .2s; }
+  .link:hover { color: var(--accent); border-color: var(--accent); }
+
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; border-top: 1px solid var(--line); padding: 18px 0 8px; }
+  .panel h2 { font-family: var(--serif); font-weight: 500; font-size: 22px; margin: 0 0 4px; color: var(--ink); }
+  .panel p.sub { margin: 0 0 8px; color: var(--muted); font-size: 14.5px; max-width: 46ch; }
+  .panel svg { display: block; width: 100%; height: auto; max-width: 520px; touch-action: none; }
+  .ctl { display: flex; align-items: center; gap: 14px; margin: 8px 0 0; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
+  .ctl input[type=range] { flex: 1; min-width: 140px; max-width: 280px; accent-color: var(--accent); }
+  .ctl .val { font-family: var(--mono); font-size: 13px; color: var(--ink); min-width: 3.4em; }
+
+  svg text { font-family: var(--sans); font-size: 12px; fill: var(--muted); }
+  svg .lab { fill: var(--ink); font-size: 14px; font-weight: 500; }
+  svg .labT { fill: var(--accent); font-size: 14px; font-weight: 500; }
+
+  .notes { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 20px; font-family: var(--serif); font-size: clamp(18px, 2.2vw, 21px); line-height: 1.55; color: var(--ink); max-width: 78ch; }
+  .notes p { margin: 0 0 12px; }
+  .notes .eq { margin: 6px 0 14px; overflow-x: auto; }
+  .notes .warn { color: var(--accent); }
+
+  .res { display: grid; grid-template-columns: minmax(200px, 300px) 1fr; gap: 6px 22px; margin: 18px 0 8px; font-size: 15px; align-items: baseline; }
+  .res .k { color: var(--muted); }
+  .res .v { font-family: var(--mono); font-size: 14px; color: var(--ink); overflow-x: auto; white-space: nowrap; }
+  .res .v sup { font-size: .7em; }
+  .res .em { color: var(--accent); }
+  .seg { display: inline-flex; gap: 18px; font-size: 14px; }
+  .seg button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 0 0 1px; font: inherit; font-weight: 500; color: var(--muted); cursor: pointer; }
+  .seg button.on { color: var(--ink); border-color: var(--accent); }
+  select.op { font: 500 20px var(--mono); color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 4px 2px; outline: none; }
+  .mrow { overflow-x: auto; padding: 6px 0; margin: 4px 0 6px; font-size: 1.12em; }
+  .mrow .katex-display { margin: 0; }
+  .stepbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; margin: 18px 0 8px; font-size: 15px; }
+  .stepbar .cnt { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+  .stepbar button:disabled { opacity: .35; cursor: default; }
+  .sty { font-family: var(--serif); font-size: clamp(18px, 2.1vw, 20px); line-height: 1.55; max-width: 80ch; margin: 6px 0 8px; }
+  .sty p { margin: 0 0 6px; }
+  .sty .ops { color: var(--ink); font-family: var(--mono); font-size: 14px; line-height: 1.7; margin: 4px 0 8px; }
+  .sty .ok { color: var(--accent); }
+  .sty .bad2 { color: #a33; }
+  .sizes { display: inline-flex; gap: 14px; align-items: baseline; font-size: 14px; color: var(--muted); }
+  .mat.n3 { grid-template-columns: repeat(3, auto); } .mat.n4 { grid-template-columns: repeat(4, auto); }
+  .mat input { width: 58px; }
+  .sec2 { border-top: 1px solid var(--line); margin-top: 26px; padding-top: 18px; }
+  .sec2 h2 { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 0 0 12px; }
+  .read { display: flex; flex-wrap: wrap; gap: 6px 28px; font-size: 15px; color: var(--muted); margin: 6px 0 0; }
+  .read b { font-family: var(--mono); font-weight: 500; color: var(--ink); }
+  .notes h3 { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 0 0 8px; }
+  .notes .blk { margin-bottom: 26px; }
+  @media (max-width: 860px) { .panels { grid-template-columns: 1fr; } .setup { font-size: 22px; } .mat input { width: 56px; } }
+</style>
+</head>
+<body>
+<div class="wrap la">
+  <div class="top">
+    <a href="../numericka-matematika.html">← Numerická matematika</a>
+    <a href="../index.html">Josef Hlahulek</a>
+  </div>
+  <h1 class="sm" style="margin:6px 0 26px;max-width:none">LU <em>rozklad</em></h1>
+
+  <div class="notes" style="border-top:0;padding-top:0;margin-top:0">
+    <div class="blk">
+      <h3>Definice</h3>
+      <p>Nechť $A$ je regulární. Rozklad $A=L\cdot U$, kde $L$ je dolní a $U$ horní trojúhelníková, nazveme LU rozkladem matice $A$.</p>
+      <p><b>Věta.</b> Lze-li provést prostou GE, dává LU rozklad: $U$ je matice $A$ po elementárních úpravách a $L$ je matice, do níž po sloupcích ukládáme násobitele (s jedničkami na diagonále).</p>
+      <p>Úprava v $k$-tém kroku je násobení zleva maticí
+      $$E_k=I-\sum_{i\gt k}l_{ik}\,e_ie_k^{T},\qquad E_k^{-1}=I+\sum_{i\gt k}l_{ik}\,e_ie_k^{T},$$
+      kde $l_{ik}=a_{ik}^{(k)}/a_{kk}^{(k)}$. Z $E_{n-1}\cdots E_1A=U$ plyne $A=E_1^{-1}\cdots E_{n-1}^{-1}U$, tedy $L:=E_1^{-1}\cdots E_{n-1}^{-1}$.</p>
+    </div>
+  </div>
+
+  <div class="setup" id="setup"></div>
+  <div class="presets" id="presets">
+    <span class="sizes">Velikost: <button class="link" type="button" data-n="2">2×2</button><button class="link" type="button" data-n="3">3×3</button><button class="link" type="button" data-n="4">4×4</button></span>
+    <button class="link" type="button" data-m="3|2,1,-1,-3,-1,2,-2,1,2">Ze skript</button>
+    <button class="link" type="button" data-m="2|4,3,6,3">2×2</button>
+    <button class="link" type="button" data-m="3|1,2,3,2,5,7,3,7,12">Celočíselné L</button>
+    <button class="link" type="button" data-m="4|2,-1,0,0,-1,2,-1,0,0,-1,2,-1,0,0,-1,2">Třídiagonální 4×4</button>
+    <button class="link" type="button" data-m="2|0,1,1,1">Nulový pivot</button>
+  </div>
+
+  <div class="stepbar">
+    <button class="link" id="prev" type="button">← Předchozí</button>
+    <button class="link" id="next" type="button">Další →</button>
+    <button class="link" id="reset" type="button">Znovu</button>
+    <span class="cnt" id="cnt"></span>
+  </div>
+  <div class="sty" id="txt"></div>
+  <div id="view"></div>
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script src="../assets/site.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var N = 3, step = 0, steps = [], A = null, err = '';
+  var PIV = '#d7ecf1', TEAL = '#0b6e8a';
+
+  // --- racionální čísla [n,d] ---
+  function gcd(a, b) { a = a < 0n ? -a : a; b = b < 0n ? -b : b; while (b) { var t = a % b; a = b; b = t; } return a; }
+  function R(n, d) { if (d < 0n) { n = -n; d = -d; } var g = gcd(n, d) || 1n; return [n / g, d / g]; }
+  function add(a, b) { return R(a[0] * b[1] + b[0] * a[1], a[1] * b[1]); }
+  function sub(a, b) { return R(a[0] * b[1] - b[0] * a[1], a[1] * b[1]); }
+  function mul(a, b) { return R(a[0] * b[0], a[1] * b[1]); }
+  function dv(a, b) { return R(a[0] * b[1], a[1] * b[0]); }
+  function neg(a) { return [-a[0], a[1]]; }
+  function isz(a) { return a[0] === 0n; }
+  function eq(a, b) { return a[0] === b[0] && a[1] === b[1]; }
+  var ZERO = [0n, 1n], ONE = [1n, 1n];
+  function parse(s) {
+    s = String(s).replace(/\s+/g, '').replace(/−/g, '-').replace(/,/g, '.');
+    var m = /^([+-]?)(\d+)\/(\d+)$/.exec(s);
+    if (m) { if (BigInt(m[3]) === 0n) return null; return R(BigInt(m[1] === '-' ? '-' + m[2] : m[2]), BigInt(m[3])); }
+    m = /^([+-]?)(\d*)\.?(\d*)$/.exec(s);
+    if (!m || (m[2] === '' && m[3] === '')) return null;
+    var num = BigInt((m[2] + m[3]) || '0'); if (m[1] === '-') num = -num;
+    return R(num, 10n ** BigInt(m[3].length));
+  }
+  function tex(r) { if (r[1] === 1n) return r[0].toString(); return (r[0] < 0n ? '-' : '') + '\\frac{' + (r[0] < 0n ? -r[0] : r[0]).toString() + '}{' + r[1].toString() + '}'; }
+  function txt(r) { return (r[0] < 0n ? '−' : '') + (r[0] < 0n ? -r[0] : r[0]).toString() + (r[1] === 1n ? '' : '/' + r[1].toString()); }
+  function txtP(r) { return r[0] < 0n ? '(' + txt(r) + ')' : txt(r); }
+  function ident() { var I = []; for (var i = 0; i < N; i++) { I.push([]); for (var j = 0; j < N; j++) I[i].push(i === j ? ONE : ZERO); } return I; }
+  function copy(M) { return M.map(function (r) { return r.slice(); }); }
+  function matmul(X, Y) { var Z = []; for (var i = 0; i < N; i++) { Z.push([]); for (var j = 0; j < N; j++) { var s = ZERO; for (var k = 0; k < N; k++) s = add(s, mul(X[i][k], Y[k][j])); Z[i].push(s); } } return Z; }
+
+  // --- vykreslení matic: hl[i][j] = 'piv' | 'teal' | undefined ---
+  function bm(M, hl) {
+    var rows = M.map(function (r, i) {
+      return r.map(function (x, j) {
+        var t = tex(x), h = hl && hl[i] && hl[i][j];
+        if (h === 'piv') return '\\colorbox{' + PIV + '}{$' + t + '$}';
+        if (h === 'teal') return '\\textcolor{' + TEAL + '}{' + t + '}';
+        return t;
+      }).join(' & ');
+    }).join(' \\\\ ');
+    return '\\begin{bmatrix}' + rows + '\\end{bmatrix}';
+  }
+  function line(t) { var d = document.createElement('div'); d.className = 'mrow'; d.innerHTML = katex.renderToString(t, { displayMode: true, throwOnError: false, strict: false, trust: false }); return d; }
+  function mk(M, mark) { var H = []; for (var i = 0; i < N; i++) { H.push([]); } mark.forEach(function (m) { H[m[0]][m[1]] = m[2]; }); return bm(M, H); }
+
+  // --- výpočet všech kroků ---
+  function compute() {
+    steps = []; err = '';
+    var Ak = copy(A), L = ident(), E1 = [];
+    steps.push({ type: 'start', A: copy(A) });
+    for (var k = 0; k < N - 1; k++) {
+      var p = Ak[k][k];
+      if (isz(p)) { err = 'Pivot $a_{' + (k + 1) + (k + 1) + '}^{(' + (k + 1) + ')}$ je nulový: prostou GE nelze provést, LU rozklad bez výměny řádků neexistuje.'; steps.push({ type: 'fail', k: k, Ak: copy(Ak) }); return; }
+      var l = [], Anext = copy(Ak), E = ident(), Ei = ident(), Lnew = copy(L), i, j;
+      for (i = k + 1; i < N; i++) {
+        l[i] = dv(Ak[i][k], p);
+        for (j = 0; j < N; j++) Anext[i][j] = sub(Ak[i][j], mul(l[i], Ak[k][j]));
+        E[i][k] = neg(l[i]); Ei[i][k] = l[i]; Lnew[i][k] = l[i];
+      }
+      steps.push({ type: 'op', k: k, Ak: copy(Ak), An: Anext, l: l, Lprev: copy(L), Lnew: Lnew });
+      steps.push({ type: 'inv', k: k, Ak: copy(Ak), An: Anext, E: E, Ei: Ei, Lnew: Lnew });
+      Ei.slice && E1.push(Ei);
+      Ak = Anext; L = Lnew;
+    }
+    steps.push({ type: 'final', U: Ak, L: L, Es: E1 });
+  }
+
+  function show() {
+    var v = $('view'), t = $('txt'); v.innerHTML = '';
+    $('prev').disabled = step === 0; $('next').disabled = step >= steps.length - 1;
+    $('cnt').textContent = 'Krok ' + (step + 1) + ' z ' + steps.length;
+    var s = steps[step], K, i, h = '';
+    if (s.type === 'start') {
+      t.innerHTML = '<p>Matice $A$ a vedle ní jednotková matice $L$, do které budeme zapisovat násobitele.</p>';
+      v.appendChild(line('A^{(1)}=' + bm(s.A) + '\\qquad L=' + bm(ident())));
+    } else if (s.type === 'fail') {
+      t.innerHTML = '<p class="bad2">' + err + '</p>';
+      v.appendChild(line('A^{(' + (s.k + 1) + ')}=' + mk(s.Ak, [[s.k, s.k, 'piv']])));
+    } else if (s.type === 'op') {
+      K = s.k + 1;
+      h = '<p><b>Krok ' + K + '.</b> Pivot $a_{' + K + K + '}^{(' + K + ')}=' + tex(s.Ak[s.k][s.k]) + '$. Násobitele $l_{i' + K + '}=a_{i' + K + '}^{(' + K + ')}/a_{' + K + K + '}^{(' + K + ')}$ zapíšeme do $L$ na pozici $(i,' + K + ')$ a od $i$-tého řádku odečteme $l_{i' + K + '}$-násobek ' + K + '. řádku:</p><div class="ops">';
+      for (i = s.k + 1; i < N; i++) h += 'l<sub>' + (i + 1) + K + '</sub> = ' + txt(s.Ak[i][s.k]) + ' / ' + txt(s.Ak[s.k][s.k]) + ' = ' + txt(s.l[i]) + ' &nbsp;&nbsp; ř<sub>' + (i + 1) + '</sub> ← ř<sub>' + (i + 1) + '</sub> − ' + txtP(s.l[i]) + '·ř<sub>' + K + '</sub><br>';
+      h += '</div>';
+      t.innerHTML = h;
+      var m1 = [[s.k, s.k, 'piv']], m2 = [], m3 = [];
+      for (i = s.k + 1; i < N; i++) { m1.push([i, s.k, 'teal']); m2.push([i, s.k, 'teal']); m3.push([i, s.k, 'teal']); }
+      v.appendChild(line('A^{(' + K + ')}=' + mk(s.Ak, m1) + '\\ \\longrightarrow\\ A^{(' + (K + 1) + ')}=' + mk(s.An, m2)));
+      v.appendChild(line('L=' + mk(s.Lnew, m3)));
+    } else if (s.type === 'inv') {
+      K = s.k + 1;
+      t.innerHTML = '<p><b>Krok ' + K + '.</b> Úprava je násobení zleva maticí $E_{' + K + '}$ (násobitele se znaménkem minus). Její inverze $E_{' + K + '}^{-1}$ má násobitele se znaménkem plus, tedy přesně to, co jsme zapsali do $L$.</p>';
+      var mm = [], mi = [];
+      for (i = s.k + 1; i < N; i++) { mm.push([i, s.k, 'teal']); mi.push([i, s.k, 'teal']); }
+      v.appendChild(line('E_{' + K + '}=' + mk(s.E, mm) + '\\qquad E_{' + K + '}^{-1}=' + mk(s.Ei, mi)));
+      v.appendChild(line('E_{' + K + '}\\,A^{(' + K + ')}=' + bm(s.E) + bm(s.Ak) + '=' + bm(s.An) + '=A^{(' + (K + 1) + ')}'));
+      var lab = K === 1 ? 'E_1^{-1}' : 'E_1^{-1}\\cdots E_{' + K + '}^{-1}';
+      var m4 = []; for (i = s.k + 1; i < N; i++) m4.push([i, s.k, 'teal']);
+      if (K > 1) v.appendChild(line(lab + '=' + mk(s.Lnew, m4)));
+      if (K > 1) { var p = document.createElement('p'); p.className = 'muted'; p.style.cssText = 'font-size:15px;margin:0'; p.textContent = 'Roznásobením se násobitele pouze uloží na svá místa.'; v.appendChild(p); }
+    } else if (s.type === 'final') {
+      t.innerHTML = '<p>Hotovo. $U=A^{(' + N + ')}$ je horní trojúhelníková. $L=E_1^{-1}\\cdots E_{' + (N - 1) + '}^{-1}$ je dolní trojúhelníková s jedničkami na diagonále a s násobiteli pod diagonálou.</p>';
+      var prod = s.Es.map(function (E) { return bm(E); }).join('');
+      v.appendChild(line('L=' + s.Es.map(function (E, q) { return 'E_{' + (q + 1) + '}^{-1}'; }).join('') + '=' + prod + '=' + bm(s.L)));
+      v.appendChild(line('U=' + bm(s.U)));
+      var LU = matmul(s.L, s.U), okk = true;
+      for (i = 0; i < N; i++) for (var j = 0; j < N; j++) if (!eq(LU[i][j], A[i][j])) okk = false;
+      v.appendChild(line('L\\,U=' + bm(s.L) + bm(s.U) + '=' + bm(LU) + (okk ? '=A' : '\\neq A')));
+    }
+    if (window.katexRenderText) window.katexRenderText(t);
+    renderText(t);
+  }
+  function renderText(el) {
+    el.innerHTML = el.innerHTML.replace(/\$([^$]+?)\$/g, function (_, m) { return katex.renderToString(m.replace(/&lt;/g, '<'), { throwOnError: false, strict: false }); });
+  }
+
+  // --- vstup ---
+  var ins = [];
+  function buildInputs(vals) {
+    var wrap = $('setup'); wrap.innerHTML = '';
+    var m = document.createElement('div'); m.className = 'mat n' + N; if (N === 2) m.className = 'mat two';
+    ins = [];
+    for (var i = 0; i < N * N; i++) {
+      var e = document.createElement('input'); e.setAttribute('inputmode', 'decimal'); e.setAttribute('aria-label', 'a' + (Math.floor(i / N) + 1) + ((i % N) + 1));
+      e.value = vals ? vals[i] : (i % (N + 1) === 0 ? '2' : '1'); e.addEventListener('input', read); m.appendChild(e); ins.push(e);
+    }
+    wrap.appendChild(m);
+    Array.prototype.forEach.call(document.querySelectorAll('[data-n]'), function (b) { b.style.borderColor = (+b.getAttribute('data-n') === N) ? 'var(--accent)' : ''; });
+  }
+  function read() {
+    var M = [], ok = true;
+    for (var i = 0; i < N; i++) { M.push([]); for (var j = 0; j < N; j++) { var e = ins[i * N + j], r = parse(e.value); e.classList.toggle('bad', !r); if (!r) ok = false; M[i].push(r); } }
+    if (!ok) { $('txt').innerHTML = '<p>Zadejte čísla (celá, desetinná nebo zlomky a/b).</p>'; $('view').innerHTML = ''; $('prev').disabled = $('next').disabled = true; return; }
+    A = M; step = 0; compute(); show();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-n]'), function (b) { b.addEventListener('click', function () { N = +b.getAttribute('data-n'); buildInputs(); read(); }); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-m]'), function (b) { b.addEventListener('click', function () { var v = b.getAttribute('data-m').split('|'); N = +v[0]; buildInputs(v[1].split(',')); read(); }); });
+  $('prev').addEventListener('click', function () { if (step > 0) { step--; show(); } });
+  $('next').addEventListener('click', function () { if (step < steps.length - 1) { step++; show(); } });
+  $('reset').addEventListener('click', function () { step = 0; show(); });
+
+  var Mn = document.querySelector('.notes');
+  Mn.innerHTML = Mn.innerHTML.replace(/\$\$([\s\S]+?)\$\$/g, function (_, m) { return katex.renderToString(m, { displayMode: true, throwOnError: false }); })
+                             .replace(/\$([^$]+?)\$/g, function (_, m) { return katex.renderToString(m, { throwOnError: false }); });
+  N = 3; buildInputs(['2', '1', '-1', '-3', '-1', '2', '-2', '1', '2']); read();
+})();
+</script>
+</body>
+</html>

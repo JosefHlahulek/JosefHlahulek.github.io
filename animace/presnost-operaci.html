@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Přesnost operací · Josef Hlahulek</title>
+<meta name="description" content="Strojová přesnost a zaokrouhlování při operacích v pohyblivé řádové čárce.">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  nav ul a.cur { color: var(--ink); }
+  body { padding-bottom: 80px; }
+  .top { display: flex; justify-content: space-between; align-items: center; height: 76px; font-size: 14px; color: var(--muted); }
+  .top a:hover { color: var(--ink); }
+  .katex { font-size: 1.06em; }
+
+  .setup { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 22px; margin: 0 0 14px; font-family: var(--serif); font-size: 26px; color: var(--ink); }
+  .mat { display: grid; gap: 6px 8px; padding: 4px 12px; border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); border-radius: 3px; }
+  .mat.two { grid-template-columns: repeat(2, auto); }
+  .mat.one { grid-template-columns: auto; }
+  .mat input { width: 64px; padding: 6px 4px; text-align: center; font: 500 18px var(--mono); color: var(--ink); background: transparent;
+               border: 0; border-bottom: 1px solid var(--line); border-radius: 0; outline: none; transition: border-color .2s, color .2s; }
+  .mat input:focus { border-color: var(--accent); }
+  .mat input.bad { color: #a33; border-color: #a33; }
+  .mat .x { font-family: var(--serif); font-size: 24px; text-align: center; min-width: 64px; padding: 6px 4px; }
+  .mat input, .mat .x { height: 40px; box-sizing: border-box; line-height: 26px; }
+  .op { color: var(--muted); }
+
+  .presets { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; font-size: 14px; color: var(--muted); margin: 0 0 22px; }
+  .link { background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 0 0 1px; font: inherit; font-size: 14px; font-weight: 500;
+          cursor: pointer; color: var(--ink); transition: color .2s, border-color .2s; }
+  .link:hover { color: var(--accent); border-color: var(--accent); }
+
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; border-top: 1px solid var(--line); padding: 18px 0 8px; }
+  .panel h2 { font-family: var(--serif); font-weight: 500; font-size: 22px; margin: 0 0 4px; color: var(--ink); }
+  .panel p.sub { margin: 0 0 8px; color: var(--muted); font-size: 14.5px; max-width: 46ch; }
+  .panel svg { display: block; width: 100%; height: auto; max-width: 520px; touch-action: none; }
+  .ctl { display: flex; align-items: center; gap: 14px; margin: 8px 0 0; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
+  .ctl input[type=range] { flex: 1; min-width: 140px; max-width: 280px; accent-color: var(--accent); }
+  .ctl .val { font-family: var(--mono); font-size: 13px; color: var(--ink); min-width: 3.4em; }
+
+  svg text { font-family: var(--sans); font-size: 12px; fill: var(--muted); }
+  svg .lab { fill: var(--ink); font-size: 14px; font-weight: 500; }
+  svg .labT { fill: var(--accent); font-size: 14px; font-weight: 500; }
+
+  .notes { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 20px; font-family: var(--serif); font-size: clamp(18px, 2.2vw, 21px); line-height: 1.55; color: var(--ink); max-width: 78ch; }
+  .notes p { margin: 0 0 12px; }
+  .notes .eq { margin: 6px 0 14px; overflow-x: auto; }
+  .notes .warn { color: var(--accent); }
+
+  .res { display: grid; grid-template-columns: minmax(200px, 300px) 1fr; gap: 6px 22px; margin: 18px 0 8px; font-size: 15px; align-items: baseline; }
+  .res .k { color: var(--muted); }
+  .res .v { font-family: var(--mono); font-size: 14px; color: var(--ink); overflow-x: auto; white-space: nowrap; }
+  .res .v sup { font-size: .7em; }
+  .res .em { color: var(--accent); }
+  .seg { display: inline-flex; gap: 18px; font-size: 14px; }
+  .seg button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 0 0 1px; font: inherit; font-weight: 500; color: var(--muted); cursor: pointer; }
+  .seg button.on { color: var(--ink); border-color: var(--accent); }
+  select.op { font: 500 20px var(--mono); color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 4px 2px; outline: none; }
+  .sec2 { border-top: 1px solid var(--line); margin-top: 26px; padding-top: 18px; }
+  .sec2 h2 { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 0 0 12px; }
+  .read { display: flex; flex-wrap: wrap; gap: 6px 28px; font-size: 15px; color: var(--muted); margin: 6px 0 0; }
+  .read b { font-family: var(--mono); font-weight: 500; color: var(--ink); }
+  .notes h3 { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 0 0 8px; }
+  .notes .blk { margin-bottom: 26px; }
+  @media (max-width: 860px) { .panels { grid-template-columns: 1fr; } .setup { font-size: 22px; } .mat input { width: 56px; } }
+</style>
+</head>
+<body>
+<div class="wrap la">
+  <div class="top">
+    <a href="../numericka-matematika.html">← Numerická matematika</a>
+    <a href="../index.html">Josef Hlahulek</a>
+  </div>
+  <h1 class="sm" style="margin:6px 0 26px;max-width:none">Přesnost <em>operací</em></h1>
+
+  <div class="notes" style="border-top:0;padding-top:0;margin-top:0">
+    <div class="blk">
+      <h3>Strojová přesnost</h3>
+      <p>Pro operaci $*\in\{+,-,\cdot,/\}$ platí
+      $$\mathrm{fl}(x*y)=(x*y)(1+\delta),\qquad|\delta|\lt C\,\varepsilon_{\mathrm{mach}}.$$
+      Při zaokrouhlení k nejbližšímu číslu je $\varepsilon_{\mathrm{mach}}=2^{-24}\approx5{,}96\cdot10^{-8}$ v single a $2^{-53}\approx1{,}11\cdot10^{-16}$ v double.</p>
+    </div>
+  </div>
+
+  <div class="seg" id="prec" role="group" aria-label="Přesnost">
+    <button type="button" data-p="single">single</button><button type="button" data-p="double" class="on">double</button>
+  </div>
+
+  <div class="sec2" style="border-top:0;margin-top:14px;padding-top:0">
+    <h2>Jedna operace</h2>
+    <div class="setup">
+      <div class="mat one"><input id="x" value="0,1" inputmode="decimal" aria-label="x"></div>
+      <select class="op" id="op" aria-label="operace"><option value="+">+</option><option value="-">−</option><option value="*">·</option><option value="/">/</option></select>
+      <div class="mat one"><input id="y" value="0,2" inputmode="decimal" aria-label="y"></div>
+    </div>
+    <div class="presets">
+      <button class="link" type="button" data-s="0,1|+|0,2|double">0,1 + 0,2</button>
+      <button class="link" type="button" data-s="0,1|*|3|double">0,1 · 3</button>
+      <button class="link" type="button" data-s="1|/|3|single">1 / 3 (single)</button>
+      <button class="link" type="button" data-s="1,0000001|-|1|single">1,0000001 − 1 (single)</button>
+      <button class="link" type="button" data-s="100000000|+|1|single">10⁸ + 1 (single)</button>
+    </div>
+    <div class="res" id="res1"></div>
+  </div>
+
+  <div class="sec2">
+    <h2>Asociativita sčítání</h2>
+    <div class="setup" style="font-size:22px">
+      <div class="mat one"><input id="a" value="0,1" inputmode="decimal" aria-label="a"></div><span class="op">,</span>
+      <div class="mat one"><input id="b" value="100000000" inputmode="decimal" aria-label="b"></div><span class="op">,</span>
+      <div class="mat one"><input id="c" value="-100000000" inputmode="decimal" aria-label="c"></div>
+    </div>
+    <div class="presets">
+      <button class="link" type="button" data-t="0,1|100000000|-100000000|single">0,1 + 10⁸ − 10⁸ (single)</button>
+      <button class="link" type="button" data-t="0,1|100000000|-100000000|double">0,1 + 10⁸ − 10⁸ (double)</button>
+      <button class="link" type="button" data-t="1|1e16|-1e16|double">1 + 10¹⁶ − 10¹⁶ (double)</button>
+      <button class="link" type="button" data-t="0,1|0,2|0,3|double">0,1 + 0,2 + 0,3 (double)</button>
+    </div>
+    <div class="res" id="res2"></div>
+  </div>
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script src="../assets/site.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var P = 'double';
+  function EPS() { return P === 'single' ? [1n, 1n << 24n] : [1n, 1n << 53n]; }
+  function fl(v) { return P === 'single' ? Math.fround(v) : v; }
+
+  // rationals [n, d], d > 0
+  function norm(r) { var n = r[0], d = r[1]; if (d < 0n) { n = -n; d = -d; } return [n, d]; }
+  function add(a, b) { return norm([a[0] * b[1] + b[0] * a[1], a[1] * b[1]]); }
+  function sub(a, b) { return norm([a[0] * b[1] - b[0] * a[1], a[1] * b[1]]); }
+  function mul(a, b) { return norm([a[0] * b[0], a[1] * b[1]]); }
+  function div(a, b) { return norm([a[0] * b[1], a[1] * b[0]]); }
+  function abs(a) { return [a[0] < 0n ? -a[0] : a[0], a[1]]; }
+  function lt(a, b) { return a[0] * b[1] < b[0] * a[1]; }
+
+  function parseDec(s) {
+    s = String(s).replace(/\s+/g, '').replace(/−/g, '-').replace(',', '.');
+    var m = /^([+-]?)(\d*)\.?(\d*)(?:[eE]([+-]?\d+))?$/.exec(s);
+    if (!m || (m[2] === '' && m[3] === '')) return null;
+    var ex = (m[4] ? parseInt(m[4], 10) : 0) - m[3].length;
+    if (Math.abs(ex) > 300) return null;
+    var num = BigInt((m[2] + m[3]) || '0'); if (m[1] === '-') num = -num;
+    return { r: ex >= 0 ? [num * 10n ** BigInt(ex), 1n] : [num, 10n ** BigInt(-ex)], f: parseFloat(s) };
+  }
+  function ratOf(x) {
+    if (x === 0) return [0n, 1n];
+    var dv = new DataView(new ArrayBuffer(8)); dv.setFloat64(0, x);
+    var hi = dv.getUint32(0), lo = dv.getUint32(4), neg = hi >>> 31, e = (hi >>> 20) & 0x7ff;
+    var frac = (BigInt(hi & 0xfffff) << 32n) | BigInt(lo), mant, ex;
+    if (e === 0) { mant = frac; ex = -1074; } else { mant = frac | (1n << 52n); ex = e - 1075; }
+    var r = ex >= 0 ? [mant << BigInt(ex), 1n] : [mant, 1n << BigInt(-ex)];
+    return neg ? [-r[0], r[1]] : r;
+  }
+  function sup(e) { return '<sup>' + String(e).replace('-', '−') + '</sup>'; }
+  function fmt(r, sig) {
+    var n = r[0], d = r[1];
+    if (n === 0n) return '0';
+    var neg = n < 0n; if (neg) n = -n;
+    var e = n.toString().length - d.toString().length;
+    function ge(k) { return k >= 0 ? n >= d * 10n ** BigInt(k) : n * 10n ** BigInt(-k) >= d; }
+    while (!ge(e)) e--; while (ge(e + 1)) e++;
+    var k = e - sig + 1, q;
+    if (k >= 0) { var t = 10n ** BigInt(k); q = (2n * n + d * t) / (2n * d * t); }
+    else q = (2n * n * 10n ** BigInt(-k) + d) / (2n * d);
+    var ds = q.toString(); if (ds.length > sig) { ds = ds.slice(0, sig); e++; }
+    ds = ds.replace(/0+$/, ''); if (ds === '') ds = '0';
+    var out;
+    if (e >= -5 && e <= 15) {
+      if (e >= 0) { var ip = ds.slice(0, e + 1); while (ip.length < e + 1) ip += '0'; var fp = ds.slice(e + 1); out = ip + (fp ? ',' + fp : ''); }
+      else out = '0,' + '0'.repeat(-e - 1) + ds;
+    } else out = ds[0] + (ds.length > 1 ? ',' + ds.slice(1) : '') + '·10' + sup(e);
+    return (neg ? '−' : '') + out;
+  }
+  var SIG = function () { return P === 'single' ? 9 : 17; };
+  function row(k, v, em) { return '<div class="k">' + k + '</div><div class="v' + (em ? ' em' : '') + '">' + v + '</div>'; }
+  function relerr(approx, exact) { return exact[0] === 0n ? null : div(abs(sub(approx, exact)), abs(exact)); }
+
+  function one() {
+    var X = parseDec($('x').value), Y = parseDec($('y').value), op = $('op').value, o = $('res1');
+    $('x').classList.toggle('bad', !X); $('y').classList.toggle('bad', !Y);
+    if (!X || !Y) { o.innerHTML = row('', 'Zadejte čísla.'); return; }
+    var xf = fl(X.f), yf = fl(Y.f);
+    if (!isFinite(xf) || !isFinite(yf)) { o.innerHTML = row('', 'Číslo je mimo rozsah.'); return; }
+    if (op === '/' && Y.r[0] === 0n) { o.innerHTML = row('', 'Dělení nulou.'); return; }
+    var xr = ratOf(xf), yr = ratOf(yf), f = { '+': add, '-': sub, '*': mul, '/': div }[op];
+    var ex = f(X.r, Y.r), exm = f(xr, yr);
+    var zf = fl(op === '+' ? xf + yf : op === '-' ? xf - yf : op === '*' ? xf * yf : xf / yf);
+    if (!isFinite(zf)) { o.innerHTML = row('', 'Výsledek je mimo rozsah (přetečení).'); return; }
+    var zr = ratOf(zf), s = SIG(), eps = EPS();
+    var dOp = relerr(zr, exm), dTot = relerr(zr, ex);
+    var h = '';
+    h += row('x zadané → uložené fl(x)', fmt(X.r, s) + ' → ' + fmt(xr, s));
+    h += row('y zadané → uložené fl(y)', fmt(Y.r, s) + ' → ' + fmt(yr, s));
+    h += row('přesný výsledek z uložených čísel', fmt(exm, s));
+    h += row('výsledek stroje fl(x ∗ y)', fmt(zr, s), true);
+    h += row('δ (chyba operace)', dOp ? fmt(dOp, 3) : '0');
+    h += row('ε<sub>mach</sub>', fmt(eps, 3));
+    h += row('|δ| &lt; ε<sub>mach</sub>', (!dOp || lt(dOp, eps)) ? 'ano' : 'ne');
+    h += row('přesný výsledek ze zadaných čísel', fmt(ex, s));
+    h += row('relativní chyba oproti němu', dTot ? fmt(dTot, 3) : (zr[0] === 0n ? '0' : 'výsledek má být 0'));
+    o.innerHTML = h;
+  }
+
+  function three() {
+    var A = parseDec($('a').value), B = parseDec($('b').value), C = parseDec($('c').value), o = $('res2');
+    $('a').classList.toggle('bad', !A); $('b').classList.toggle('bad', !B); $('c').classList.toggle('bad', !C);
+    if (!A || !B || !C) { o.innerHTML = row('', 'Zadejte čísla.'); return; }
+    var a = fl(A.f), b = fl(B.f), c = fl(C.f);
+    var l = fl(fl(a + b) + c), r = fl(a + fl(b + c));
+    if (!isFinite(l) || !isFinite(r)) { o.innerHTML = row('', 'Výsledek je mimo rozsah (přetečení).'); return; }
+    var ex = add(add(A.r, B.r), C.r), s = SIG(), h = '';
+    function line(name, v) {
+      var vr = ratOf(v), ae = abs(sub(vr, ex)), re = relerr(vr, ex);
+      return row(name, fmt(vr, s), true) + row('chyba absolutní / relativní', fmt(ae, 3) + (re ? ' / ' + fmt(re, 3) : ''));
+    }
+    h += row('přesný součet zadaných čísel', fmt(ex, s));
+    h += line('fl(fl(a + b) + c)', l);
+    h += line('fl(a + fl(b + c))', r);
+    h += row('výsledky se shodují', l === r ? 'ano' : 'ne');
+    o.innerHTML = h;
+  }
+
+  function all() { one(); three(); }
+  ['x', 'y', 'a', 'b', 'c'].forEach(function (i) { $(i).addEventListener('input', all); });
+  $('op').addEventListener('change', all);
+  Array.prototype.forEach.call(document.querySelectorAll('#prec button'), function (bt) {
+    bt.addEventListener('click', function () { setP(bt.getAttribute('data-p')); all(); });
+  });
+  function setP(p) { P = p; Array.prototype.forEach.call(document.querySelectorAll('#prec button'), function (b) { b.classList.toggle('on', b.getAttribute('data-p') === p); }); }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-s]'), function (bt) {
+    bt.addEventListener('click', function () { var v = bt.getAttribute('data-s').split('|'); $('x').value = v[0]; $('op').value = v[1]; $('y').value = v[2]; setP(v[3]); all(); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-t]'), function (bt) {
+    bt.addEventListener('click', function () { var v = bt.getAttribute('data-t').split('|'); $('a').value = v[0]; $('b').value = v[1]; $('c').value = v[2]; setP(v[3]); all(); });
+  });
+
+  var M = document.querySelector('.notes');
+  M.innerHTML = M.innerHTML.replace(/\$\$([\s\S]+?)\$\$/g, function (_, m) { return katex.renderToString(m, { displayMode: true, throwOnError: false }); })
+                           .replace(/\$([^$]+?)\$/g, function (_, m) { return katex.renderToString(m.replace(/&lt;/g, '<'), { throwOnError: false }); });
+  all();
+})();
+</script>
+</body>
+</html>

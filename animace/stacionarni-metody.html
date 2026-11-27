@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stacionární iterační metody · Josef Hlahulek</title>
+<meta name="description" content="Jacobiho a Gauss-Seidelova metoda na reálných datech A, b, x₀.">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  nav ul a.cur { color: var(--ink); }
+  body { padding-bottom: 80px; }
+  .top { display: flex; justify-content: space-between; align-items: center; height: 76px; font-size: 14px; color: var(--muted); }
+  .top a:hover { color: var(--ink); }
+  .katex { font-size: 1.06em; }
+
+  .setup { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 22px; margin: 0 0 14px; font-family: var(--serif); font-size: 26px; color: var(--ink); }
+  .mat { display: grid; gap: 6px 8px; padding: 4px 12px; border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); border-radius: 3px; }
+  .mat.two { grid-template-columns: repeat(2, auto); }
+  .mat.one { grid-template-columns: auto; }
+  .mat input { width: 64px; padding: 6px 4px; text-align: center; font: 500 18px var(--mono); color: var(--ink); background: transparent;
+               border: 0; border-bottom: 1px solid var(--line); border-radius: 0; outline: none; transition: border-color .2s, color .2s; }
+  .mat input:focus { border-color: var(--accent); }
+  .mat input.bad { color: #a33; border-color: #a33; }
+  .mat .x { font-family: var(--serif); font-size: 24px; text-align: center; min-width: 64px; padding: 6px 4px; }
+  .mat input, .mat .x { height: 40px; box-sizing: border-box; line-height: 26px; }
+  .op { color: var(--muted); }
+
+  .presets { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; font-size: 14px; color: var(--muted); margin: 0 0 22px; }
+  .link { background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 0 0 1px; font: inherit; font-size: 14px; font-weight: 500;
+          cursor: pointer; color: var(--ink); transition: color .2s, border-color .2s; }
+  .link:hover { color: var(--accent); border-color: var(--accent); }
+
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; border-top: 1px solid var(--line); padding: 18px 0 8px; }
+  .panel h2 { font-family: var(--serif); font-weight: 500; font-size: 22px; margin: 0 0 4px; color: var(--ink); }
+  .panel p.sub { margin: 0 0 8px; color: var(--muted); font-size: 14.5px; max-width: 46ch; }
+  .panel svg { display: block; width: 100%; height: auto; max-width: 520px; touch-action: none; }
+  .ctl { display: flex; align-items: center; gap: 14px; margin: 8px 0 0; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
+  .ctl input[type=range] { flex: 1; min-width: 140px; max-width: 280px; accent-color: var(--accent); }
+  .ctl .val { font-family: var(--mono); font-size: 13px; color: var(--ink); min-width: 3.4em; }
+
+  svg text { font-family: var(--sans); font-size: 12px; fill: var(--muted); }
+  svg .lab { fill: var(--ink); font-size: 14px; font-weight: 500; }
+  svg .labT { fill: var(--accent); font-size: 14px; font-weight: 500; }
+
+  .notes { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 20px; font-family: var(--serif); font-size: clamp(18px, 2.2vw, 21px); line-height: 1.55; color: var(--ink); max-width: 78ch; }
+  .notes p { margin: 0 0 12px; }
+  .notes .eq { margin: 6px 0 14px; overflow-x: auto; }
+  .notes .warn { color: var(--accent); }
+
+  .res { display: grid; grid-template-columns: minmax(200px, 300px) 1fr; gap: 6px 22px; margin: 18px 0 8px; font-size: 15px; align-items: baseline; }
+  .res .k { color: var(--muted); }
+  .res .v { font-family: var(--mono); font-size: 14px; color: var(--ink); overflow-x: auto; white-space: nowrap; }
+  .res .v sup { font-size: .7em; }
+  .res .em { color: var(--accent); }
+  .seg { display: inline-flex; gap: 18px; font-size: 14px; }
+  .seg button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 0 0 1px; font: inherit; font-weight: 500; color: var(--muted); cursor: pointer; }
+  .seg button.on { color: var(--ink); border-color: var(--accent); }
+  select.op { font: 500 20px var(--mono); color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 4px 2px; outline: none; }
+  .mrow { overflow-x: auto; padding: 6px 0; margin: 4px 0 6px; font-size: 1.12em; }
+  .mrow .katex-display { margin: 0; }
+  .stepbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; margin: 18px 0 8px; font-size: 15px; }
+  .stepbar .cnt { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+  .stepbar button:disabled { opacity: .35; cursor: default; }
+  .sty { font-family: var(--serif); font-size: clamp(18px, 2.1vw, 20px); line-height: 1.55; max-width: 80ch; margin: 6px 0 8px; }
+  .sty p { margin: 0 0 6px; }
+  .sty .ops { color: var(--ink); font-family: var(--mono); font-size: 14px; line-height: 1.7; margin: 4px 0 8px; }
+  .sty .ok { color: var(--accent); }
+  .sty .bad2 { color: #a33; }
+  .sizes { display: inline-flex; gap: 14px; align-items: baseline; font-size: 14px; color: var(--muted); }
+  .mat.n3 { grid-template-columns: repeat(3, auto); } .mat.n4 { grid-template-columns: repeat(4, auto); }
+  .mat input { width: 58px; }
+  .legend { font-size: 15px; color: var(--muted); margin: 6px 0 2px; }
+  .legend b { font-weight: 600; }
+  .vecs { display: flex; flex-wrap: wrap; gap: 14px 26px; align-items: center; margin: 4px 0 10px; font-size: 15px; color: var(--muted); }
+  .vecs .mat { font-size: 16px; }
+  .vecs .mat input { width: 52px; }
+  .cmp { border-collapse: collapse; margin: 10px 0 18px; font-size: 16px; }
+  .cmp td, .cmp th { border-top: 1px solid var(--line); padding: 8px 18px 8px 0; text-align: left; vertical-align: top; font-weight: 400; }
+  .cmp th { color: var(--muted); font-size: 14px; }
+  table.err { border-collapse: collapse; font-family: var(--mono); font-size: 13px; margin: 8px 0 14px; }
+  table.err td, table.err th { padding: 3px 22px 3px 0; text-align: right; font-weight: 400; }
+  table.err th { color: var(--muted); font-family: var(--sans); font-size: 14px; }
+  .cmpgrid { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(300px, 1fr); gap: 10px 40px; align-items: start; }
+  @media (max-width: 860px) { .cmpgrid { grid-template-columns: 1fr; } }
+  .nw { color: var(--accent); font-weight: 600; }
+  .sec2 { border-top: 1px solid var(--line); margin-top: 26px; padding-top: 18px; }
+  .sec2 h2 { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 0 0 12px; }
+  .read { display: flex; flex-wrap: wrap; gap: 6px 28px; font-size: 15px; color: var(--muted); margin: 6px 0 0; }
+  .read b { font-family: var(--mono); font-weight: 500; color: var(--ink); }
+  .notes h3 { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 0 0 8px; }
+  .notes .blk { margin-bottom: 26px; }
+  @media (max-width: 860px) { .panels { grid-template-columns: 1fr; } .setup { font-size: 22px; } .mat input { width: 56px; } }
+</style>
+</head>
+<body>
+<div class="wrap la">
+  <div class="top">
+    <a href="../numericka-matematika.html">← Numerická matematika</a>
+    <a href="../index.html">Josef Hlahulek</a>
+  </div>
+  <h1 class="sm" style="margin:6px 0 26px;max-width:none">Stacionární <em>iterační metody</em></h1>
+
+  <div class="notes" style="border-top:0;padding-top:0;margin-top:0">
+    <div class="blk">
+      <h3>Obecné štěpení</h3>
+      <p>$A=M-N$, kde $M$ je regulární. Z $Ax=b$ plyne $Mx=Nx+b$, tedy
+      $$x=M^{-1}Nx+M^{-1}b=x+M^{-1}(b-Ax).$$
+      Stacionární iterační metoda je tvaru
+      $$x_k:=(M^{-1}N)\,x_{k-1}+M^{-1}b=x_{k-1}+M^{-1}(b-Ax_{k-1}),\qquad k=1,2,\dots$$
+      Matice $T:=M^{-1}N$ je iterační matice (nezávisí na $k$) a $r_{k-1}:=b-Ax_{k-1}$ je residuum.</p>
+      <p>Matici $A$ rozložíme na $A=D-L-U$, kde $D$ je diagonální část $A$, $-L$ je ostře dolní část a $-U$ ostře horní část $A$.
+      <b>Jacobi:</b> $M=D$, $N=L+U$. <b>Gauss-Seidel:</b> $M=D-L$, $N=U$.</p>
+      <p>Chyba aproximace v $k$-té iteraci je $e_k:=x-x_k$, kde $x$ je přesné řešení. Platí $e_k=(I-M^{-1}A)\,e_{k-1}=(I-M^{-1}A)^k\,e_0$ a $I-M^{-1}A=M^{-1}N=T$, tedy
+      $$\frac{\|e_k\|}{\|e_0\|}\le\|T^k\|\le\|T\|^k.$$</p>
+    </div>
+  </div>
+
+  <div class="setup" id="setup"></div>
+  <div class="vecs" id="vecs"></div>
+  <div class="presets" id="presets">
+    <span class="sizes">Velikost: <button class="link" type="button" data-n="2">2×2</button><button class="link" type="button" data-n="3">3×3</button><button class="link" type="button" data-n="4">4×4</button></span>
+    <button class="link" type="button" data-m="3|4,-1,0,-1,4,-1,0,-1,4|2,4,10|0,0,0">Obě konvergují</button>
+    <button class="link" type="button" data-m="3|2,-1,1,2,2,2,-1,-1,2|2,6,0|0,0,0">Jacobi diverguje</button>
+    <button class="link" type="button" data-m="3|1,2,-2,1,1,1,2,2,1|1,3,5|0,0,0">Gauss-Seidel diverguje</button>
+    <button class="link" type="button" data-m="2|4,1,2,3|9,11|0,0">2×2</button>
+  </div>
+
+  <div class="legend" id="legend"></div>
+  <div class="stepbar">
+    <button class="link" id="prev" type="button">← Předchozí</button>
+    <button class="link" id="next" type="button">Další →</button>
+    <button class="link" id="reset" type="button">Znovu</button>
+    <span class="sizes"><button class="link" id="mJ" type="button">Jacobi</button><button class="link" id="mG" type="button">Gauss-Seidel</button></span>
+    <span class="cnt" id="cnt"></span>
+  </div>
+  <div class="sty" id="txt"></div>
+  <div id="view"></div>
+
+  <div class="sec2">
+    <h2>Rozdíl metod</h2>
+    <table class="cmp">
+      <tr><th></th><th>Jacobi</th><th>Gauss-Seidel</th></tr>
+      <tr><td>$M$</td><td>$D$</td><td>$D-L$</td></tr>
+      <tr><td>$N$</td><td>$L+U$</td><td>$U$</td></tr>
+      <tr><td>$i$-tá složka</td><td>$x_i^{(k)}=\dfrac{b_i-\sum_{j\ne i}a_{ij}x_j^{(k-1)}}{a_{ii}}$</td><td>$x_i^{(k)}=\dfrac{b_i-\sum_{j\lt i}a_{ij}x_j^{(k)}-\sum_{j\gt i}a_{ij}x_j^{(k-1)}}{a_{ii}}$</td></tr>
+      <tr><td>použité hodnoty</td><td>jen z iterace $k-1$</td><td>nové složky z iterace $k$ ihned</td></tr>
+    </table>
+    <div id="cmpres"></div>
+  </div>
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script src="../assets/site.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var N = 3, step = 0, meth = 'J', D = null, KIT = 8;
+  var CD = '#0b6e8a', CL = '#b36b00', CU = '#7a4fb0', GREY = '#b4b8bc';
+
+  // ---- racionální čísla ----
+  function gcd(a, b) { a = a < 0n ? -a : a; b = b < 0n ? -b : b; while (b) { var t = a % b; a = b; b = t; } return a; }
+  function R(n, d) { if (d < 0n) { n = -n; d = -d; } var g = gcd(n, d) || 1n; return [n / g, d / g]; }
+  function add(a, b) { return R(a[0] * b[1] + b[0] * a[1], a[1] * b[1]); }
+  function sub(a, b) { return R(a[0] * b[1] - b[0] * a[1], a[1] * b[1]); }
+  function mul(a, b) { return R(a[0] * b[0], a[1] * b[1]); }
+  function dv(a, b) { return R(a[0] * b[1], a[1] * b[0]); }
+  function neg(a) { return [-a[0], a[1]]; }
+  function isz(a) { return a[0] === 0n; }
+  var ZERO = [0n, 1n], ONE = [1n, 1n];
+  function num(r) { return Number(r[0]) / Number(r[1]); }
+  function parse(s) {
+    s = String(s).replace(/\s+/g, '').replace(/−/g, '-').replace(/,/g, '.');
+    var m = /^([+-]?)(\d+)\/(\d+)$/.exec(s);
+    if (m) { if (BigInt(m[3]) === 0n) return null; return R(BigInt(m[1] === '-' ? '-' + m[2] : m[2]), BigInt(m[3])); }
+    m = /^([+-]?)(\d*)\.?(\d*)$/.exec(s);
+    if (!m || (m[2] === '' && m[3] === '')) return null;
+    var n = BigInt((m[2] + m[3]) || '0'); if (m[1] === '-') n = -n;
+    return R(n, 10n ** BigInt(m[3].length));
+  }
+  function texR(r) { if (r[1] === 1n) return r[0].toString(); return (r[0] < 0n ? '-' : '') + '\\frac{' + (r[0] < 0n ? -r[0] : r[0]).toString() + '}{' + r[1].toString() + '}'; }
+  function txtR(r) { return (r[0] < 0n ? '−' : '') + (r[0] < 0n ? -r[0] : r[0]).toString() + (r[1] === 1n ? '' : '/' + r[1].toString()); }
+  function txtRP(r) { return r[0] < 0n ? '(' + txtR(r) + ')' : txtR(r); }
+  function zmat(f) { var M = []; for (var i = 0; i < N; i++) { M.push([]); for (var j = 0; j < N; j++) M[i].push(f(i, j)); } return M; }
+  function matmulR(X, Y) { return zmat(function (i, j) { var s = ZERO; for (var k = 0; k < N; k++) s = add(s, mul(X[i][k], Y[k][j])); return s; }); }
+  function matvecR(X, v) { return X.map(function (row) { var s = ZERO; for (var k = 0; k < N; k++) s = add(s, mul(row[k], v[k])); return s; }); }
+
+  // ---- reálná čísla ----
+  function fD(x, tex) { if (!isFinite(x)) return '∞'; var a = Math.abs(x); var s; if (a !== 0 && (a < 1e-4 || a >= 1e6)) { s = x.toExponential(2); } else { s = (Math.round(x * 10000) / 10000).toString(); } s = s.replace('.', tex ? '{,}' : ','); if (tex) s = s.replace('e', '\\cdot10^{').replace(/\{,\}0+\\cdot/, '\\cdot') + (s.indexOf('e') >= 0 ? '}' : ''); else s = s.replace('-', '−'); return s; }
+  function fS(x) { return fD(x, false); }
+  function matvecF(X, v) { return X.map(function (row) { var s = 0; for (var k = 0; k < row.length; k++) s += row[k] * v[k]; return s; }); }
+  function nrmV(v) { return Math.max.apply(null, v.map(Math.abs)); }
+  function nrmM(M) { return Math.max.apply(null, M.map(function (r) { return r.reduce(function (s, x) { return s + Math.abs(x); }, 0); })); }
+
+  // ---- vykreslení matic ----
+  function col(t, c) { return c ? '\\textcolor{' + c + '}{' + t + '}' : t; }
+  function bmS(rows) { return '\\begin{bmatrix}' + rows.map(function (r) { return r.join(' & '); }).join(' \\\\ ') + '\\end{bmatrix}'; }
+  function bmR(M, cf) { return bmS(M.map(function (r, i) { return r.map(function (x, j) { var c = cf ? cf(i, j, x) : null; return col(texR(x), isz(x) && cf ? GREY : c); }); })); }
+  function bvR(v) { return bmS(v.map(function (x) { return [texR(x)]; })); }
+  function bvF(v) { return bmS(v.map(function (x) { return [fD(x, true)]; })); }
+  function bvC(v, cs) { return bmS(v.map(function (x, i) { return [col(fD(x, true), cs ? cs[i] : null)]; })); }
+  function line(t) { var d = document.createElement('div'); d.className = 'mrow'; d.innerHTML = katex.renderToString(t, { displayMode: true, throwOnError: false, strict: false }); return d; }
+  function partColor(i, j) { return i === j ? CD : (i > j ? CL : CU); }
+
+  // ---- přesné řešení (Gauss s výběrem pivota) ----
+  function solveExact(A, b) {
+    var M = A.map(function (r, i) { return r.concat([b[i]]); }), n = N, i, j, k;
+    for (k = 0; k < n; k++) {
+      var p = -1; for (i = k; i < n; i++) if (!isz(M[i][k])) { p = i; break; }
+      if (p < 0) return null;
+      var t = M[k]; M[k] = M[p]; M[p] = t;
+      for (i = k + 1; i < n; i++) { var f = dv(M[i][k], M[k][k]); for (j = k; j <= n; j++) M[i][j] = sub(M[i][j], mul(f, M[k][j])); }
+    }
+    var x = []; for (i = n - 1; i >= 0; i--) { var s = M[i][n]; for (j = i + 1; j < n; j++) s = sub(s, mul(M[i][j], x[j])); x[i] = dv(s, M[i][i]); }
+    return x;
+  }
+  function invLower(M) {
+    var I = zmat(function (i, j) { return ZERO; }), c, i, j;
+    for (c = 0; c < N; c++) for (i = 0; i < N; i++) { var s = i === c ? ONE : ZERO; for (j = 0; j < i; j++) s = sub(s, mul(M[i][j], I[j][c])); I[i][c] = dv(s, M[i][i]); }
+    return I;
+  }
+  function specRad(T) {
+    var P = T.map(function (r) { return r.slice(); }), ls = 0, m = 14, q, i, j, k;
+    for (q = 0; q < m; q++) {
+      var nr = 0; P.forEach(function (r) { r.forEach(function (x) { nr += x * x; }); }); nr = Math.sqrt(nr);
+      if (nr === 0) return 0;
+      ls = 2 * ls + 2 * Math.log(nr);   // log měřítka pro T^(2^(q+1))
+      P = P.map(function (r) { return r.map(function (x) { return x / nr; }); });
+      var Q = []; for (i = 0; i < N; i++) { Q.push([]); for (j = 0; j < N; j++) { var s = 0; for (k = 0; k < N; k++) s += P[i][k] * P[k][j]; Q[i].push(s); } } P = Q;
+    }
+    var nf = 0; P.forEach(function (r) { r.forEach(function (x) { nf += x * x; }); }); nf = Math.sqrt(nf);
+    if (nf === 0) return 0;
+    ls += Math.log(nf);
+    return Math.exp(ls / Math.pow(2, m));
+  }
+
+  // ---- model ----
+  function build(A, b, x0) {
+    var d = { A: A, b: b, x0: x0 }, i, j;
+    d.Af = A.map(function (r) { return r.map(num); }); d.bf = b.map(num); d.x0f = x0.map(num);
+    for (i = 0; i < N; i++) if (isz(A[i][i])) { d.err = 'Na diagonále je nula, $D$ není regulární: $D^{-1}$ neexistuje.'; return d; }
+    d.xs = solveExact(A, b);
+    if (!d.xs) { d.err = 'Matice $A$ je singulární.'; return d; }
+    d.xsf = d.xs.map(num);
+    d.Dm = zmat(function (i, j) { return i === j ? A[i][i] : ZERO; });
+    d.Lm = zmat(function (i, j) { return i > j ? neg(A[i][j]) : ZERO; });
+    d.Um = zmat(function (i, j) { return i < j ? neg(A[i][j]) : ZERO; });
+    ['J', 'G'].forEach(function (m) {
+      var o = {};
+      o.M = m === 'J' ? d.Dm : zmat(function (i, j) { return i >= j ? A[i][j] : ZERO; });
+      o.N = m === 'J' ? zmat(function (i, j) { return add(d.Lm[i][j], d.Um[i][j]); }) : d.Um;
+      o.Mi = m === 'J' ? zmat(function (i, j) { return i === j ? dv(ONE, A[i][i]) : ZERO; }) : invLower(o.M);
+      o.T = matmulR(o.Mi, o.N); o.c = matvecR(o.Mi, b);
+      o.Tf = o.T.map(function (r) { return r.map(num); }); o.cf = o.c.map(num); o.Mif = o.Mi.map(function (r) { return r.map(num); });
+      o.rho = specRad(o.Tf); o.nT = nrmM(o.Tf);
+      o.X = [d.x0f.slice()]; o.R = []; o.lines = [];
+      for (var k = 1; k <= 24; k++) {
+        var xp = o.X[k - 1], r = d.bf.map(function (bi, ii) { var s = bi; for (var jj = 0; jj < N; jj++) s -= d.Af[ii][jj] * xp[jj]; return s; });
+        o.R.push(r);
+        var xn = [], txt = [];
+        for (i = 0; i < N; i++) {
+          var s = d.bf[i], str = txtR(b[i]), val = [];
+          for (j = 0; j < N; j++) {
+            if (j === i) continue;
+            var use = (m === 'G' && j < i) ? xn[j] : xp[j];
+            s -= d.Af[i][j] * use;
+            str += ' − ' + txtRP(A[i][j]) + '·' + ((m === 'G' && j < i) ? '<span class="nw">' + fS(use) + '</span>' : fS(use));
+          }
+          xn.push(s / d.Af[i][i]);
+          txt.push('x<sub>' + (i + 1) + '</sub><sup>(' + k + ')</sup> = (' + str + ') / ' + txtRP(A[i][i]) + ' = <b>' + fS(xn[i]) + '</b>');
+        }
+        o.X.push(xn); o.lines.push(txt);
+      }
+      o.E = o.X.map(function (x) { return nrmV(x.map(function (v, ii) { return d.xsf[ii] - v; })); });
+      d[m] = o;
+    });
+    return d;
+  }
+
+  function show() {
+    var v = $('view'), t = $('txt'); v.innerHTML = '';
+    $('mJ').style.borderColor = meth === 'J' ? 'var(--accent)' : ''; $('mG').style.borderColor = meth === 'G' ? 'var(--accent)' : '';
+    $('legend').innerHTML = '';
+    if (!D) return;
+    if (D.err) { t.innerHTML = '<p class="bad2">' + D.err + '</p>'; $('cnt').textContent = ''; $('prev').disabled = $('next').disabled = true; $('cmpres').innerHTML = ''; render(t); return; }
+    var total = 3 + KIT, o = D[meth], i, k;
+    step = Math.min(step, total - 1);
+    $('prev').disabled = step === 0; $('next').disabled = step >= total - 1; $('cnt').textContent = 'Krok ' + (step + 1) + ' z ' + total;
+    var name = meth === 'J' ? 'Jacobi' : 'Gauss-Seidel';
+    if (step === 0) {
+      t.innerHTML = '<p><b>Data.</b> Soustava $Ax=b$, počáteční odhad $x_0$ a (pro kontrolu chyby) přesné řešení $x$. Matici rozložíme na $A=D-L-U$: <span style="color:' + CD + '">$D$ diagonála</span>, <span style="color:' + CL + '">$-L$ dolní část</span>, <span style="color:' + CU + '">$-U$ horní část</span>.</p>';
+      v.appendChild(line('A=' + bmR(D.A, function (i, j) { return partColor(i, j); }) + '\\quad b=' + bvR(D.b) + '\\quad x_0=' + bvR(D.x0) + '\\quad x=' + bvR(D.xs)));
+      v.appendChild(line('A=D-L-U:\\quad ' + bmR(D.A, partColor) + '=' + bmR(D.Dm, function () { return CD; }) + '-' + bmR(D.Lm, function () { return CL; }) + '-' + bmR(D.Um, function () { return CU; })));
+    } else if (step === 1) {
+      t.innerHTML = '<p><b>' + name + ': štěpení $A=M-N$.</b> ' + (meth === 'J' ? '$M=D$, $N=L+U$: matice $M$ obsahuje jen diagonálu, $N$ zbytek $A$ s opačným znaménkem.' : '$M=D-L$, $N=U$: matice $M$ obsahuje diagonálu a dolní část $A$ (dolní trojúhelníková), $N$ horní část s opačným znaménkem.') + '</p>';
+      var cM = function (i, j) { return meth === 'J' ? CD : partColor(i, j); }, cN = function (i, j) { return partColor(i, j) === CD ? CD : (meth === 'J' ? (i > j ? CL : CU) : CU); };
+      v.appendChild(line('M=' + (meth === 'J' ? 'D' : 'D-L') + '=' + bmR(o.M, cM) + '\\qquad N=' + (meth === 'J' ? 'L+U' : 'U') + '=' + bmR(o.N, cN)));
+      v.appendChild(line('M-N=' + bmR(o.M, cM) + '-' + bmR(o.N, cN) + '=' + bmR(D.A, partColor) + '=A'));
+    } else if (step === 2) {
+      t.innerHTML = '<p><b>' + name + ': ' + (meth === 'J' ? '$D^{-1}$' : '$M^{-1}=(D-L)^{-1}$') + ', iterační matice $T=M^{-1}N$ a $c=M^{-1}b$.</b> ' + (meth === 'J' ? '$D$ je diagonální, proto $D^{-1}$ má na diagonále převrácené hodnoty $1/a_{ii}$.' : '$M$ je dolní trojúhelníková, její inverzi spočteme dopřednou substitucí (je opět dolní trojúhelníková).') + ' Iterace pak je $x_k=Tx_{k-1}+c$.</p>';
+      v.appendChild(line('M^{-1}=' + (meth === 'J' ? 'D^{-1}=' : '') + bmR(o.Mi, function () { return CD; })));
+      v.appendChild(line('T=M^{-1}N=' + bmR(o.Mi) + bmR(o.N) + '=' + bmR(o.T)));
+      v.appendChild(line('c=M^{-1}b=' + bmR(o.Mi) + bvR(D.b) + '=' + bvR(o.c)));
+      var sp = document.createElement('p'); sp.style.cssText = 'font-size:15px;margin:0;color:var(--muted)'; sp.innerHTML = '‖T‖<sub>∞</sub> = ' + fS(o.nT) + ', spektrální poloměr ρ(T) ≈ ' + fS(o.rho) + (o.rho < 1 ? ' &lt; 1: metoda konverguje' : ' ≥ 1: metoda nekonverguje'); v.appendChild(sp);
+    } else {
+      k = step - 2; var xp = o.X[k - 1], xk = o.X[k], r = o.R[k - 1];
+      t.innerHTML = '<p><b>' + name + ': iterace ' + k + '.</b> Residuum $r_{' + (k - 1) + '}=b-Ax_{' + (k - 1) + '}$, poté $x_{' + k + '}=x_{' + (k - 1) + '}+M^{-1}r_{' + (k - 1) + '}$. Po složkách:</p><div class="ops">' + o.lines[k - 1].join('<br>') + '</div>' + (meth === 'G' ? '<p style="font-size:15px;color:var(--muted)">Zvýrazněné hodnoty jsou už nové složky z iterace ' + k + '.</p>' : '');
+      v.appendChild(line('r_{' + (k - 1) + '}=b-Ax_{' + (k - 1) + '}=' + bvR(D.b) + '-' + bmR(D.A) + bvF(xp) + '=' + bvF(r)));
+      v.appendChild(line('x_{' + k + '}=x_{' + (k - 1) + '}+M^{-1}r_{' + (k - 1) + '}=' + bvF(xp) + '+' + bmS(o.Mif.map(function (rw) { return rw.map(function (x) { return fD(x, true); }); })) + bvF(r) + '=' + bvF(xk)));
+      var e0 = o.E[0], ek = o.E[k], p = document.createElement('p'); p.style.cssText = 'font-size:15px;margin:0;color:var(--muted)';
+      p.innerHTML = '‖e<sub>' + k + '</sub>‖<sub>∞</sub> = ‖x − x<sub>' + k + '</sub>‖<sub>∞</sub> = ' + fS(ek) + (e0 > 0 ? ', ‖e<sub>' + k + '</sub>‖/‖e<sub>0</sub>‖ = ' + fS(ek / e0) + ' ≤ ‖T‖<sup>' + k + '</sup> = ' + fS(Math.pow(o.nT, k)) : ''); v.appendChild(p);
+    }
+    render(t);
+    legend();
+    compare();
+  }
+  function legend() { $('legend').innerHTML = ''; }
+  function render(el) {
+    el.innerHTML = el.innerHTML.replace(/\$([^$]+?)\$/g, function (_, m) { return katex.renderToString(m.replace(/&lt;/g, '<'), { throwOnError: false, strict: false }); });
+  }
+
+  function compare() {
+    var J = D.J, G = D.G, h = '', k;
+    h += '<p style="font-size:16px;margin:0 0 6px">ρ(T<sub>J</sub>) ≈ <b>' + fS(J.rho) + '</b>, ‖T<sub>J</sub>‖<sub>∞</sub> = ' + fS(J.nT) + ' &nbsp;·&nbsp; ρ(T<sub>GS</sub>) ≈ <b>' + fS(G.rho) + '</b>, ‖T<sub>GS</sub>‖<sub>∞</sub> = ' + fS(G.nT) + '</p>';
+    h += '<div class="cmpgrid"><div><table class="err"><tr><th>k</th><th>‖e<sub>k</sub>‖ Jacobi</th><th>‖e<sub>k</sub>‖ Gauss-Seidel</th></tr>';
+    for (k = 0; k <= 10; k++) h += '<tr><td>' + k + '</td><td>' + fS(J.E[k]) + '</td><td>' + fS(G.E[k]) + '</td></tr>';
+    h += '</table></div><div>' + chart(J.E, G.E) + '</div></div>';
+    $('cmpres').innerHTML = h;
+  }
+  function chart(a, b) {
+    var W = 440, H = 260, ml = 44, mb = 28, mt = 12, mr = 12, K = 20, all = [], i;
+    function lg(x) { return x <= 1e-13 ? -13 : Math.max(-13, Math.min(13, Math.log10(x))); }
+    for (i = 0; i <= K; i++) { all.push(lg(a[i])); all.push(lg(b[i])); }
+    var lo = Math.floor(Math.min.apply(null, all)), hi = Math.ceil(Math.max.apply(null, all)); if (hi === lo) hi = lo + 1;
+    var X = function (k) { return ml + (W - ml - mr) * k / K; }, Y = function (y) { return mt + (H - mt - mb) * (hi - y) / (hi - lo); };
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;max-width:460px;height:auto" role="img" aria-label="Chyba v závislosti na k">';
+    var st = Math.max(1, Math.round((hi - lo) / 5));
+    for (var y = lo; y <= hi; y += st) s += '<line x1="' + ml + '" x2="' + (W - mr) + '" y1="' + Y(y) + '" y2="' + Y(y) + '" stroke="#d9d7ce"/><text x="' + (ml - 6) + '" y="' + (Y(y) + 4) + '" text-anchor="end" font-size="11" fill="#6b7782">10<tspan dy="-4" font-size="8">' + String(y).replace('-', '−') + '</tspan></text>';
+    for (i = 0; i <= K; i += 5) s += '<text x="' + X(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="#6b7782">' + i + '</text>';
+    function path(arr, c) { return '<polyline fill="none" stroke="' + c + '" stroke-width="2" points="' + arr.slice(0, K + 1).map(function (v, k) { return X(k).toFixed(1) + ',' + Y(lg(v)).toFixed(1); }).join(' ') + '"/>'; }
+    s += path(a, '#0b6e8a') + path(b, '#0d1b2a');
+    s += '<text x="' + (ml + 8) + '" y="' + (mt + 12) + '" font-size="12" fill="#0b6e8a">Jacobi</text><text x="' + (ml + 62) + '" y="' + (mt + 12) + '" font-size="12" fill="#0d1b2a">Gauss-Seidel</text>';
+    return s + '</svg>';
+  }
+
+  // ---- vstup ----
+  var insA = [], insB = [], insX = [];
+  function buildInputs(A, b, x0) {
+    var wrap = $('setup'); wrap.innerHTML = ''; insA = []; insB = []; insX = [];
+    function grid(cls, arr, count, vals, label) { var m = document.createElement('div'); m.className = cls; for (var i = 0; i < count; i++) { var e = document.createElement('input'); e.setAttribute('inputmode', 'decimal'); e.setAttribute('aria-label', label + (i + 1)); e.value = vals[i]; e.addEventListener('input', read); m.appendChild(e); arr.push(e); } return m; }
+    var da = []; for (var i = 0; i < N * N; i++) da.push(A ? A[i] : (i % (N + 1) === 0 ? '4' : '-1'));
+    var db = [], dx = []; for (i = 0; i < N; i++) { db.push(b ? b[i] : '1'); dx.push(x0 ? x0[i] : '0'); }
+    var cA = N === 2 ? 'mat two' : 'mat n' + N;
+    wrap.appendChild(grid(cA, insA, N * N, da, 'a'));
+    var x = document.createElement('div'); x.className = 'mat one'; for (i = 0; i < N; i++) { var d = document.createElement('div'); d.className = 'x'; d.textContent = 'x' + '₁₂₃₄'[i]; x.appendChild(d); } wrap.appendChild(x);
+    var eq = document.createElement('span'); eq.className = 'op'; eq.textContent = '='; wrap.appendChild(eq);
+    wrap.appendChild(grid('mat one', insB, N, db, 'b'));
+    var vc = $('vecs'); vc.innerHTML = '<span>Počáteční odhad x₀:</span>'; vc.appendChild(grid('mat one', insX, N, dx, 'x0_'));
+    Array.prototype.forEach.call(document.querySelectorAll('[data-n]'), function (bt) { bt.style.borderColor = (+bt.getAttribute('data-n') === N) ? 'var(--accent)' : ''; });
+  }
+  function read() {
+    var ok = true, A = [], b = [], x0 = [], i, j;
+    function pr(e) { var r = parse(e.value); e.classList.toggle('bad', !r); if (!r) ok = false; return r; }
+    for (i = 0; i < N; i++) { A.push([]); for (j = 0; j < N; j++) A[i].push(pr(insA[i * N + j])); b.push(pr(insB[i])); x0.push(pr(insX[i])); }
+    if (!ok) { $('txt').innerHTML = '<p>Zadejte čísla (celá, desetinná nebo zlomky a/b).</p>'; $('view').innerHTML = ''; $('cmpres').innerHTML = ''; $('prev').disabled = $('next').disabled = true; return; }
+    D = build(A, b, x0); step = 0; show();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-n]'), function (bt) { bt.addEventListener('click', function () { N = +bt.getAttribute('data-n'); buildInputs(); read(); }); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-m]'), function (bt) { bt.addEventListener('click', function () { var v = bt.getAttribute('data-m').split('|'); N = +v[0]; buildInputs(v[1].split(','), v[2].split(','), v[3].split(',')); read(); }); });
+  $('prev').addEventListener('click', function () { if (step > 0) { step--; show(); } });
+  $('next').addEventListener('click', function () { step++; show(); });
+  $('reset').addEventListener('click', function () { step = 0; show(); });
+  $('mJ').addEventListener('click', function () { meth = 'J'; show(); });
+  $('mG').addEventListener('click', function () { meth = 'G'; show(); });
+
+  var Mn = document.querySelector('.notes');
+  Mn.innerHTML = Mn.innerHTML.replace(/\$\$([\s\S]+?)\$\$/g, function (_, m) { return katex.renderToString(m, { displayMode: true, throwOnError: false }); })
+                             .replace(/\$([^$]+?)\$/g, function (_, m) { return katex.renderToString(m, { throwOnError: false }); });
+  var CT = document.querySelector('.cmp');
+  CT.innerHTML = CT.innerHTML.replace(/\$([^$]+?)\$/g, function (_, m) { return katex.renderToString(m.replace(/&lt;/g, '<').replace(/&gt;/g, '>'), { throwOnError: false }); });
+  N = 3; buildInputs(['4', '-1', '0', '-1', '4', '-1', '0', '-1', '4'], ['2', '4', '10'], ['0', '0', '0']); read();
+})();
+</script>
+</body>
+</html>
